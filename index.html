@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaggaer Software Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 680px;
+      width: 100%;
+    }
+
+    /* Start Screen */
+    .start-screen {
+      text-align: center;
+      padding: 60px 40px;
+      background: #1e293b;
+      border-radius: 16px;
+      border: 1px solid #334155;
+    }
+
+    .start-screen h1 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      color: #f8fafc;
+    }
+
+    .start-screen p {
+      color: #94a3b8;
+      margin-bottom: 32px;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #2563eb; }
+
+    /* Progress Bar */
+    .progress-bar {
+      height: 6px;
+      background: #334155;
+      border-radius: 3px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* Question Card */
+    .question-card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 36px;
+      border: 1px solid #334155;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .question-number {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: #f1f5f9;
+      margin-bottom: 28px;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 12px; }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .option:hover { border-color: #475569; background: #1a2640; }
+
+    .option.selected {
+      border-color: #3b82f6;
+      background: #1e3a5f;
+    }
+
+    .option.correct {
+      border-color: #22c55e;
+      background: #14532d;
+      cursor: default;
+    }
+
+    .option.incorrect {
+      border-color: #ef4444;
+      background: #450a0a;
+      cursor: default;
+    }
+
+    .option.dimmed {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .option-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      background: #334155;
+      color: #cbd5e1;
+    }
+
+    .option.selected .option-letter { background: #3b82f6; color: #fff; }
+    .option.correct .option-letter { background: #22c55e; color: #fff; }
+    .option.incorrect .option-letter { background: #ef4444; color: #fff; }
+
+    /* Explanation */
+    .explanation {
+      margin-top: 20px;
+      padding: 16px 20px;
+      background: #0f172a;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #94a3b8;
+    }
+
+    /* Navigation */
+    .nav {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    /* Results Screen */
+    .results {
+      text-align: center;
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 48px 40px;
+      border: 1px solid #334155;
+    }
+
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      border: 6px solid #334155;
+    }
+
+    .score-circle.perfect { border-color: #22c55e; }
+    .score-circle.great { border-color: #3b82f6; }
+    .score-circle.ok { border-color: #eab308; }
+    .score-circle.low { border-color: #ef4444; }
+
+    .score-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .score-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .results h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: #f8fafc;
+    }
+
+    .results p {
+      color: #94a3b8;
+      margin-bottom: 32px;
+      font-size: 1.05rem;
+    }
+
+    .results-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    .btn-secondary:hover { background: #475569; }
+
+    /* Review list */
+    .review-list {
+      text-align: left;
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .review-item {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 18px 20px;
+      border: 1px solid #334155;
+    }
+
+    .review-item .label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .review-item .label.correct-label { color: #22c55e; }
+    .review-item .label.incorrect-label { color: #ef4444; }
+
+    .review-item .question { font-weight: 600; margin-bottom: 6px; color: #e2e8f0; }
+    .review-item .detail { font-size: 0.9rem; color: #94a3b8; }
+
+    /* Hidden utility */
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Start Screen -->
+    <div id="start-screen" class="start-screen">
+      <h1>Jaggaer Software Quiz</h1>
+      <p>Test your knowledge of the JAGGAER procurement platform with 5 multiple-choice questions.</p>
+      <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="hidden">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="question-card">
+        <div class="question-header">
+          <span class="question-number" id="question-number"></span>
+        </div>
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div class="explanation hidden" id="explanation"></div>
+      </div>
+      <div class="nav">
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="hidden"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "What is the name of JAGGAER's unified platform that covers the full source-to-pay spectrum?",
+        options: ["JAGGAER Pro", "JAGGAER One", "JAGGAER Suite", "JAGGAER Cloud"],
+        answer: 1,
+        explanation: "JAGGAER One is the company's fully integrated suite covering the entire source-to-pay lifecycle for managing both direct and indirect spend categories."
+      },
+      {
+        question: "Which modules make up JAGGAER's Procure-to-Pay (P2P) workflow?",
+        options: [
+          "Sourcing, Contracts, Analytics, Payments",
+          "eProcurement, Supply Chain Collaboration, Invoicing, Payments",
+          "Budgeting, Ordering, Receiving, Reporting",
+          "Catalog Management, Approvals, Receipts, Auditing"
+        ],
+        answer: 1,
+        explanation: "These four modules — eProcurement, Supply Chain Collaboration, Invoicing, and Payments — are orchestrated together with guided buying, dashboards, and other facilities to streamline the procure-to-pay process."
+      },
+      {
+        question: "What type of delivery model does JAGGAER primarily operate under?",
+        options: [
+          "On-premises perpetual license",
+          "Open-source community edition",
+          "Cloud-based SaaS (Software as a Service)",
+          "Desktop application with manual updates"
+        ],
+        answer: 2,
+        explanation: "JAGGAER is a cloud-based procurement platform delivered as a SaaS solution, enabling organizations to streamline and automate the entire source-to-pay cycle."
+      },
+      {
+        question: "What was JAGGAER formerly known as before its rebranding?",
+        options: ["Ariba", "Coupa", "SciQuest", "Basware"],
+        answer: 2,
+        explanation: "JAGGAER was formerly known as SciQuest. The company is headquartered in Durham, North Carolina, and was acquired by Vista Equity Partners in 2024."
+      },
+      {
+        question: "Which AI-powered capability does JAGGAER offer to help procurement teams with contract reviews?",
+        options: [
+          "A blockchain-based contract ledger",
+          "A GenAI-powered chatbot for contract-related questions",
+          "An automated contract printing service",
+          "A manual clause comparison tool"
+        ],
+        answer: 1,
+        explanation: "JAGGAER's GenAI-powered chatbot accelerates contract reviews by delivering fast, accurate answers to contract-related questions, reducing review time for legal and procurement teams."
+      }
+    ];
+
+    const letters = ["A", "B", "C", "D"];
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = [];
+
+    function startQuiz() {
+      document.getElementById("start-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.remove("hidden");
+      currentQuestion = 0;
+      score = 0;
+      userAnswers = [];
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const q = quizData[currentQuestion];
+
+      document.getElementById("progress-fill").style.width =
+        ((currentQuestion) / quizData.length) * 100 + "%";
+      document.getElementById("question-number").textContent =
+        "Question " + (currentQuestion + 1) + " of " + quizData.length;
+      document.getElementById("question-text").textContent = q.question;
+
+      const optionsEl = document.getElementById("options");
+      optionsEl.innerHTML = "";
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.innerHTML =
+          '<span class="option-letter">' + letters[i] + "</span><span>" + opt + "</span>";
+        div.addEventListener("click", () => selectAnswer(i));
+        optionsEl.appendChild(div);
+      });
+
+      document.getElementById("explanation").classList.add("hidden");
+      document.getElementById("next-btn").classList.add("hidden");
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+      answered = true;
+
+      const q = quizData[currentQuestion];
+      const options = document.querySelectorAll(".option");
+      const isCorrect = index === q.answer;
+
+      userAnswers.push({ selected: index, correct: q.answer, isCorrect });
+      if (isCorrect) score++;
+
+      options.forEach((opt, i) => {
+        if (i === q.answer) {
+          opt.classList.add("correct");
+        } else if (i === index && !isCorrect) {
+          opt.classList.add("incorrect");
+        } else {
+          opt.classList.add("dimmed");
+        }
+      });
+
+      const explanationEl = document.getElementById("explanation");
+      explanationEl.textContent = q.explanation;
+      explanationEl.classList.remove("hidden");
+
+      const nextBtn = document.getElementById("next-btn");
+      nextBtn.textContent =
+        currentQuestion < quizData.length - 1 ? "Next" : "See Results";
+      nextBtn.classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById("quiz-screen").classList.add("hidden");
+      const resultsEl = document.getElementById("results-screen");
+      resultsEl.classList.remove("hidden");
+
+      const pct = Math.round((score / quizData.length) * 100);
+      let grade, message;
+      if (pct === 100) {
+        grade = "perfect";
+        message = "Flawless! You really know your Jaggaer.";
+      } else if (pct >= 80) {
+        grade = "great";
+        message = "Great job! You have strong Jaggaer knowledge.";
+      } else if (pct >= 60) {
+        grade = "ok";
+        message = "Not bad! A little more study and you'll ace it.";
+      } else {
+        grade = "low";
+        message = "Keep learning! Review the explanations below.";
+      }
+
+      let reviewHTML = "";
+      quizData.forEach((q, i) => {
+        const ua = userAnswers[i];
+        const labelClass = ua.isCorrect ? "correct-label" : "incorrect-label";
+        const labelText = ua.isCorrect ? "Correct" : "Incorrect";
+        const detail = ua.isCorrect
+          ? "You answered: " + letters[ua.selected] + ") " + q.options[ua.selected]
+          : "You answered: " + letters[ua.selected] + ") " + q.options[ua.selected] +
+            " — Correct answer: " + letters[ua.correct] + ") " + q.options[ua.correct];
+
+        reviewHTML +=
+          '<div class="review-item">' +
+          '<div class="label ' + labelClass + '">' + labelText + "</div>" +
+          '<div class="question">' + (i + 1) + ". " + q.question + "</div>" +
+          '<div class="detail">' + detail + "</div>" +
+          "</div>";
+      });
+
+      resultsEl.innerHTML =
+        '<div class="results">' +
+        '<div class="score-circle ' + grade + '">' +
+        '<div class="score-number">' + score + "/" + quizData.length + "</div>" +
+        '<div class="score-label">Score</div>' +
+        "</div>" +
+        "<h2>" + pct + "% Complete</h2>" +
+        "<p>" + message + "</p>" +
+        '<div class="results-buttons">' +
+        '<button class="btn btn-primary" onclick="retake()">Retake Quiz</button>' +
+        "</div>" +
+        '<div class="review-list">' + reviewHTML + "</div>" +
+        "</div>";
+    }
+
+    function retake() {
+      document.getElementById("results-screen").classList.add("hidden");
+      document.getElementById("results-screen").innerHTML = "";
+      startQuiz();
+    }
+  </script>
+</body>
+</html>
