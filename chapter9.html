@@ -180,7 +180,7 @@
 <section id="workflows"><div class="container fade-in">
   <div class="section-label">Deep Dive</div>
   <div class="section-title">Direct Spend Workflows by Subsegment</div>
-  <p class="section-desc">Each subsegment follows a distinct procurement cycle. Select a subsegment to see its end-to-end direct spend workflow and what makes it unique.</p>
+  <p class="section-desc">Each subsegment follows a distinct procurement cycle. Select a subsegment, then click any step in the workflow diagram to see details.</p>
   <div class="tabs" id="wf-tabs">
     <div class="tab active" onclick="showWf(0,this)">Automotive</div>
     <div class="tab" onclick="showWf(1,this)">Aerospace</div>
@@ -189,7 +189,10 @@
     <div class="tab" onclick="showWf(4,this)">Med Devices</div>
     <div class="tab" onclick="showWf(5,this)">Food &amp; Bev</div>
   </div>
-  <div class="tab-content" id="wf-content"></div>
+  <div id="wf-diagram-area"></div>
+  <p style="text-align:center;color:#4a5568;font-size:.82rem;margin-top:8px">Click any step for details</p>
+  <div class="wf-detail" id="wf-detail-box"><h4 id="wf-detail-title"></h4><p id="wf-detail-text"></p></div>
+  <div id="wf-metric-bar" style="margin-top:16px"></div>
   <div class="callout">
     <h4>CMO Insight: Subsegment Messaging</h4>
     <p>Generic "procurement transformation" messaging falls flat. A VP of Supply Chain at a medical device company cares about FDA audit trails, not JIT sequencing. <strong>Jaggaer's competitive edge is the ability to configure workflows for each subsegment</strong> &mdash; and your marketing must speak each subsegment's language.</p>
@@ -282,16 +285,137 @@ const segData=[
 function showSeg(idx,el){document.querySelectorAll('.seg-card').forEach(s=>s.classList.remove('active'));el.classList.add('active');const d=segData[idx],box=document.getElementById('seg-detail');box.innerHTML='<h4>'+d.t+'</h4><p>'+d.p+'</p>';box.classList.add('visible');}
 showSeg(0,document.querySelector('.seg-card'));
 
-// Workflow tabs
+// Workflow diagrams
 const wfData=[
-  {title:'Automotive Direct Spend Workflow',items:['<strong>1. Demand signal:</strong> MRP explodes production schedule against multi-level BOMs &rarr; generates planned orders for raw materials, stampings, castings, and sub-assemblies','<strong>2. Source selection:</strong> Commodity buyers manage category strategies. New parts go through full RFQ with PPAP requirements. Existing parts have blanket POs with annual price renegotiation','<strong>3. Release &amp; scheduling:</strong> EDI 830 forecasts sent weekly. EDI 862 shipping schedules sent daily. Suppliers plan production to OEM\'s rolling 12-week forecast','<strong>4. Supplier manufacturing:</strong> Tier 1 suppliers manage their own tier-2/3 supply chains. Quality is governed by IATF 16949 process controls, FMEA, and control plans','<strong>5. Logistics &amp; delivery:</strong> JIT delivery to dock or line-side. JIS (Just-in-Sequence) for assembly lines. ASN (EDI 856) triggers receiving. Milk runs optimize freight','<strong>6. Receiving &amp; quality:</strong> Dock-to-stock for qualified parts. Incoming inspection for new or flagged suppliers. SPC data reviewed against control limits','<strong>7. Payment:</strong> Evaluated Receipt Settlement (ERS) — auto-pay on receipt confirmation, no invoice needed. Or standard 3-way match. Payment terms: Net 45-90 with early-pay discount programs'],metric:'Cycle: Daily releases, 2-hour delivery windows, auto-pay on receipt'},
-  {title:'Aerospace Direct Spend Workflow',items:['<strong>1. Program planning:</strong> Long-range procurement plans tied to aircraft program schedules (5-15 year horizons). Material requirements driven by production rate decisions (e.g., 42 aircraft/month)','<strong>2. Source selection:</strong> Qualified supplier lists (QSL) restrict sourcing to pre-approved sources. New supplier qualification takes 12-18 months including NADCAP and AS9100 audits','<strong>3. Long-lead ordering:</strong> Titanium forgings, specialty alloys, and castings ordered 18-24 months ahead. Raw material locked in before detailed design is finalized','<strong>4. Contract structure:</strong> Long-Term Agreements (LTAs) spanning 5-10 years with annual pricing adjustments. Progress payments based on manufacturing milestones, not delivery','<strong>5. Quality &amp; inspection:</strong> FAI (First Article Inspection) per AS9102. Source inspection at supplier site for critical parts. Certificates of Conformance required with every shipment','<strong>6. Traceability &amp; documentation:</strong> Full material certification from mill to finished part. ITAR-controlled data managed through restricted-access supplier portals. Every transaction auditable','<strong>7. Receiving &amp; payment:</strong> Complex goods receipt with documentation verification. Progress payments, milestone payments, and retainage. Invoice matching includes contract milestone verification'],metric:'Cycle: 18-24 month lead times, decade-long contracts, milestone payments'},
-  {title:'Electronics Direct Spend Workflow',items:['<strong>1. Design-to-source:</strong> Engineering selects components during design phase. AVL (Approved Vendor List) defines acceptable manufacturers and distributors. Procurement engaged at NPI (New Product Introduction)','<strong>2. BOM costing &amp; sourcing:</strong> Full BOM cost analysis across 500-2,000 line items. Component engineers validate availability and lifecycle status. Last-time-buy analysis for EOL components','<strong>3. Multi-channel sourcing:</strong> Direct from component manufacturers (TI, Intel, STMicro), through authorized distributors (Arrow, Avnet, Digi-Key), and spot market for allocation-constrained parts','<strong>4. EMS coordination:</strong> If outsourced, the EMS partner (Foxconn, Flex, Jabil) executes procurement against OEM-approved AVL. Consignment vs. turnkey model determines who buys','<strong>5. Allocation management:</strong> During shortages, manage allocation quantities across product lines. Escalation protocols with supplier executives. Alternative part qualification in parallel','<strong>6. Receiving &amp; inspection:</strong> Counterfeit detection (especially for brokers/spot market). X-ray, decap, and electrical testing for suspect components. SAE AS6171 counterfeit prevention','<strong>7. Payment &amp; inventory:</strong> Standard invoicing for distributor purchases. Consignment accounting for EMS models. Buffer stock and safety stock strategies for long-lead components'],metric:'Cycle: 8-52 week lead times, 500-2000 BOM line items, multi-channel sourcing'},
-  {title:'Chemicals Direct Spend Workflow',items:['<strong>1. Formulation-driven demand:</strong> MRP based on production recipes (formulas), not discrete BOMs. Yield losses and batch sizes determine raw material quantities. Demand varies by grade and specification','<strong>2. Commodity procurement:</strong> Bulk chemicals bought through index-linked contracts (ICIS, Platts). Quarterly or monthly price adjustments. Hedging strategies for volatile feedstocks (ethylene, propylene, methanol)','<strong>3. Contract structures:</strong> Volume commitments with take-or-pay clauses. Consignment inventory where supplier owns material in customer tanks. Toll processing agreements for intermediate chemicals','<strong>4. Logistics &amp; delivery:</strong> Bulk delivery by tanker truck (5,000-9,000 gallons), railcar (20,000 gallons), or ISO container. Weight-based receiving — calibrated scales and flow meters replace count-based GRNs','<strong>5. Quality &amp; compliance:</strong> Certificate of Analysis (COA) required for every lot — testing for purity, moisture, contaminants. Safety Data Sheets (SDS) must be current. REACH/TSCA compliance documentation','<strong>6. Hazmat handling:</strong> DOT/IMDG transport classification. Storage compatibility matrices (no oxidizers next to flammables). Emergency response planning for each raw material','<strong>7. Payment:</strong> Invoicing against measured consumption (tank gauging) for consignment. Standard 3-way match for delivered purchases. Commodity price true-ups at index reset dates'],metric:'Cycle: Index-linked pricing, weight-based receiving, consignment inventory'},
-  {title:'Medical Devices Direct Spend Workflow',items:['<strong>1. Design input requirements:</strong> Procurement requirements originate from Design Controls (FDA 21 CFR 820.30). Every material specification links to the Design History File (DHF). Supplier selection is a design decision','<strong>2. Supplier qualification:</strong> Formal qualification process: supplier assessment questionnaire &rarr; desk audit &rarr; on-site audit &rarr; qualification samples &rarr; IQ/OQ/PQ. Takes 6-18 months for critical components','<strong>3. Change control:</strong> Any supplier change (new supplier, material change, process change) triggers formal change control. May require 510(k) supplement or PMA amendment with FDA. Months to implement','<strong>4. Purchasing controls:</strong> Approved Supplier List (ASL) is a controlled document. POs must reference specific material specifications and revision levels. Deviations require formal disposition (use-as-is, rework, scrap)','<strong>5. Incoming inspection:</strong> Risk-based inspection per ANSI/ASQ Z1.4 sampling plans. Some components require 100% inspection. Lot acceptance tied to supplier quality history and component risk classification','<strong>6. Lot traceability:</strong> Device History Record (DHR) traces every component lot to finished device serial numbers. UDI (Unique Device Identification) requirements flow upstream to component level','<strong>7. Supplier monitoring:</strong> Ongoing supplier quality metrics (PPM, OTD, CAPA closure rate). Annual re-qualification audits. FDA and EU MDR expect documented supplier monitoring programs'],metric:'Cycle: 6-18 month qualification, change control = regulatory submission, 100% traceability'},
-  {title:'Food & Beverage Direct Spend Workflow',items:['<strong>1. Seasonal demand planning:</strong> Ingredient procurement planned around growing seasons, harvest cycles, and production calendars. Forward contracts locked in 3-12 months ahead for key commodities (sugar, cocoa, dairy, proteins)','<strong>2. Supplier approval:</strong> Food safety audits (GFSI-benchmarked: SQF, BRC, FSSC 22000). Allergen management programs verified. Organic, kosher, halal certifications validated. Supplier approval takes 2-6 months','<strong>3. Specification management:</strong> Detailed ingredient specifications covering physical (particle size, color, viscosity), chemical (moisture, pH, fat content), and microbiological (TPC, yeast/mold, pathogens) parameters','<strong>4. Ordering &amp; logistics:</strong> Temperature-controlled transport for perishables. FIFO enforcement at receiving. Shelf-life validation against production schedules. Bulk and packaged ingredient handling','<strong>5. Receiving &amp; quality:</strong> COA matching against specifications for every incoming lot. Hold-and-release for microbiological testing (24-72 hour results). Rejected lots require immediate disposition and supplier notification','<strong>6. Traceability &amp; recall:</strong> FSMA requires one-up/one-back traceability achievable within 24 hours. Mock recall exercises conducted annually. Lot codes link ingredients to finished product batches and distribution','<strong>7. Payment &amp; commodity management:</strong> Commodity-linked pricing for key ingredients. Cooperative and exchange-based purchasing for some categories. Payment terms vary: Net 10-30 for perishables, Net 30-60 for shelf-stable'],metric:'Cycle: Seasonal contracts, COA on every lot, 24-hour recall readiness'}
+  {title:'Automotive Direct Spend Workflow',metric:'Cycle: Daily releases, 2-hour delivery windows, auto-pay on receipt',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Demand Signal',detail:'MRP explodes production schedule against multi-level BOMs, generating planned orders for raw materials, stampings, castings, and sub-assemblies. Demand is driven by OEM production schedules that change weekly.'},
+      {name:'Source Selection',detail:'Commodity buyers manage category strategies. New parts go through full RFQ with PPAP requirements (18-element qualification, 3-6 months). Existing parts have blanket POs with annual price renegotiation targeting 2-5% cost-downs.'}
+    ]},
+    {label:'Execute',color:'#00b4d8',steps:[
+      {name:'Release & Scheduling',detail:'EDI 830 forecasts sent weekly. EDI 862 shipping schedules sent daily. Suppliers plan production to OEM\'s rolling 12-week forecast. Release quantities adjust daily based on actual vs. planned production.'},
+      {name:'Supplier Manufacturing',detail:'Tier 1 suppliers manage their own tier-2/3 supply chains. Quality governed by IATF 16949 process controls, FMEA, and control plans. OEMs have limited visibility beyond tier 1.'},
+      {name:'JIT/JIS Delivery',detail:'Just-in-Time delivery to dock or line-side within 2-hour windows. Just-in-Sequence (JIS) for assembly lines — parts arrive in exact build order. ASN (EDI 856) triggers receiving. Milk runs optimize freight across suppliers.'}
+    ]},
+    {label:'Receive & Pay',color:'#10b981',steps:[
+      {name:'Receiving & Quality',detail:'Dock-to-stock for qualified parts (no inspection). Incoming inspection only for new or flagged suppliers. SPC data reviewed against control limits. Reject rates tracked as PPM (parts per million).'},
+      {name:'Auto-Payment (ERS)',detail:'Evaluated Receipt Settlement (ERS) — auto-pay on receipt confirmation with no invoice needed. Or standard 3-way match for non-ERS suppliers. Payment terms: Net 45-90 with early-pay discount programs.'}
+    ]}
+  ]},
+  {title:'Aerospace Direct Spend Workflow',metric:'Cycle: 18-24 month lead times, decade-long contracts, milestone payments',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Program Planning',detail:'Long-range procurement plans tied to aircraft program schedules spanning 5-15 year horizons. Material requirements driven by production rate decisions (e.g., 42 aircraft/month). Planning starts years before first delivery.'},
+      {name:'Source Selection',detail:'Qualified Supplier Lists (QSL) restrict sourcing to pre-approved sources only. New supplier qualification takes 12-18 months including NADCAP special process certification and AS9100 quality system audits.'},
+      {name:'Long-Lead Ordering',detail:'Titanium forgings, specialty alloys, and castings ordered 18-24 months ahead. Raw material is locked in before detailed design is finalized. Purchase commitments made against preliminary engineering data.'}
+    ]},
+    {label:'Execute',color:'#a78bfa',steps:[
+      {name:'LTA Contracts',detail:'Long-Term Agreements (LTAs) spanning 5-10 years with annual pricing adjustments. Progress payments based on manufacturing milestones, not delivery. Contract values can exceed $100M per supplier.'},
+      {name:'FAI & Inspection',detail:'First Article Inspection (FAI) per AS9102 — every dimension on the drawing verified on the first production part. Source inspection at supplier site for critical parts. Certificates of Conformance required with every shipment.'}
+    ]},
+    {label:'Trace & Pay',color:'#10b981',steps:[
+      {name:'Traceability & ITAR',detail:'Full material certification chain from mill to finished part. ITAR-controlled data managed through restricted-access supplier portals with nationality-based access controls. Every transaction must be auditable for decades.'},
+      {name:'Milestone Payments',detail:'Complex goods receipt with documentation verification. Progress payments, milestone payments, and retainage. Invoice matching includes contract milestone verification — not simple 3-way match.'}
+    ]}
+  ]},
+  {title:'Electronics Direct Spend Workflow',metric:'Cycle: 8-52 week lead times, 500-2000 BOM line items, multi-channel sourcing',
+   phases:[
+    {label:'Design',color:'#0077b6',steps:[
+      {name:'Design-to-Source',detail:'Engineering selects components during design phase. AVL (Approved Vendor List) defines acceptable manufacturers and distributors. Procurement engaged at NPI (New Product Introduction) stage to validate availability and cost.'},
+      {name:'BOM Costing',detail:'Full BOM cost analysis across 500-2,000 line items. Component engineers validate availability and lifecycle status. Last-time-buy analysis for EOL components. Cross-reference BOMs against supplier allocation commitments.'}
+    ]},
+    {label:'Source',color:'#10b981',steps:[
+      {name:'Multi-Channel Sourcing',detail:'Direct from component manufacturers (TI, Intel, STMicro), through authorized distributors (Arrow, Avnet, Digi-Key), and spot market for allocation-constrained parts. Each channel has different pricing and risk profiles.'},
+      {name:'EMS Coordination',detail:'If outsourced, the EMS partner (Foxconn, Flex, Jabil) executes procurement against OEM-approved AVL. Consignment vs. turnkey model determines who buys components. Visibility across OEM + EMS inventory is critical.'},
+      {name:'Allocation Mgmt',detail:'During shortages, manage allocation quantities across product lines and customers. Escalation protocols with supplier executives. Alternative part qualification runs in parallel — takes 4-12 weeks.'}
+    ]},
+    {label:'Receive & Pay',color:'#00b4d8',steps:[
+      {name:'Counterfeit Detection',detail:'Counterfeit detection critical for broker/spot market purchases. X-ray, decap, and electrical testing for suspect components. SAE AS6171 counterfeit prevention standard. Authorized channels have lower risk.'},
+      {name:'Payment & Inventory',detail:'Standard invoicing for distributor purchases. Consignment accounting for EMS models. Buffer stock and safety stock strategies for long-lead components. E&O (excess and obsolete) management for EOL parts.'}
+    ]}
+  ]},
+  {title:'Chemicals Direct Spend Workflow',metric:'Cycle: Index-linked pricing, weight-based receiving, consignment inventory',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Formulation Demand',detail:'MRP based on production recipes (formulas), not discrete BOMs. Yield losses and batch sizes determine raw material quantities. Demand varies by grade and specification. Batch vs. continuous production drives order patterns.'},
+      {name:'Commodity Sourcing',detail:'Bulk chemicals bought through index-linked contracts (ICIS, Platts, CRU). Quarterly or monthly price adjustments. Hedging strategies for volatile feedstocks (ethylene, propylene, methanol). Spot vs. contract split varies by volatility.'}
+    ]},
+    {label:'Execute',color:'#f59e0b',steps:[
+      {name:'Contract & Consignment',detail:'Volume commitments with take-or-pay clauses. Consignment inventory where supplier owns material in customer tanks until consumed. Toll processing agreements for intermediate chemicals. Contract durations: 1-3 years.'},
+      {name:'Bulk Logistics',detail:'Bulk delivery by tanker truck (5,000-9,000 gal), railcar (20,000 gal), or ISO container. Weight-based receiving using calibrated scales and flow meters — replaces count-based GRNs. Scheduling around tank capacity.'},
+      {name:'Quality & Compliance',detail:'Certificate of Analysis (COA) required for every lot — testing for purity, moisture, contaminants. Safety Data Sheets (SDS) must be current. REACH/TSCA compliance documentation maintained for every raw material.'}
+    ]},
+    {label:'Handle & Pay',color:'#10b981',steps:[
+      {name:'Hazmat Handling',detail:'DOT/IMDG transport classification for every material. Storage compatibility matrices enforce separation rules (no oxidizers next to flammables). Emergency response planning required for each raw material on site.'},
+      {name:'Consumption Payment',detail:'Invoicing against measured consumption (tank gauging) for consignment. Standard 3-way match for delivered purchases. Commodity price true-ups at index reset dates — automated reconciliation against published indices.'}
+    ]}
+  ]},
+  {title:'Medical Devices Direct Spend Workflow',metric:'Cycle: 6-18 month qualification, change control = regulatory submission, 100% traceability',
+   phases:[
+    {label:'Design & Qualify',color:'#0077b6',steps:[
+      {name:'Design Inputs',detail:'Procurement requirements originate from Design Controls (FDA 21 CFR 820.30). Every material specification links to the Design History File (DHF). Supplier selection is a design decision — not just a procurement decision.'},
+      {name:'Supplier Qualification',detail:'Formal qualification process: supplier assessment questionnaire \u2192 desk audit \u2192 on-site audit \u2192 qualification samples \u2192 IQ/OQ/PQ validation. Takes 6-18 months for critical components. Cannot be shortcut.'},
+      {name:'Change Control',detail:'Any supplier change (new supplier, material change, process change) triggers formal change control. May require 510(k) supplement or PMA amendment submission to FDA. Implementation takes months, not days.'}
+    ]},
+    {label:'Control',color:'#ef4444',steps:[
+      {name:'Purchasing Controls',detail:'Approved Supplier List (ASL) is a controlled document with revision history. POs must reference specific material specifications and revision levels. Deviations from spec require formal disposition: use-as-is, rework, or scrap.'},
+      {name:'Incoming Inspection',detail:'Risk-based inspection per ANSI/ASQ Z1.4 sampling plans. Some critical components require 100% inspection. Lot acceptance tied to supplier quality history and component risk classification (critical, major, minor).'}
+    ]},
+    {label:'Trace & Monitor',color:'#10b981',steps:[
+      {name:'Lot Traceability',detail:'Device History Record (DHR) traces every component lot to finished device serial numbers. UDI (Unique Device Identification) requirements flow upstream to component level. Full chain: supplier lot \u2192 incoming lot \u2192 production batch \u2192 device serial.'},
+      {name:'Supplier Monitoring',detail:'Ongoing supplier quality metrics: PPM defect rates, on-time delivery, CAPA closure rate. Annual re-qualification audits required. FDA and EU MDR expect documented, continuous supplier monitoring programs — not just initial qualification.'}
+    ]}
+  ]},
+  {title:'Food & Beverage Direct Spend Workflow',metric:'Cycle: Seasonal contracts, COA on every lot, 24-hour recall readiness',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Seasonal Planning',detail:'Ingredient procurement planned around growing seasons, harvest cycles, and production calendars. Forward contracts locked in 3-12 months ahead for key commodities (sugar, cocoa, dairy, proteins). Weather and crop reports drive planning.'},
+      {name:'Supplier Approval',detail:'Food safety audits using GFSI-benchmarked standards (SQF, BRC, FSSC 22000). Allergen management programs verified. Organic, kosher, halal certifications validated. Full supplier approval takes 2-6 months.'},
+      {name:'Spec Management',detail:'Detailed ingredient specifications covering physical (particle size, color, viscosity), chemical (moisture, pH, fat content), and microbiological (TPC, yeast/mold, pathogens) parameters. Specs are living documents.'}
+    ]},
+    {label:'Execute',color:'#fbbf24',steps:[
+      {name:'Ordering & Logistics',detail:'Temperature-controlled transport for perishables. FIFO enforcement mandatory at receiving dock. Shelf-life validation against production schedules — reject if remaining shelf life is too short. Bulk and packaged ingredient handling.'},
+      {name:'Receiving & COA',detail:'COA matching against specifications for every incoming lot — automated where possible. Hold-and-release protocol for microbiological testing (24-72 hour results). Rejected lots require immediate disposition and supplier notification.'}
+    ]},
+    {label:'Trace & Pay',color:'#10b981',steps:[
+      {name:'Recall Traceability',detail:'FSMA requires one-up/one-back traceability achievable within 24 hours. Mock recall exercises conducted annually. Lot codes link ingredients to finished product batches and distribution channels. One contamination event can cost $10M+.'},
+      {name:'Commodity Payment',detail:'Commodity-linked pricing for key ingredients (sugar, dairy, cocoa). Cooperative and exchange-based purchasing for some categories. Payment terms vary: Net 10-30 for perishables, Net 30-60 for shelf-stable ingredients.'}
+    ]}
+  ]}
 ];
-function showWf(idx,el){document.querySelectorAll('#wf-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const d=wfData[idx],c=document.getElementById('wf-content');c.innerHTML='<h4>'+d.title+'</h4><ul>'+d.items.map(i=>'<li>'+i+'</li>').join('')+'</ul><div class="tab-metric">'+d.metric+'</div>';}
+let curWfIdx=0;
+function showWf(idx,el){
+  document.querySelectorAll('#wf-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');curWfIdx=idx;
+  const d=wfData[idx],area=document.getElementById('wf-diagram-area');
+  // Build the visual diagram
+  let html='<div class="workflow-wrapper"><div class="workflow">';
+  let stepGlobal=0;
+  d.phases.forEach((ph,pi)=>{
+    html+='<div class="wf-phase"><div class="wf-phase-label" style="background:'+ph.color+'">'+ph.label+'</div><div class="wf-steps">';
+    ph.steps.forEach(st=>{
+      html+='<div class="wf-step" onclick="showWfStep('+idx+','+stepGlobal+',this)">'+st.name+'</div>';
+      stepGlobal++;
+    });
+    html+='</div></div>';
+    if(pi<d.phases.length-1) html+='<div class="wf-arrow">&#9654;</div>';
+  });
+  html+='</div></div>';
+  area.innerHTML=html;
+  // Set metric
+  document.getElementById('wf-metric-bar').innerHTML='<div class="tab-metric">'+d.metric+'</div>';
+  // Hide detail box
+  document.getElementById('wf-detail-box').classList.remove('visible');
+}
+function showWfStep(wfIdx,stepIdx,el){
+  document.querySelectorAll('#wf-diagram-area .wf-step').forEach(s=>s.classList.remove('active'));el.classList.add('active');
+  const d=wfData[wfIdx];let count=0,found=null;
+  for(let p=0;p<d.phases.length;p++){for(let s=0;s<d.phases[p].steps.length;s++){if(count===stepIdx){found=d.phases[p].steps[s];break;}count++;}if(found)break;}
+  if(!found)return;
+  document.getElementById('wf-detail-title').textContent=found.name;
+  document.getElementById('wf-detail-text').textContent=found.detail;
+  document.getElementById('wf-detail-box').classList.add('visible');
+}
 showWf(0,document.querySelector('#wf-tabs .tab'));
 
 // Charts
