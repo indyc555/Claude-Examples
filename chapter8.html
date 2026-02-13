@@ -108,11 +108,11 @@
 <nav class="topnav">
   <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
   <div class="topnav-chapters">
-    <a href="index.html" class="ch-dot completed">1</a><a href="chapter2.html" class="ch-dot completed">2</a><a href="chapter3.html" class="ch-dot completed">3</a><a href="chapter4.html" class="ch-dot completed">4</a><a href="chapter5.html" class="ch-dot completed">5</a><a href="chapter6.html" class="ch-dot completed">6</a><a href="chapter7.html" class="ch-dot completed">7</a><a href="chapter8.html" class="ch-dot active">8</a>
+    <a href="index.html" class="ch-dot completed">1</a><a href="chapter2.html" class="ch-dot completed">2</a><a href="chapter3.html" class="ch-dot completed">3</a><a href="chapter4.html" class="ch-dot completed">4</a><a href="chapter5.html" class="ch-dot completed">5</a><a href="chapter6.html" class="ch-dot completed">6</a><a href="chapter7.html" class="ch-dot completed">7</a><a href="chapter8.html" class="ch-dot active">8</a><a href="chapter9.html" class="ch-dot">9</a>
   </div>
 </nav>
 
-<section class="hero"><div class="hero-badge">Final Chapter</div>
+<section class="hero"><div class="hero-badge">Chapter 8 of 9</div>
   <h1>Analytics, AI &amp; Your <em>S2P Transformation</em> Roadmap</h1>
   <p class="hero-sub">The capstone &mdash; turning data into decisions, building your strategy, and completing your journey to S2P mastery.</p>
   <button class="hero-cta" onclick="document.getElementById('kpis').scrollIntoView({behavior:'smooth'})">Begin Final Chapter &#8595;</button>
@@ -206,7 +206,7 @@
 <section id="exam"><div class="container fade-in">
   <div class="section-label">Final Assessment</div>
   <div class="section-title">Comprehensive Final Exam</div>
-  <p class="section-desc">15 questions covering all 8 chapters. Score 70% to earn your S2P Masterclass completion.</p>
+  <p class="section-desc">15 questions covering all 9 chapters. Score 70% to earn your S2P Masterclass completion.</p>
   <div class="quiz-wrapper">
     <div class="quiz-progress"><div class="quiz-progress-fill" id="qz-progress"></div></div>
     <div class="quiz-card" id="qz-card"></div>
@@ -216,7 +216,7 @@
 
   <div class="completion" id="completion" style="display:none">
     <h2>S2P Masterclass Complete</h2>
-    <p>You've completed all 8 chapters of the Jaggaer S2P Masterclass. You now understand the full Source-to-Pay lifecycle, customer pain points, manufacturing workflows, and how to position Jaggaer against the competition.</p>
+    <p>You've completed all 9 chapters of the Jaggaer S2P Masterclass. You now understand the full Source-to-Pay lifecycle, customer pain points, manufacturing subsegment workflows, and how to position Jaggaer against the competition.</p>
     <div style="text-align:left;max-width:600px;margin:0 auto 24px;padding:20px;border-radius:12px;background:#0a0e1a;border:1px solid #1e2d4a">
       <h4 style="color:#10b981;margin-bottom:12px;font-size:1rem">Key Takeaways</h4>
       <ul style="padding-left:18px;list-style:none">
@@ -229,12 +229,12 @@
     </div>
     <p style="font-size:1.1rem;color:#fff;font-weight:700">You're ready to lead Jaggaer's marketing strategy.</p>
     <div class="links">
-      <a href="index.html">Ch 1: S2P Landscape</a><a href="chapter2.html">Ch 2: Spend Analysis</a><a href="chapter3.html">Ch 3: Strategic Sourcing</a><a href="chapter4.html">Ch 4: Supplier Mgmt</a><a href="chapter5.html">Ch 5: Procure-to-Pay</a><a href="chapter6.html">Ch 6: Invoice & Payment</a><a href="chapter7.html">Ch 7: Competitive</a><a href="chapter8.html">Ch 8: Roadmap</a>
+      <a href="index.html">Ch 1: S2P Landscape</a><a href="chapter2.html">Ch 2: Spend Analysis</a><a href="chapter3.html">Ch 3: Strategic Sourcing</a><a href="chapter4.html">Ch 4: Supplier Mgmt</a><a href="chapter5.html">Ch 5: Procure-to-Pay</a><a href="chapter6.html">Ch 6: Invoice & Payment</a><a href="chapter7.html">Ch 7: Competitive</a><a href="chapter8.html">Ch 8: Roadmap</a><a href="chapter9.html">Ch 9: Subsegments</a>
     </div>
   </div>
 </div></section>
 
-<footer><div class="container">Jaggaer S2P Masterclass &mdash; Chapter 8 of 8 (Final)<br><a href="chapter7.html">&larr; Chapter 7</a> &nbsp;|&nbsp; <strong>Course Complete</strong></div></footer>
+<footer><div class="container">Jaggaer S2P Masterclass &mdash; Chapter 8 of 9<br><a href="chapter7.html">&larr; Chapter 7</a> &nbsp;|&nbsp; <a href="chapter9.html">Chapter 9 &rarr;</a></div></footer>
 
 <script>
 // KPIs
@@ -298,7 +298,7 @@ const quizData=[
   {q:'What AI improvement does Jaggaer deliver in spend visibility? (Ch 8)',opts:['8.1%','15%','24.4%','43%'],ans:2,explain:'AI-powered procurement tools improve spend visibility by 24.4%, revealing hidden savings opportunities and enabling better category management.'}
 ];
 const letters=['A','B','C','D'];let qzIdx=0,qzScore=0,qzAnswered=false,qzUserAnswers=[];
-function renderQuiz(){qzAnswered=false;const q=quizData[qzIdx];document.getElementById('qz-progress').style.width=(qzIdx/quizData.length*100)+'%';document.getElementById('qz-card').innerHTML='<div class="quiz-qnum">Final Exam — Question '+(qzIdx+1)+' of '+quizData.length+'</div><div class="quiz-qtext">'+q.q+'</div><div class="quiz-options" id="qz-opts">'+q.opts.map((o,i)=>'<div class="quiz-opt" onclick="qzSelect('+i+')"><span class="quiz-letter">'+letters[i]+'</span><span>'+o+'</span></div>').join('')+'</div><div class="quiz-explanation" id="qz-explain">'+q.explain+'</div>';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-results').style.display='none';}
+function renderQuiz(){qzAnswered=false;const q=quizData[qzIdx];document.getElementById('qz-progress').style.width=(qzIdx/quizData.length*100)+'%';document.getElementById('qz-card').innerHTML='<div class="quiz-qnum">Comprehensive Exam — Question '+(qzIdx+1)+' of '+quizData.length+'</div><div class="quiz-qtext">'+q.q+'</div><div class="quiz-options" id="qz-opts">'+q.opts.map((o,i)=>'<div class="quiz-opt" onclick="qzSelect('+i+')"><span class="quiz-letter">'+letters[i]+'</span><span>'+o+'</span></div>').join('')+'</div><div class="quiz-explanation" id="qz-explain">'+q.explain+'</div>';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-results').style.display='none';}
 function qzSelect(idx){if(qzAnswered)return;qzAnswered=true;const q=quizData[qzIdx],ok=idx===q.ans;if(ok)qzScore++;qzUserAnswers.push({selected:idx,correct:q.ans,isCorrect:ok});document.querySelectorAll('#qz-opts .quiz-opt').forEach((o,i)=>{if(i===q.ans)o.classList.add('correct');else if(i===idx&&!ok)o.classList.add('incorrect');else o.classList.add('dimmed');});document.getElementById('qz-explain').classList.add('visible');const btn=document.getElementById('qz-next');btn.textContent=qzIdx<quizData.length-1?'Next':'See Final Results';btn.classList.add('visible');}
 function qzNext(){qzIdx++;if(qzIdx<quizData.length)renderQuiz();else{document.getElementById('qz-card').style.display='none';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-progress').style.width='100%';showResults();}}
 function showResults(){const pct=Math.round(qzScore/quizData.length*100);let g,m;if(pct>=90){g='perfect';m='Outstanding! You have mastered the S2P landscape.';}else if(pct>=80){g='great';m='Excellent performance across all chapters.';}else if(pct>=70){g='ok';m='Passed! Review the items you missed.';}else{g='low';m='Review the chapters and retake the exam.';}let rv=qzUserAnswers.map((ua,i)=>{const q=quizData[i];return'<div class="qr-item"><div class="qr-tag '+(ua.isCorrect?'c':'w')+'">'+(ua.isCorrect?'Correct':'Incorrect')+'</div><div class="qr-q">'+(i+1)+'. '+q.q+'</div><div class="qr-d">'+(ua.isCorrect?'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]:'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]+' — Correct: '+letters[ua.correct]+') '+q.opts[ua.correct])+'</div></div>';}).join('');document.getElementById('qz-results').style.display='block';document.getElementById('qz-results').innerHTML='<div class="quiz-results"><div class="qr-circle '+g+'"><div class="qr-score">'+qzScore+'/'+quizData.length+'</div><div class="qr-label">Final Score</div></div><h3>'+pct+'%'+(pct>=70?' — Masterclass Complete!':' — Keep Studying')+'</h3><p>'+m+'</p><div><button class="btn-restart" onclick="qzRestart()">Retake Exam</button></div><div class="qr-review">'+rv+'</div></div>';if(pct>=70)document.getElementById('completion').style.display='block';}
