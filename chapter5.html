@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaggaer S2P Masterclass | Chapter 5: Procure-to-Pay Execution</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0e1a;color:#c9d1d9;line-height:1.7}
+    a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1e2d4a;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
+    .topnav-brand{font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-.02em}.topnav-brand span{color:#00b4d8}
+    .topnav-chapters{display:flex;gap:6px;align-items:center}
+    .ch-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;background:#1a2240;color:#4a5568;border:2px solid #2a3558;cursor:pointer;transition:all .3s;text-decoration:none}
+    .ch-dot.active{background:#00b4d8;color:#fff;border-color:#00b4d8}.ch-dot.completed{background:#10b981;color:#fff;border-color:#10b981}
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;background:linear-gradient(180deg,#0a0e1a 0%,#0d1b2a 50%,#0a0e1a 100%);position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.08) 0%,transparent 70%)}
+    .hero-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.25);margin-bottom:20px}
+    .hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:900;color:#fff;line-height:1.15;max-width:800px;margin-bottom:16px;letter-spacing:-.03em}
+    .hero h1 em{font-style:normal;color:#00b4d8}
+    .hero-sub{font-size:1.15rem;color:#8b95a5;max-width:640px;margin-bottom:40px;line-height:1.7}
+    .hero-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;border-radius:12px;font-size:1.05rem;font-weight:700;background:linear-gradient(135deg,#00b4d8,#0077b6);color:#fff;border:none;cursor:pointer;transition:transform .15s,box-shadow .3s;box-shadow:0 4px 24px rgba(0,180,216,.25)}
+    .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,180,216,.35)}
+    .container{max-width:960px;margin:0 auto;padding:0 24px}section{padding:80px 0}
+    .section-label{font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#00b4d8;margin-bottom:8px}
+    .section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.25;letter-spacing:-.02em}
+    .section-desc{color:#8b95a5;max-width:640px;margin-bottom:40px;font-size:1.05rem}
+    .divider{border:none;border-top:1px solid #1e2d4a;margin:0}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+    .stat-card{text-align:center;padding:28px 16px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .stat-num{font-size:2.2rem;font-weight:900;color:#fff;line-height:1}.stat-num span{color:#00b4d8}
+    .stat-label{font-size:.85rem;color:#6b7280;margin-top:6px}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px}
+    @media(max-width:700px){.chart-grid{grid-template-columns:1fr}}
+    .chart-box{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .chart-box h4{font-size:.95rem;font-weight:700;color:#e2e8f0;margin-bottom:16px}
+    .chart-box canvas{width:100%!important;max-height:280px}
+    .callout{padding:28px 32px;border-radius:14px;border-left:4px solid #f59e0b;background:rgba(245,158,11,.06);margin:40px 0}
+    .callout h4{color:#f59e0b;font-size:1.05rem;margin-bottom:8px}.callout p{color:#8b95a5;font-size:.95rem}
+    .workflow-wrapper{overflow-x:auto;padding:20px 0}
+    .workflow{display:flex;align-items:stretch;gap:0;min-width:800px}
+    .wf-phase{flex:1}.wf-phase-label{text-align:center;font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:8px 4px;border-radius:8px 8px 0 0;color:#fff;background:#0077b6}
+    .wf-steps{display:flex;flex-direction:column;gap:6px;padding:10px 6px;background:#111827;border:1px solid #1e2d4a;border-top:none;border-radius:0 0 8px 8px}
+    .wf-step{padding:10px 8px;border-radius:8px;font-size:.78rem;font-weight:600;color:#c9d1d9;background:#1a2240;border:1px solid transparent;cursor:pointer;transition:all .2s;text-align:center}
+    .wf-step:hover{border-color:#00b4d8;background:#0d1f35}.wf-step.active{border-color:#00b4d8;background:#0d1f35;color:#fff}
+    .wf-arrow{display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#2a3558;padding:0 2px;align-self:center}
+    .wf-detail{margin-top:24px;padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;display:none}
+    .wf-detail.visible{display:block}.wf-detail h4{color:#00b4d8;font-size:1rem;margin-bottom:8px}.wf-detail p{font-size:.92rem;color:#8b95a5;line-height:1.7}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+    .tab{padding:10px 20px;border-radius:10px;font-size:.88rem;font-weight:600;background:#1a2240;color:#6b7280;border:1px solid #2a3558;cursor:pointer;transition:all .2s}
+    .tab:hover{color:#c9d1d9;border-color:#3a4568}.tab.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+    .tab-content{padding:28px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .tab-content h4{color:#fff;font-size:1.1rem;margin-bottom:12px}
+    .tab-content ul{padding-left:20px}.tab-content li{margin-bottom:8px;color:#8b95a5;font-size:.95rem}.tab-content li strong{color:#e2e8f0}
+    .tab-metric{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:700;background:rgba(0,180,216,.12);color:#00b4d8;margin-top:12px}
+    .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:700px){.comp-grid{grid-template-columns:1fr}}
+    .comp-card{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;text-align:center;transition:border-color .3s}
+    .comp-card:hover{border-color:#3a4568}.comp-card.highlight{border-color:#00b4d8;background:#0d1f35}
+    .comp-logo{font-size:1.4rem;font-weight:900;margin-bottom:6px}.comp-card:nth-child(1) .comp-logo{color:#00b4d8}.comp-card:nth-child(2) .comp-logo{color:#f59e0b}.comp-card:nth-child(3) .comp-logo{color:#ef4444}
+    .comp-card ul{text-align:left;padding-left:14px;list-style:none}.comp-card li{font-size:.85rem;color:#8b95a5;margin-bottom:5px;padding-left:14px;position:relative}
+    .comp-card li::before{content:'>';position:absolute;left:0;color:#4a5568;font-weight:700}
+    .quiz-wrapper{max-width:720px;margin:0 auto}
+    .quiz-progress{height:6px;background:#1e2d4a;border-radius:3px;margin-bottom:28px;overflow:hidden}
+    .quiz-progress-fill{height:100%;background:#00b4d8;border-radius:3px;transition:width .4s}
+    .quiz-card{padding:36px;border-radius:16px;background:#111827;border:1px solid #1e2d4a}
+    .quiz-qnum{font-size:.8rem;font-weight:700;color:#4a5568;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+    .quiz-qtext{font-size:1.15rem;font-weight:700;color:#fff;line-height:1.5;margin-bottom:24px}
+    .quiz-options{display:flex;flex-direction:column;gap:10px}
+    .quiz-opt{display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:10px;font-size:.95rem;background:#0a0e1a;border:2px solid #1e2d4a;cursor:pointer;transition:all .2s;color:#c9d1d9}
+    .quiz-opt:hover{border-color:#3a4568;background:#131b30}
+    .quiz-opt.correct{border-color:#10b981;background:rgba(16,185,129,.1);cursor:default}
+    .quiz-opt.incorrect{border-color:#ef4444;background:rgba(239,68,68,.08);cursor:default}
+    .quiz-opt.dimmed{opacity:.4;cursor:default}
+    .quiz-letter{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0;background:#1e2d4a;color:#6b7280}
+    .quiz-opt.correct .quiz-letter{background:#10b981;color:#fff}.quiz-opt.incorrect .quiz-letter{background:#ef4444;color:#fff}
+    .quiz-explanation{margin-top:20px;padding:16px 20px;border-radius:10px;background:#0a0e1a;border-left:4px solid #00b4d8;font-size:.92rem;color:#8b95a5;line-height:1.7;display:none}
+    .quiz-explanation.visible{display:block}
+    .quiz-nav{display:flex;justify-content:flex-end;margin-top:20px}
+    .quiz-btn{padding:12px 32px;border-radius:10px;font-size:.95rem;font-weight:700;background:#00b4d8;color:#fff;border:none;cursor:pointer;transition:background .2s;display:none}
+    .quiz-btn.visible{display:inline-block}.quiz-btn:hover{background:#0096b7}
+    .quiz-results{text-align:center;padding:48px 32px}
+    .qr-circle{width:130px;height:130px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;border:5px solid #1e2d4a}
+    .qr-circle.perfect{border-color:#10b981}.qr-circle.great{border-color:#00b4d8}.qr-circle.ok{border-color:#f59e0b}.qr-circle.low{border-color:#ef4444}
+    .qr-score{font-size:2.2rem;font-weight:900;color:#fff}.qr-label{font-size:.75rem;color:#4a5568;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .quiz-results h3{color:#fff;font-size:1.3rem;margin-bottom:6px}.quiz-results p{color:#6b7280;margin-bottom:28px}
+    .qr-review{text-align:left;margin-top:28px;display:flex;flex-direction:column;gap:12px}
+    .qr-item{padding:16px;border-radius:10px;background:#0a0e1a;border:1px solid #1e2d4a}
+    .qr-item .qr-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}.qr-item .qr-tag.c{color:#10b981}.qr-item .qr-tag.w{color:#ef4444}
+    .qr-item .qr-q{font-weight:600;color:#e2e8f0;font-size:.92rem;margin-bottom:4px}.qr-item .qr-d{font-size:.85rem;color:#6b7280}
+    .btn-restart{padding:12px 28px;border-radius:10px;font-size:.9rem;font-weight:700;background:#1e2d4a;color:#c9d1d9;border:none;cursor:pointer;transition:background .2s;margin-right:10px}.btn-restart:hover{background:#2a3558}
+    footer{text-align:center;padding:40px 24px;color:#4a5568;font-size:.82rem;border-top:1px solid #1e2d4a}
+    .fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}.fade-in.visible{opacity:1;transform:translateY(0)}
+    @media(max-width:600px){.topnav{padding:0 16px}section{padding:48px 0}.comp-grid{grid-template-columns:1fr}.quiz-card{padding:24px 18px}}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
+  <div class="topnav-chapters">
+    <a href="index.html" class="ch-dot completed">1</a>
+    <a href="chapter2.html" class="ch-dot completed">2</a>
+    <a href="chapter3.html" class="ch-dot completed">3</a>
+    <a href="chapter4.html" class="ch-dot completed">4</a>
+    <a href="chapter5.html" class="ch-dot active">5</a>
+    <a href="chapter6.html" class="ch-dot">6</a>
+    <a href="chapter7.html" class="ch-dot">7</a>
+    <a href="chapter8.html" class="ch-dot">8</a>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="hero-badge">Chapter 5 of 8</div>
+  <h1><em>Procure-to-Pay</em> Execution</h1>
+  <p class="hero-sub">Transforming purchase requests into paid invoices &mdash; the operational engine of procurement for $1B+ manufacturers.</p>
+  <button class="hero-cta" onclick="document.getElementById('p2p-workflow').scrollIntoView({behavior:'smooth'})">Begin Learning &#8595;</button>
+</section>
+<hr class="divider">
+
+<!-- P2P WORKFLOW -->
+<section id="p2p-workflow">
+  <div class="container fade-in">
+    <div class="section-label">The Engine</div>
+    <div class="section-title">The 8-Step Procure-to-Pay Workflow</div>
+    <p class="section-desc">Every purchase in a manufacturing organization flows through these steps. Direct materials are MRP-driven; indirect uses guided buying.</p>
+    <div class="workflow-wrapper">
+      <div class="workflow">
+        <div class="wf-phase"><div class="wf-phase-label">Request</div><div class="wf-steps"><div class="wf-step" onclick="showP2P(this,0)">Demand Signal</div><div class="wf-step" onclick="showP2P(this,1)">Requisition</div></div></div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase"><div class="wf-phase-label" style="background:#00b4d8">Approve & Order</div><div class="wf-steps"><div class="wf-step" onclick="showP2P(this,2)">Approval</div><div class="wf-step" onclick="showP2P(this,3)">PO Creation</div></div></div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase"><div class="wf-phase-label" style="background:#f59e0b">Fulfill</div><div class="wf-steps"><div class="wf-step" onclick="showP2P(this,4)">Order Tracking</div><div class="wf-step" onclick="showP2P(this,5)">Goods Receipt</div></div></div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase"><div class="wf-phase-label" style="background:#10b981">Pay</div><div class="wf-steps"><div class="wf-step" onclick="showP2P(this,6)">Invoice Match</div><div class="wf-step" onclick="showP2P(this,7)">Payment</div></div></div>
+      </div>
+    </div>
+    <p style="text-align:center;color:#4a5568;font-size:.82rem;margin-top:8px">Click any step for manufacturing-specific details</p>
+    <div class="wf-detail" id="p2p-detail"><h4 id="p2p-title"></h4><p id="p2p-text"></p></div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- GUIDED BUYING -->
+<section id="guided">
+  <div class="container fade-in">
+    <div class="section-label">Compliance by Design</div>
+    <div class="section-title">Guided Buying: Eliminating Maverick Spend</div>
+    <p class="section-desc">Guided buying creates a consumer-like shopping experience that directs users to approved catalogs and contracts &mdash; making the compliant path the easiest path.</p>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">29<span>%</span></div><div class="stat-label">of indirect spend is off-contract</div></div>
+      <div class="stat-card"><div class="stat-num">80<span>%</span></div><div class="stat-label">of invoices from maverick buying</div></div>
+      <div class="stat-card"><div class="stat-num">5<span>%</span></div><div class="stat-label">maverick rate (world-class)</div></div>
+      <div class="stat-card"><div class="stat-num">5-16<span>%</span></div><div class="stat-label">of savings lost to maverick spend</div></div>
+    </div>
+    <div class="tabs" id="buy-tabs">
+      <div class="tab active" onclick="showBuy(0,this)">Punchout Catalogs</div>
+      <div class="tab" onclick="showBuy(1,this)">Hosted Catalogs</div>
+      <div class="tab" onclick="showBuy(2,this)">Adoption Strategies</div>
+    </div>
+    <div class="tab-content" id="buy-content"></div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- MANUFACTURING P2P -->
+<section id="mfg-p2p">
+  <div class="container fade-in">
+    <div class="section-label">Manufacturing Focus</div>
+    <div class="section-title">Manufacturing-Specific P2P Workflows</div>
+    <p class="section-desc">Manufacturing procurement has unique requirements that generic P2P solutions struggle to handle.</p>
+    <div class="tabs" id="mfg-tabs">
+      <div class="tab active" onclick="showMfg(0,this)">JIT / Lean</div>
+      <div class="tab" onclick="showMfg(1,this)">Blanket POs</div>
+      <div class="tab" onclick="showMfg(2,this)">MRP Integration</div>
+      <div class="tab" onclick="showMfg(3,this)">Quality at Receipt</div>
+    </div>
+    <div class="tab-content" id="mfg-content"></div>
+    <div class="callout">
+      <h4>ERP Integration is Non-Negotiable</h4>
+      <p>For $1B+ manufacturers, P2P must be deeply integrated with ERP systems (SAP, Oracle, Infor). Real-time inventory visibility, automated PO generation from MRP, and financial tracking are table stakes. Fragmented systems from M&amp;A activity create data gaps &mdash; <strong>Jaggaer supports multi-ERP environments</strong> where Coupa typically struggles with manufacturing-depth integration.</p>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- APPROVAL WORKFLOWS -->
+<section id="approvals">
+  <div class="container fade-in">
+    <div class="section-label">Speed vs. Control</div>
+    <div class="section-title">Smart Approval Workflows</div>
+    <p class="section-desc">The $60 HDMI cable should not follow the same 7-day approval path as a $60,000 service renewal. Smart thresholds balance speed with control.</p>
+    <div class="chart-grid">
+      <div class="chart-box"><h4>Processing Time: Before vs. After Optimization</h4><canvas id="chart-approvals"></canvas></div>
+      <div class="chart-box"><h4>Cost per PO by Processing Method</h4><canvas id="chart-po-cost"></canvas></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num"><span>$</span>429</div><div class="stat-label">average manual PO cost</div></div>
+      <div class="stat-card"><div class="stat-num">7→2.5</div><div class="stat-label">days with parallel approvals</div></div>
+      <div class="stat-card"><div class="stat-num">72<span>hr</span></div><div class="stat-label">auto-escalation timer</div></div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- COMPETITIVE -->
+<section id="compete">
+  <div class="container fade-in">
+    <div class="section-label">Competitive Intel</div>
+    <div class="section-title">P2P Capabilities: Jaggaer vs. Ariba vs. Coupa</div>
+    <div class="comp-grid">
+      <div class="comp-card highlight">
+        <div class="comp-logo">JAGGAER</div>
+        <ul><li>Best MRP/ERP integration depth</li><li>Direct materials P2P leader</li><li>Multi-ERP environment support</li><li>Strong supplier collaboration</li></ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-logo">SAP Ariba</div>
+        <ul><li>Best for SAP S/4HANA shops</li><li>Strong catalog management</li><li>Large supplier network</li><li>Complex implementation</li></ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-logo">Coupa</div>
+        <ul><li>Best-in-class buying UX</li><li>Highest user adoption rates</li><li>Strong mobile experience</li><li>Weaker manufacturing depth</li></ul>
+      </div>
+    </div>
+    <div class="chart-grid" style="margin-top:32px">
+      <div class="chart-box" style="grid-column:1/-1"><h4>P2P Capability Comparison</h4><canvas id="chart-compete"></canvas></div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="container fade-in">
+    <div class="section-label">Test Your Knowledge</div>
+    <div class="section-title">Chapter 5 Quiz</div>
+    <p class="section-desc">10 questions on Procure-to-Pay execution. Score 70% to advance.</p>
+    <div class="quiz-wrapper">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="qz-progress"></div></div>
+      <div class="quiz-card" id="qz-card"></div>
+      <div class="quiz-nav"><button class="quiz-btn" id="qz-next" onclick="qzNext()">Next</button></div>
+      <div id="qz-results" style="display:none"></div>
+    </div>
+  </div>
+</section>
+<footer><div class="container">Jaggaer S2P Masterclass &mdash; Chapter 5 of 8<br><a href="chapter4.html">&larr; Chapter 4</a> &nbsp;|&nbsp; <a href="chapter6.html">Chapter 6 &rarr;</a></div></footer>
+
+<script>
+// P2P workflow details
+const p2pData=[
+  {t:'Demand Signal',d:'For direct materials, MRP generates demand signals based on production schedules and BOMs — automatically calculating what materials are needed, when, and in what quantities. For indirect, demand comes from department budgets, employee requests, or reorder point triggers. This is where manufacturing P2P fundamentally diverges from services procurement.'},
+  {t:'Requisition Creation',d:'MRP-triggered requisitions are linked to specific production orders, BOM line items, and quality requirements. Indirect requisitions use guided buying through approved catalogs. Each requisition includes specifications, quantities, delivery dates, budget codes, and cost center allocation. Smart forms pre-populate fields from master data to reduce errors.'},
+  {t:'Approval Routing',d:'Routed through workflows based on dollar thresholds, category, and organizational hierarchy. Best practice: tiered thresholds with parallel approvals and 72-hour auto-escalation. A $500M manufacturer cut processing from 7-day delays to 2.5 days using this approach. Budget validation and compliance checks happen automatically before human approvals.'},
+  {t:'PO Creation & Dispatch',d:'Approved requisitions convert to POs with complete vendor, pricing, delivery, and terms data. POs transmit electronically via EDI, supplier portal, or API. For JIT manufacturing, blanket POs with scheduled releases are used against production demand. Average manual PO cost: $429 — automation cuts this by 50%+.'},
+  {t:'Order Tracking & Expediting',d:'Monitor supplier delivery against committed dates in real-time. For direct materials, coordinate with production scheduling for JIT delivery windows. Manage exceptions: delays, partial shipments, quality holds. Escalation protocols for critical material shortages. A missing component can halt an entire production line — visibility is everything.'},
+  {t:'Goods Receipt & Quality Inspection',d:'Confirm delivery against PO specifications. For direct materials, incoming quality inspection includes sampling, testing, and certification verification per the quality plan. Document partial receipts, damaged goods, and rejected materials. Generates the Goods Receipt Note (GRN) — the third document needed for three-way matching.'},
+  {t:'Invoice Three-Way Matching',d:'Compare supplier invoice against PO and GRN for quantity, price, and terms. Manual processing: $12-30/invoice, 17+ days. Automated: $1-5/invoice, 3 days. Apply tolerance thresholds for minor variances (e.g., ±2% on quantity) to avoid unnecessary holds. Route exceptions to the right resolver automatically.'},
+  {t:'Payment Processing',d:'Schedule payments per contract terms (Net 30/60/90). Evaluate early payment discounts — 2/10 Net 30 offers 2% savings if paid within 10 days. Automated processing (3-4 days) makes this possible; manual (20+ days) does not. On-time payment rates jump from 70% to 95% with automation, reducing vendor disputes by 40-60%.'}
+];
+function showP2P(el,idx){document.querySelectorAll('.wf-step').forEach(s=>s.classList.remove('active'));el.classList.add('active');const box=document.getElementById('p2p-detail');document.getElementById('p2p-title').textContent=p2pData[idx].t;document.getElementById('p2p-text').textContent=p2pData[idx].d;box.classList.add('visible');}
+
+// Buying tabs
+const buyData=[
+  {title:'Punchout Catalogs',items:['<strong>How it works:</strong> User clicks "Shop" in the procurement system and is redirected to the supplier\'s live website','<strong>Real-time pricing:</strong> Always reflects current pricing, availability, and promotions from the supplier','<strong>Best for:</strong> Suppliers with large, frequently changing catalogs (Amazon Business, Grainger, RS Components)','<strong>Manufacturing use:</strong> MRO supplies, office supplies, IT equipment, lab consumables','<strong>Pros:</strong> Always current, supplier maintains the catalog, rich product content','<strong>Cons:</strong> Requires supplier technical setup, user leaves the procurement interface temporarily'],metric:'Best for: Large, dynamic supplier catalogs'},
+  {title:'Hosted Catalogs',items:['<strong>How it works:</strong> Supplier product data is loaded directly into the procurement system\'s catalog','<strong>Curated experience:</strong> Procurement team controls what products and prices users see','<strong>Best for:</strong> Negotiated contract items, preferred products, restricted categories','<strong>Manufacturing use:</strong> Safety equipment, standard components, approved chemicals and materials','<strong>Pros:</strong> Full control over what\'s displayed, consistent user experience, works offline','<strong>Cons:</strong> Requires manual updates when prices or products change, maintenance overhead'],metric:'Best for: Controlled, contract-based purchasing'},
+  {title:'Driving Adoption',items:['<strong>Make compliance easier than non-compliance:</strong> If the guided buying experience is worse than Amazon, users will go around it','<strong>Executive sponsorship:</strong> CPO must mandate usage and track compliance by department','<strong>Training:</strong> Role-based training — don\'t train a lab tech the same way as a facilities manager','<strong>Metrics that matter:</strong> Adoption rate by department, catalog utilization, off-catalog spend %','<strong>Quick wins:</strong> Start with the highest-volume, easiest categories (office supplies, MRO) before tackling complex ones','<strong>The CMO angle:</strong> Internal marketing campaigns for procurement adoption — this is where you can add unique value'],metric:'User adoption is the #1 predictor of P2P success'}
+];
+function showBuy(idx,el){document.querySelectorAll('#buy-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const d=buyData[idx],c=document.getElementById('buy-content');c.innerHTML='<h4>'+d.title+'</h4><ul>'+d.items.map(i=>'<li>'+i+'</li>').join('')+'</ul><div class="tab-metric">'+d.metric+'</div>';}
+showBuy(0,document.querySelector('#buy-tabs .tab'));
+
+// Manufacturing P2P tabs
+const mfgData=[
+  {title:'JIT / Lean Procurement',items:['<strong>Just-in-Time:</strong> Order materials only as needed to minimize inventory costs and avoid holding depreciating stock','<strong>Post-pandemic shift:</strong> Pure JIT is giving way to "JIT with buffers" — 45% of organizations are increasing inventories as mitigation against disruption','<strong>Dual sourcing:</strong> 39% pursuing dual sourcing strategies to reduce single-source JIT risk','<strong>Digital inventory management:</strong> Track stock levels in real-time and trigger reordering based on actual demand, not forecasts','<strong>Lean principles:</strong> Reduce waste, minimize excess, substitute materials where possible to lower consumption','<strong>Jaggaer enables:</strong> Scheduled releases on blanket POs, supplier portal for demand visibility, real-time inventory integration'],metric:'45% of manufacturers increasing buffer stock post-pandemic'},
+  {title:'Blanket Purchase Orders',items:['<strong>What they are:</strong> Standing orders with pre-negotiated terms — individual releases are issued against the blanket as needed','<strong>Manufacturing use:</strong> Perfect for recurring direct materials where you know annual volumes but delivery timing varies with production schedules','<strong>How releases work:</strong> MRP calculates needs → system generates a release against the blanket PO → supplier delivers per the schedule','<strong>Benefits:</strong> Eliminates repetitive approvals, locks in negotiated pricing, reduces PO processing costs dramatically','<strong>Volume flexibility:</strong> Typically allow ±10-20% variance from committed volumes without renegotiation','<strong>Example:</strong> A blanket PO for $2M of aluminum extrusions with weekly releases scheduled 4 weeks ahead of production'],metric:'Eliminates repetitive approvals for recurring purchases'},
+  {title:'MRP Integration',items:['<strong>Automated demand:</strong> MRP calculates material requirements from BOMs and production schedules — procurement receives automated requisitions','<strong>Real-time visibility:</strong> Inventory levels, on-order quantities, and projected demand are visible across procurement and production','<strong>Lead time planning:</strong> MRP uses supplier lead times to calculate when orders must be placed to arrive for production','<strong>Safety stock:</strong> System maintains minimum stock levels for critical materials, auto-triggering replenishment orders','<strong>Multi-ERP challenge:</strong> M&A activity creates fragmented ERP landscapes — Jaggaer supports SAP, Oracle, Infor, and others simultaneously','<strong>Integration depth matters:</strong> Shallow integration means manual data re-entry; deep integration means automated end-to-end flows'],metric:'Deep ERP integration is Jaggaer\'s key manufacturing advantage'},
+  {title:'Quality at Goods Receipt',items:['<strong>Incoming inspection:</strong> Sample-based or 100% inspection depending on component criticality and supplier history','<strong>Quality plan driven:</strong> Inspection type, sample size, acceptance criteria, and test methods defined per component','<strong>Documentation:</strong> Certificates of conformance (CoC), material test reports (MTR), REACH/RoHS compliance certificates','<strong>Rejection handling:</strong> Non-conforming material triggers return-to-vendor (RTV), supplier corrective action request (SCAR), and production replanning','<strong>GRN generation:</strong> Goods Receipt Note documents what was received, inspected, and accepted — the third leg of three-way matching','<strong>Supplier quality history:</strong> Inspection results feed into supplier scorecards, driving performance-based sourcing decisions'],metric:'Quality inspection is the gate between receiving and production'}
+];
+function showMfg(idx,el){document.querySelectorAll('#mfg-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const d=mfgData[idx],c=document.getElementById('mfg-content');c.innerHTML='<h4>'+d.title+'</h4><ul>'+d.items.map(i=>'<li>'+i+'</li>').join('')+'</ul><div class="tab-metric">'+d.metric+'</div>';}
+showMfg(0,document.querySelector('#mfg-tabs .tab'));
+
+// Charts
+const cc={blue:'#00b4d8',darkBlue:'#0077b6',green:'#10b981',yellow:'#f59e0b',red:'#ef4444',purple:'#a78bfa'};
+Chart.defaults.color='#6b7280';Chart.defaults.borderColor='#1e2d4a';Chart.defaults.font.family="'Segoe UI',system-ui,sans-serif";
+
+new Chart(document.getElementById('chart-approvals'),{type:'bar',data:{labels:['Sequential Approvals','Parallel + Auto-Escalation'],datasets:[{label:'Days to Process',data:[7,2.5],backgroundColor:[cc.red+'99',cc.green+'99'],borderRadius:6}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1e2d4a'},title:{display:true,text:'Days',color:'#6b7280'}},y:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chart-po-cost'),{type:'bar',data:{labels:['Fully Manual','Semi-Automated','Fully Automated','Industrial Mfg Best'],datasets:[{label:'Cost per PO ($)',data:[429,280,175,148],backgroundColor:[cc.red+'99',cc.yellow+'99',cc.blue+'99',cc.green+'99'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1e2d4a'},title:{display:true,text:'Cost ($)',color:'#6b7280'}},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chart-compete'),{type:'radar',data:{labels:['Guided Buying UX','Catalog Management','MRP Integration','Direct Materials P2P','Approval Workflows','Mobile Experience'],datasets:[{label:'Jaggaer',data:[75,80,92,95,82,72],borderColor:cc.blue,backgroundColor:cc.blue+'15',pointBackgroundColor:cc.blue,borderWidth:2},{label:'SAP Ariba',data:[78,85,82,65,80,68],borderColor:cc.yellow,backgroundColor:cc.yellow+'15',pointBackgroundColor:cc.yellow,borderWidth:2},{label:'Coupa',data:[95,88,58,52,85,90],borderColor:cc.red,backgroundColor:cc.red+'15',pointBackgroundColor:cc.red,borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:20,usePointStyle:true}}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#1e2d4a'},angleLines:{color:'#1e2d4a'},pointLabels:{font:{size:11}},ticks:{display:false}}}}});
+
+// Quiz
+const quizData=[
+  {q:'What triggers purchase requisitions for direct materials in manufacturing?',opts:['Department budgets','Executive approval','MRP demand signals from BOMs and production schedules','Marketing forecasts'],ans:2,explain:'In manufacturing, MRP (Material Requirements Planning) automatically generates requisitions based on production schedules and Bills of Materials, calculating what materials are needed, when, and in what quantities.'},
+  {q:'What is "guided buying"?',opts:['A vendor-managed inventory program','A curated shopping experience directing users to approved catalogs and suppliers','A method of supplier negotiation','An inventory forecasting tool'],ans:1,explain:'Guided buying creates a consumer-like shopping experience that directs users to approved catalogs, contracted suppliers, and compliant purchasing channels — making the compliant path the easiest path.'},
+  {q:'What is the average cost to manually process a purchase order?',opts:['$29','$129','$429','$929'],ans:2,explain:'The average manual PO processing cost is $429. Automation reduces this by 50%+, with best-in-class industrial manufacturers achieving under $200 per PO through full automation.'},
+  {q:'What is a blanket purchase order?',opts:['A one-time emergency order','A standing order with scheduled releases against production demand','An order that covers all categories','A supplier credit agreement'],ans:1,explain:'A blanket PO is a standing order with pre-negotiated terms. Individual releases are issued against the blanket as production demand dictates, eliminating repetitive approvals and locking in negotiated pricing.'},
+  {q:'What approach reduced processing time from 7 days to 2.5 days?',opts:['Hiring more staff','Eliminating all approvals','Parallel approvals with 72-hour auto-escalation','Outsourcing to a third party'],ans:2,explain:'A $500M manufacturing company cut processing from 7-day delays to 2.5 days by switching to parallel approvals (multiple approvers simultaneously) with 72-hour auto-escalation for unresponsive approvers.'},
+  {q:'What document is generated at goods receipt that is needed for three-way matching?',opts:['Purchase Order','Invoice','Goods Receipt Note (GRN)','Bill of Materials'],ans:2,explain:'The Goods Receipt Note (GRN) documents what was received, inspected, and accepted. It\'s the third document in three-way matching, compared against the Purchase Order and the supplier Invoice.'},
+  {q:'What percentage of organizations are increasing inventories as a buffer against disruption?',opts:['15%','25%','45%','75%'],ans:2,explain:'45% of organizations facing tariff and supply chain impacts are increasing inventories as a mitigation strategy. This represents a shift from pure JIT toward "JIT with buffers" in manufacturing procurement.'},
+  {q:'How do punchout catalogs differ from hosted catalogs?',opts:['Punchout is for direct materials only','Punchout connects to the supplier\'s live website; hosted catalogs are maintained in the procurement system','There is no difference','Hosted catalogs are more expensive'],ans:1,explain:'Punchout catalogs redirect users to the supplier\'s live website for real-time pricing and availability. Hosted catalogs load supplier product data directly into the procurement system, giving procurement more control but requiring manual updates.'},
+  {q:'What is Jaggaer\'s primary P2P advantage over Coupa for manufacturers?',opts:['Better user interface','Lower price','Deep MRP integration and direct materials P2P workflows','Larger supplier network'],ans:2,explain:'Jaggaer scores 92 on MRP Integration and 95 on Direct Materials P2P, compared to Coupa\'s 58 and 52 respectively. Jaggaer\'s deep ERP integration and manufacturing-specific workflows are its key differentiator.'},
+  {q:'What percentage of indirect spend is off-contract (maverick)?',opts:['5%','15%','29%','50%'],ans:2,explain:'29% of indirect spend is off-contract according to The Hackett Group. World-class organizations achieve 5% maverick spending, while non-mature organizations average 10%+. This represents billions in uncontrolled spending at large enterprises.'}
+];
+const letters=['A','B','C','D'];let qzIdx=0,qzScore=0,qzAnswered=false,qzUserAnswers=[];
+function renderQuiz(){qzAnswered=false;const q=quizData[qzIdx];document.getElementById('qz-progress').style.width=(qzIdx/quizData.length*100)+'%';document.getElementById('qz-card').innerHTML='<div class="quiz-qnum">Question '+(qzIdx+1)+' of '+quizData.length+'</div><div class="quiz-qtext">'+q.q+'</div><div class="quiz-options" id="qz-opts">'+q.opts.map((o,i)=>'<div class="quiz-opt" onclick="qzSelect('+i+')"><span class="quiz-letter">'+letters[i]+'</span><span>'+o+'</span></div>').join('')+'</div><div class="quiz-explanation" id="qz-explain">'+q.explain+'</div>';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-results').style.display='none';}
+function qzSelect(idx){if(qzAnswered)return;qzAnswered=true;const q=quizData[qzIdx],correct=idx===q.ans;if(correct)qzScore++;qzUserAnswers.push({selected:idx,correct:q.ans,isCorrect:correct});const opts=document.querySelectorAll('#qz-opts .quiz-opt');opts.forEach((o,i)=>{if(i===q.ans)o.classList.add('correct');else if(i===idx&&!correct)o.classList.add('incorrect');else o.classList.add('dimmed');});document.getElementById('qz-explain').classList.add('visible');const btn=document.getElementById('qz-next');btn.textContent=qzIdx<quizData.length-1?'Next':'See Results';btn.classList.add('visible');}
+function qzNext(){qzIdx++;if(qzIdx<quizData.length)renderQuiz();else{document.getElementById('qz-card').style.display='none';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-progress').style.width='100%';showQzResults();}}
+function showQzResults(){const pct=Math.round(qzScore/quizData.length*100);let grade,msg;if(pct===100){grade='perfect';msg='Perfect! P2P execution mastered.';}else if(pct>=80){grade='great';msg='Excellent understanding of P2P workflows.';}else if(pct>=70){grade='ok';msg='Good enough to proceed. Review misses below.';}else{grade='low';msg='Review the material and retake the quiz.';}let rv=qzUserAnswers.map((ua,i)=>{const q=quizData[i],tc=ua.isCorrect?'c':'w',tt=ua.isCorrect?'Correct':'Incorrect',dt=ua.isCorrect?'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]:'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]+' — Correct: '+letters[ua.correct]+') '+q.opts[ua.correct];return'<div class="qr-item"><div class="qr-tag '+tc+'">'+tt+'</div><div class="qr-q">'+(i+1)+'. '+q.q+'</div><div class="qr-d">'+dt+'</div></div>';}).join('');document.getElementById('qz-results').style.display='block';document.getElementById('qz-results').innerHTML='<div class="quiz-results"><div class="qr-circle '+grade+'"><div class="qr-score">'+qzScore+'/'+quizData.length+'</div><div class="qr-label">Score</div></div><h3>'+pct+'%'+(pct>=70?' — Passed!':' — Keep Studying')+'</h3><p>'+msg+'</p><div><button class="btn-restart" onclick="qzRestart()">Retake Quiz</button></div><div class="qr-review">'+rv+'</div></div>';}
+function qzRestart(){qzIdx=0;qzScore=0;qzAnswered=false;qzUserAnswers=[];document.getElementById('qz-card').style.display='block';document.getElementById('qz-results').style.display='none';renderQuiz();}
+renderQuiz();
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

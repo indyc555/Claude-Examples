@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaggaer S2P Masterclass | Chapter 3: Strategic Sourcing</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0e1a;color:#c9d1d9;line-height:1.7}
+    a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1e2d4a;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
+    .topnav-brand{font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-.02em}.topnav-brand span{color:#00b4d8}
+    .topnav-chapters{display:flex;gap:6px;align-items:center}
+    .ch-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;background:#1a2240;color:#4a5568;border:2px solid #2a3558;cursor:pointer;transition:all .3s;text-decoration:none}
+    .ch-dot.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+    .ch-dot.completed{background:#10b981;color:#fff;border-color:#10b981}
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;background:linear-gradient(180deg,#0a0e1a 0%,#0d1b2a 50%,#0a0e1a 100%);position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.08) 0%,transparent 70%)}
+    .hero-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.25);margin-bottom:20px}
+    .hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:900;color:#fff;line-height:1.15;max-width:800px;margin-bottom:16px;letter-spacing:-.03em}
+    .hero h1 em{font-style:normal;color:#00b4d8}
+    .hero-sub{font-size:1.15rem;color:#8b95a5;max-width:640px;margin-bottom:40px;line-height:1.7}
+    .hero-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;border-radius:12px;font-size:1.05rem;font-weight:700;background:linear-gradient(135deg,#00b4d8,#0077b6);color:#fff;border:none;cursor:pointer;transition:transform .15s,box-shadow .3s;box-shadow:0 4px 24px rgba(0,180,216,.25)}
+    .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,180,216,.35)}
+    .container{max-width:960px;margin:0 auto;padding:0 24px}
+    section{padding:80px 0}
+    .section-label{font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#00b4d8;margin-bottom:8px}
+    .section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.25;letter-spacing:-.02em}
+    .section-desc{color:#8b95a5;max-width:640px;margin-bottom:40px;font-size:1.05rem}
+    .divider{border:none;border-top:1px solid #1e2d4a;margin:0}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+    .stat-card{text-align:center;padding:28px 16px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .stat-num{font-size:2.2rem;font-weight:900;color:#fff;line-height:1}.stat-num span{color:#00b4d8}
+    .stat-label{font-size:.85rem;color:#6b7280;margin-top:6px}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px}
+    @media(max-width:700px){.chart-grid{grid-template-columns:1fr}}
+    .chart-box{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .chart-box h4{font-size:.95rem;font-weight:700;color:#e2e8f0;margin-bottom:16px}
+    .chart-box canvas{width:100%!important;max-height:280px}
+    .callout{padding:28px 32px;border-radius:14px;border-left:4px solid #f59e0b;background:rgba(245,158,11,.06);margin:40px 0}
+    .callout h4{color:#f59e0b;font-size:1.05rem;margin-bottom:8px}
+    .callout p{color:#8b95a5;font-size:.95rem}
+    /* Workflow */
+    .workflow-wrapper{overflow-x:auto;padding:20px 0}
+    .workflow{display:flex;align-items:stretch;gap:0;min-width:700px}
+    .wf-phase{flex:1}.wf-phase-label{text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px;border-radius:8px 8px 0 0;color:#fff;background:#0077b6}
+    .wf-steps{display:flex;flex-direction:column;gap:6px;padding:12px 8px;background:#111827;border:1px solid #1e2d4a;border-top:none;border-radius:0 0 8px 8px}
+    .wf-step{padding:10px 12px;border-radius:8px;font-size:.82rem;font-weight:600;color:#c9d1d9;background:#1a2240;border:1px solid transparent;cursor:pointer;transition:all .2s;text-align:center}
+    .wf-step:hover{border-color:#00b4d8;background:#0d1f35}.wf-step.active{border-color:#00b4d8;background:#0d1f35;color:#fff}
+    .wf-arrow{display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#2a3558;padding:0 4px;align-self:center}
+    .wf-detail{margin-top:24px;padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;display:none}
+    .wf-detail.visible{display:block}.wf-detail h4{color:#00b4d8;font-size:1rem;margin-bottom:8px}.wf-detail p{font-size:.92rem;color:#8b95a5;line-height:1.7}
+    /* Tabs */
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+    .tab{padding:10px 20px;border-radius:10px;font-size:.88rem;font-weight:600;background:#1a2240;color:#6b7280;border:1px solid #2a3558;cursor:pointer;transition:all .2s}
+    .tab:hover{color:#c9d1d9;border-color:#3a4568}.tab.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+    .tab-content{padding:28px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .tab-content h4{color:#fff;font-size:1.1rem;margin-bottom:12px}
+    .tab-content ul{padding-left:20px}.tab-content li{margin-bottom:8px;color:#8b95a5;font-size:.95rem}.tab-content li strong{color:#e2e8f0}
+    .tab-metric{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:700;background:rgba(0,180,216,.12);color:#00b4d8;margin-top:12px}
+    /* Comp cards */
+    .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    @media(max-width:700px){.comp-grid{grid-template-columns:1fr}}
+    .comp-card{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;text-align:center;transition:border-color .3s}
+    .comp-card:hover{border-color:#3a4568}.comp-card.highlight{border-color:#00b4d8;background:#0d1f35}
+    .comp-logo{font-size:1.4rem;font-weight:900;margin-bottom:6px;letter-spacing:-.02em}
+    .comp-card:nth-child(1) .comp-logo{color:#00b4d8}.comp-card:nth-child(2) .comp-logo{color:#f59e0b}.comp-card:nth-child(3) .comp-logo{color:#ef4444}
+    .comp-card ul{text-align:left;padding-left:14px;list-style:none}.comp-card li{font-size:.85rem;color:#8b95a5;margin-bottom:5px;padding-left:14px;position:relative}
+    .comp-card li::before{content:'>';position:absolute;left:0;color:#4a5568;font-weight:700}
+    /* Quiz */
+    .quiz-wrapper{max-width:720px;margin:0 auto}
+    .quiz-progress{height:6px;background:#1e2d4a;border-radius:3px;margin-bottom:28px;overflow:hidden}
+    .quiz-progress-fill{height:100%;background:#00b4d8;border-radius:3px;transition:width .4s}
+    .quiz-card{padding:36px;border-radius:16px;background:#111827;border:1px solid #1e2d4a}
+    .quiz-qnum{font-size:.8rem;font-weight:700;color:#4a5568;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+    .quiz-qtext{font-size:1.15rem;font-weight:700;color:#fff;line-height:1.5;margin-bottom:24px}
+    .quiz-options{display:flex;flex-direction:column;gap:10px}
+    .quiz-opt{display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:10px;font-size:.95rem;background:#0a0e1a;border:2px solid #1e2d4a;cursor:pointer;transition:all .2s;color:#c9d1d9}
+    .quiz-opt:hover{border-color:#3a4568;background:#131b30}
+    .quiz-opt.correct{border-color:#10b981;background:rgba(16,185,129,.1);cursor:default}
+    .quiz-opt.incorrect{border-color:#ef4444;background:rgba(239,68,68,.08);cursor:default}
+    .quiz-opt.dimmed{opacity:.4;cursor:default}
+    .quiz-letter{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0;background:#1e2d4a;color:#6b7280}
+    .quiz-opt.correct .quiz-letter{background:#10b981;color:#fff}
+    .quiz-opt.incorrect .quiz-letter{background:#ef4444;color:#fff}
+    .quiz-explanation{margin-top:20px;padding:16px 20px;border-radius:10px;background:#0a0e1a;border-left:4px solid #00b4d8;font-size:.92rem;color:#8b95a5;line-height:1.7;display:none}
+    .quiz-explanation.visible{display:block}
+    .quiz-nav{display:flex;justify-content:flex-end;margin-top:20px}
+    .quiz-btn{padding:12px 32px;border-radius:10px;font-size:.95rem;font-weight:700;background:#00b4d8;color:#fff;border:none;cursor:pointer;transition:background .2s;display:none}
+    .quiz-btn.visible{display:inline-block}.quiz-btn:hover{background:#0096b7}
+    .quiz-results{text-align:center;padding:48px 32px}
+    .qr-circle{width:130px;height:130px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;border:5px solid #1e2d4a}
+    .qr-circle.perfect{border-color:#10b981}.qr-circle.great{border-color:#00b4d8}.qr-circle.ok{border-color:#f59e0b}.qr-circle.low{border-color:#ef4444}
+    .qr-score{font-size:2.2rem;font-weight:900;color:#fff}.qr-label{font-size:.75rem;color:#4a5568;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .quiz-results h3{color:#fff;font-size:1.3rem;margin-bottom:6px}.quiz-results p{color:#6b7280;margin-bottom:28px}
+    .qr-review{text-align:left;margin-top:28px;display:flex;flex-direction:column;gap:12px}
+    .qr-item{padding:16px;border-radius:10px;background:#0a0e1a;border:1px solid #1e2d4a}
+    .qr-item .qr-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}.qr-item .qr-tag.c{color:#10b981}.qr-item .qr-tag.w{color:#ef4444}
+    .qr-item .qr-q{font-weight:600;color:#e2e8f0;font-size:.92rem;margin-bottom:4px}.qr-item .qr-d{font-size:.85rem;color:#6b7280}
+    .btn-restart{padding:12px 28px;border-radius:10px;font-size:.9rem;font-weight:700;background:#1e2d4a;color:#c9d1d9;border:none;cursor:pointer;transition:background .2s;margin-right:10px}.btn-restart:hover{background:#2a3558}
+    footer{text-align:center;padding:40px 24px;color:#4a5568;font-size:.82rem;border-top:1px solid #1e2d4a}
+    .fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}.fade-in.visible{opacity:1;transform:translateY(0)}
+    @media(max-width:600px){.topnav{padding:0 16px}section{padding:48px 0}.comp-grid{grid-template-columns:1fr}.quiz-card{padding:24px 18px}}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
+  <div class="topnav-chapters">
+    <a href="index.html" class="ch-dot completed">1</a>
+    <a href="chapter2.html" class="ch-dot completed">2</a>
+    <a href="chapter3.html" class="ch-dot active">3</a>
+    <a href="chapter4.html" class="ch-dot">4</a>
+    <a href="chapter5.html" class="ch-dot">5</a>
+    <a href="chapter6.html" class="ch-dot">6</a>
+    <a href="chapter7.html" class="ch-dot">7</a>
+    <a href="chapter8.html" class="ch-dot">8</a>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="hero-badge">Chapter 3 of 8</div>
+  <h1>Strategic <em>Sourcing</em></h1>
+  <p class="hero-sub">Finding, evaluating, and securing the best suppliers for $1B+ manufacturers &mdash; from RFx to contract award.</p>
+  <button class="hero-cta" onclick="document.getElementById('lifecycle').scrollIntoView({behavior:'smooth'})">Begin Learning &#8595;</button>
+</section>
+<hr class="divider">
+
+<!-- SOURCING LIFECYCLE -->
+<section id="lifecycle">
+  <div class="container fade-in">
+    <div class="section-label">The Process</div>
+    <div class="section-title">The 7-Step Sourcing Lifecycle</div>
+    <p class="section-desc">Every strategic sourcing event follows this lifecycle. For complex manufacturing categories, the full cycle takes 3&ndash;6 months.</p>
+    <div class="workflow-wrapper">
+      <div class="workflow">
+        <div class="wf-phase">
+          <div class="wf-phase-label">Plan</div>
+          <div class="wf-steps">
+            <div class="wf-step" onclick="showDetail(this,0)">Need Identification</div>
+            <div class="wf-step" onclick="showDetail(this,1)">Market Research</div>
+          </div>
+        </div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase">
+          <div class="wf-phase-label" style="background:#00b4d8">Execute</div>
+          <div class="wf-steps">
+            <div class="wf-step" onclick="showDetail(this,2)">RFx Strategy</div>
+            <div class="wf-step" onclick="showDetail(this,3)">Supplier Evaluation</div>
+            <div class="wf-step" onclick="showDetail(this,4)">Negotiation</div>
+          </div>
+        </div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase">
+          <div class="wf-phase-label" style="background:#10b981">Award</div>
+          <div class="wf-steps">
+            <div class="wf-step" onclick="showDetail(this,5)">Contract Award</div>
+            <div class="wf-step" onclick="showDetail(this,6)">Supplier Transition</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;color:#4a5568;font-size:.82rem;margin-top:8px">Click any step for details</p>
+    <div class="wf-detail" id="detail-box"><h4 id="detail-title"></h4><p id="detail-text"></p></div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- RFx DEEP-DIVE -->
+<section id="rfx">
+  <div class="container fade-in">
+    <div class="section-label">Core Competency</div>
+    <div class="section-title">The RFx Process: RFI, RFP &amp; RFQ</div>
+    <p class="section-desc">Three instruments, each serving a different purpose in the sourcing toolkit.</p>
+    <div class="tabs" id="rfx-tabs">
+      <div class="tab active" onclick="showRfx(0,this)">RFI &mdash; Discovery</div>
+      <div class="tab" onclick="showRfx(1,this)">RFP &mdash; Evaluation</div>
+      <div class="tab" onclick="showRfx(2,this)">RFQ &mdash; Pricing</div>
+    </div>
+    <div class="tab-content" id="rfx-content"></div>
+    <div class="callout">
+      <h4>Manufacturing Example</h4>
+      <p>Sourcing a new precision-machined component supplier for an automotive OEM: Start with an <strong>RFI</strong> to 20 potential suppliers to assess capabilities and certifications (IATF 16949). Narrow to 5 for an <strong>RFP</strong> with full engineering specs, quality plans, and PPAP requirements. Final 2-3 receive an <strong>RFQ</strong> for volume pricing. Total timeline: 4-6 months including qualification.</p>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- E-AUCTIONS -->
+<section id="auctions">
+  <div class="container fade-in">
+    <div class="section-label">Price Competition</div>
+    <div class="section-title">E-Auctions: Driving 5&ndash;15% Additional Savings</div>
+    <p class="section-desc">E-auctions work best for leverage and commodity items where multiple qualified suppliers compete on price.</p>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">5-15<span>%</span></div><div class="stat-label">additional savings from e-auctions</div></div>
+      <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">main auction types</div></div>
+      <div class="stat-card"><div class="stat-num"><span>&#10007;</span></div><div class="stat-label">not for strategic / bottleneck items</div></div>
+    </div>
+    <div class="tabs" id="auction-tabs">
+      <div class="tab active" onclick="showAuction(0,this)">Reverse Auction</div>
+      <div class="tab" onclick="showAuction(1,this)">Forward Auction</div>
+      <div class="tab" onclick="showAuction(2,this)">Dutch Auction</div>
+      <div class="tab" onclick="showAuction(3,this)">Japanese Auction</div>
+    </div>
+    <div class="tab-content" id="auction-content"></div>
+    <div class="chart-grid" style="margin-top:32px">
+      <div class="chart-box"><h4>Savings by Auction Type</h4><canvas id="chart-auctions"></canvas></div>
+      <div class="chart-box"><h4>Best Auction Fit by Kraljic Quadrant</h4><canvas id="chart-kraljic-auction"></canvas></div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- SUPPLIER EVALUATION -->
+<section id="evaluation">
+  <div class="container fade-in">
+    <div class="section-label">Scoring Suppliers</div>
+    <div class="section-title">QCDS Evaluation Framework</div>
+    <p class="section-desc">Quality, Cost, Delivery, Service &mdash; the four pillars of supplier evaluation. For manufacturing, Quality and Delivery carry the highest weight.</p>
+    <div class="chart-grid">
+      <div class="chart-box"><h4>Typical Manufacturing QCDS Weighting</h4><canvas id="chart-qcds"></canvas></div>
+      <div class="chart-box"><h4>Sample Supplier Comparison</h4><canvas id="chart-suppliers"></canvas></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">95<span>%+</span></div><div class="stat-label">on-time delivery target</div></div>
+      <div class="stat-card"><div class="stat-num">&lt;1<span>%</span></div><div class="stat-label">defect rate target</div></div>
+      <div class="stat-card"><div class="stat-num">3-12</div><div class="stat-label">month qualification cycle</div></div>
+    </div>
+    <div class="callout">
+      <h4>Key Manufacturing Certifications</h4>
+      <p><strong>ISO 9001</strong> &mdash; General quality management. <strong>IATF 16949</strong> &mdash; Automotive-specific. <strong>AS9100</strong> &mdash; Aerospace. <strong>ISO 14001</strong> &mdash; Environmental management. <strong>ISO 13485</strong> &mdash; Medical devices. For direct materials suppliers, these certifications are non-negotiable gates, not nice-to-haves.</p>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- DIRECT MATERIALS SOURCING -->
+<section id="direct">
+  <div class="container fade-in">
+    <div class="section-label">Manufacturing Focus</div>
+    <div class="section-title">Direct Materials Sourcing Challenges</div>
+    <p class="section-desc">Sourcing direct materials for manufacturing is fundamentally different from indirect procurement. The stakes are higher and the complexity is greater.</p>
+    <div class="tabs" id="direct-tabs">
+      <div class="tab active" onclick="showDirect(0,this)">BOM-Driven Sourcing</div>
+      <div class="tab" onclick="showDirect(1,this)">Engineering Changes</div>
+      <div class="tab" onclick="showDirect(2,this)">Price Volatility</div>
+      <div class="tab" onclick="showDirect(3,this)">Qualification Cycles</div>
+    </div>
+    <div class="tab-content" id="direct-content"></div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- COMPETITIVE COMPARISON -->
+<section id="compete">
+  <div class="container fade-in">
+    <div class="section-label">Competitive Intel</div>
+    <div class="section-title">Sourcing Capabilities: Jaggaer vs. Ariba vs. Coupa</div>
+    <p class="section-desc">Sourcing is where Jaggaer's manufacturing DNA shines brightest against the competition.</p>
+    <div class="comp-grid">
+      <div class="comp-card highlight">
+        <div class="comp-logo">JAGGAER</div>
+        <ul>
+          <li>Best-in-class direct materials RFx</li>
+          <li>Deep BOM integration for sourcing</li>
+          <li>Advanced supplier collaboration</li>
+          <li>Manufacturing-specific templates</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-logo">SAP Ariba</div>
+        <ul>
+          <li>Largest supplier discovery network</li>
+          <li>Strong for indirect categories</li>
+          <li>Good template library</li>
+          <li>Weaker on direct materials depth</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-logo">Coupa</div>
+        <ul>
+          <li>Modern, intuitive sourcing UX</li>
+          <li>Community benchmarking data</li>
+          <li>Fast implementation</li>
+          <li>Limited manufacturing sourcing</li>
+        </ul>
+      </div>
+    </div>
+    <div class="chart-grid" style="margin-top:32px">
+      <div class="chart-box" style="grid-column:1/-1"><h4>Sourcing Capability Radar</h4><canvas id="chart-compete"></canvas></div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="container fade-in">
+    <div class="section-label">Test Your Knowledge</div>
+    <div class="section-title">Chapter 3 Quiz</div>
+    <p class="section-desc">10 questions on strategic sourcing. Score 70% or higher to advance.</p>
+    <div class="quiz-wrapper">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="qz-progress"></div></div>
+      <div class="quiz-card" id="qz-card"></div>
+      <div class="quiz-nav"><button class="quiz-btn" id="qz-next" onclick="qzNext()">Next</button></div>
+      <div id="qz-results" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<footer><div class="container">Jaggaer S2P Masterclass &mdash; Chapter 3 of 8<br><a href="chapter2.html">&larr; Chapter 2</a> &nbsp;|&nbsp; <a href="chapter4.html">Chapter 4 &rarr;</a></div></footer>
+
+<script>
+// Lifecycle details
+const lcDetails=[
+  {t:'Need Identification',d:'Triggered by new product development, supplier performance issues, contract expirations, or cost reduction targets. For direct materials, needs often originate from engineering (new BOM items) or MRP (demand exceeding current supplier capacity). Indirect needs come from department budgets or renewal cycles.'},
+  {t:'Market Research',d:'Identify potential suppliers through industry databases, trade shows, Ariba network, and existing supplier referrals. For manufacturing, assess capabilities: CNC machining, injection molding, stamping, casting, etc. Evaluate geographic footprint for supply chain resilience. Check certifications (ISO, IATF, AS9100).'},
+  {t:'RFx Strategy',d:'Choose the right instrument: RFI for discovery, RFP for detailed evaluation, RFQ for price competition. Define evaluation criteria and weightings. For direct materials, include engineering drawings, quality specifications, PPAP requirements, and capacity assessments. Timeline: 2-8 weeks depending on complexity.'},
+  {t:'Supplier Evaluation',d:'Score responses using QCDS framework (Quality, Cost, Delivery, Service). For direct materials, conduct site audits, capability assessments, and financial health checks. Evaluate sub-tier supply chain risk. Manufacturing-specific: PPAP (Production Part Approval Process) for automotive, FAI (First Article Inspection) for aerospace.'},
+  {t:'Negotiation',d:'Negotiate pricing, payment terms (Net 30/60/90), volume commitments, quality guarantees, and delivery schedules. For volatile commodities (steel, copper, plastics), include price adjustment mechanisms tied to market indices. Total Cost of Ownership (TCO) analysis is critical — unit price is only part of the equation.'},
+  {t:'Contract Award',d:'Finalize contracts with all commercial terms, quality specifications, delivery requirements, and penalty clauses. Include engineering change order (ECO) processes, warranty provisions, and IP protection. For manufacturing: specify tooling ownership, minimum order quantities, and safety stock requirements.'},
+  {t:'Supplier Transition',d:'Onboard the new supplier: register in procurement systems, set up EDI/API connections, establish catalog items, run pilot orders. For direct materials, this includes PPAP submission and approval, first article inspection, initial production runs with enhanced quality checks. Transition period: 2-6 months for critical components.'}
+];
+function showDetail(el,idx){
+  document.querySelectorAll('.wf-step').forEach(s=>s.classList.remove('active'));el.classList.add('active');
+  const box=document.getElementById('detail-box');
+  document.getElementById('detail-title').textContent=lcDetails[idx].t;
+  document.getElementById('detail-text').textContent=lcDetails[idx].d;
+  box.classList.add('visible');
+}
+
+// RFx tabs
+const rfxData=[
+  {title:'RFI &mdash; Request for Information',items:['<strong>Purpose:</strong> Initial screening and discovery — learn about supplier capabilities before formal bidding','<strong>When to use:</strong> Entering a new category, unfamiliar market, or need to pre-qualify suppliers','<strong>What you send:</strong> High-level requirements, capability questionnaires, certification requests','<strong>What you get back:</strong> Company profiles, capabilities, capacity, certifications, references','<strong>Manufacturing use:</strong> "Can you machine titanium parts to ±0.001" tolerance? Are you IATF 16949 certified?"','<strong>Typical timeline:</strong> 2-4 weeks'],metric:'Best for: Market intelligence gathering'},
+  {title:'RFP &mdash; Request for Proposal',items:['<strong>Purpose:</strong> Detailed evaluation — compare suppliers on technical capability, approach, and value','<strong>When to use:</strong> Complex requirements where solution approach matters as much as price','<strong>What you send:</strong> Detailed specifications, engineering drawings, quality requirements, evaluation criteria','<strong>What you get back:</strong> Full proposals with technical approach, timelines, pricing, quality plans','<strong>Manufacturing use:</strong> Complete production plans, PPAP documentation, process flow diagrams, control plans','<strong>Typical timeline:</strong> 4-8 weeks'],metric:'Best for: Complex, high-value sourcing events'},
+  {title:'RFQ &mdash; Request for Quote',items:['<strong>Purpose:</strong> Price competition — suppliers are already qualified, you need the best price','<strong>When to use:</strong> Well-defined specs, multiple qualified suppliers, commodity or leverage items','<strong>What you send:</strong> Exact specifications, volumes, delivery schedules — "give us your best price"','<strong>What you get back:</strong> Pricing breakdowns, volume tiers, lead times, payment terms','<strong>Manufacturing use:</strong> Annual re-quoting of existing parts, commodity materials (steel, plastics), standard components','<strong>Typical timeline:</strong> 1-3 weeks'],metric:'Best for: Price-driven decisions on defined specs'}
+];
+function showRfx(idx,el){
+  document.querySelectorAll('#rfx-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  const d=rfxData[idx],c=document.getElementById('rfx-content');
+  c.innerHTML='<h4>'+d.title+'</h4><ul>'+d.items.map(i=>'<li>'+i+'</li>').join('')+'</ul><div class="tab-metric">'+d.metric+'</div>';
+}
+showRfx(0,document.querySelector('#rfx-tabs .tab'));
+
+// Auction tabs
+const auctionData=[
+  {title:'Reverse Auction',items:['<strong>How it works:</strong> Suppliers bid <em>downward</em> — price decreases over time as suppliers compete','<strong>Most common type</strong> in procurement — accounts for 80%+ of e-auctions','<strong>Best for:</strong> Commodity items, leverage quadrant, well-defined specifications','<strong>Savings:</strong> Typically 10-15% below best RFQ price','<strong>Manufacturing example:</strong> Sourcing bulk steel, standard fasteners, packaging materials','<strong>Caution:</strong> Don\'t use for strategic items where relationship and quality matter more than price'],metric:'80%+ of procurement auctions'},
+  {title:'Forward Auction',items:['<strong>How it works:</strong> Buyers bid <em>upward</em> — price increases (used for selling, not buying)','<strong>Rare in procurement</strong> — more common for surplus asset disposal','<strong>Best for:</strong> Selling excess inventory, obsolete equipment, scrap materials','<strong>Manufacturing example:</strong> Disposing of surplus raw materials after a product line discontinuation','<strong>Not a sourcing tool</strong> — included for completeness','<strong>Jaggaer supports this</strong> for reverse logistics and asset recovery'],metric:'Used for selling surplus'},
+  {title:'Dutch Auction',items:['<strong>How it works:</strong> Starts at a high price and decreases until a supplier accepts','<strong>Fast resolution</strong> — typically completes in a single round','<strong>Best for:</strong> Time-sensitive sourcing where speed matters more than maximum savings','<strong>Manufacturing example:</strong> Emergency sourcing of replacement parts during a production stoppage','<strong>Risk:</strong> May not achieve lowest possible price since first acceptor wins','<strong>Advantage:</strong> Quick decision, clear winner, no extended bidding wars'],metric:'Fastest auction format'},
+  {title:'Japanese Auction',items:['<strong>How it works:</strong> Price decreases in fixed increments — suppliers must actively opt in each round or drop out','<strong>Most transparent</strong> — all participants see exactly where the price stands','<strong>Best for:</strong> Situations requiring full transparency and equal treatment of suppliers','<strong>Manufacturing example:</strong> Public sector manufacturing contracts, regulated industries','<strong>Suppliers see:</strong> Current price level and number of remaining competitors','<strong>Key benefit:</strong> Builds trust through transparency — important for long-term supplier relationships'],metric:'Most transparent format'}
+];
+function showAuction(idx,el){
+  document.querySelectorAll('#auction-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  const d=auctionData[idx],c=document.getElementById('auction-content');
+  c.innerHTML='<h4>'+d.title+'</h4><ul>'+d.items.map(i=>'<li>'+i+'</li>').join('')+'</ul><div class="tab-metric">'+d.metric+'</div>';
+}
+showAuction(0,document.querySelector('#auction-tabs .tab'));
+
+// Direct materials tabs
+const directData=[
+  {title:'BOM-Driven Sourcing',items:['<strong>BOMs dictate what to source:</strong> Every component, material, and sub-assembly is specified with exact part numbers, quantities, and specifications','<strong>A single wrong digit</strong> in a part number leads to wrong component orders, production delays, and excess inventory','<strong>450,000+ electronic components</strong> reached end-of-life in 2023 — BOMs become outdated before designs are finalized','<strong>Cross-functional complexity:</strong> Engineering defines specs, procurement finds suppliers, quality validates — all must be in sync','<strong>Jaggaer advantage:</strong> Deep BOM integration connects sourcing events directly to engineering specifications and production requirements','<strong>Challenge:</strong> Version control across engineering, manufacturing, and procurement creates conflicting BOM versions'],metric:'BOM accuracy is the #1 challenge in direct materials sourcing'},
+  {title:'Engineering Change Orders (ECOs)',items:['<strong>ECOs trigger re-sourcing:</strong> When engineering changes a design, affected components may need new suppliers or renegotiated contracts','<strong>Cascade effect:</strong> A single ECO can impact dozens of BOM line items, multiple suppliers, and production schedules','<strong>Speed matters:</strong> Slow ECO processing delays product launches and costs $10K-$100K+ per week in large manufacturing','<strong>Manufacturing example:</strong> A design change to a bracket requires new tooling, updated quality specs, PPAP resubmission, and price renegotiation','<strong>Best practice:</strong> Integrated ECO workflow connecting PLM → procurement → supplier portal','<strong>Jaggaer advantage:</strong> Supplier collaboration portal enables real-time ECO communication and impact assessment'],metric:'ECOs can impact dozens of suppliers simultaneously'},
+  {title:'Commodity Price Volatility',items:['<strong>Raw materials fluctuate constantly:</strong> Steel, copper, aluminum, plastics, rubber, and rare earths are all volatile','<strong>Producer Price Index</strong> increased 194% since 2002 while CPI increased only 170% — squeezing manufacturer margins','<strong>Hedging strategies:</strong> Futures contracts, fixed-price agreements with repricing points, index-based pricing formulas','<strong>Long-term contracts:</strong> Provide budget reliability but sacrifice upside if prices fall — include break clauses','<strong>Manufacturing example:</strong> A $2B auto parts manufacturer ties steel pricing to the CRU Steel Index with quarterly adjustments','<strong>Jaggaer advantage:</strong> Integrated commodity tracking, index-based contract terms, and spend analytics for volatility exposure'],metric:'194% PPI increase since 2002 — margins under constant pressure'},
+  {title:'Qualification Cycles',items:['<strong>3-12 months</strong> to qualify a new direct materials supplier for critical components','<strong>Steps:</strong> Initial assessment → capability audit → sample submission → testing → pilot production → full qualification','<strong>Automotive (PPAP):</strong> Production Part Approval Process requires 18 elements including process flow, control plans, and measurement studies','<strong>Aerospace (FAI):</strong> First Article Inspection verifies that production processes produce parts meeting design specs','<strong>Cost of switching:</strong> Requalification, testing, production disruption risk — switching costs are very high','<strong>Dual sourcing trend:</strong> 63% of manufacturers now pursue "power-of-two" sourcing to reduce single-source risk'],metric:'Switching costs make qualification a strategic investment'}
+];
+function showDirect(idx,el){
+  document.querySelectorAll('#direct-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  const d=directData[idx],c=document.getElementById('direct-content');
+  c.innerHTML='<h4>'+d.title+'</h4><ul>'+d.items.map(i=>'<li>'+i+'</li>').join('')+'</ul><div class="tab-metric">'+d.metric+'</div>';
+}
+showDirect(0,document.querySelector('#direct-tabs .tab'));
+
+// Charts
+const cc={blue:'#00b4d8',darkBlue:'#0077b6',green:'#10b981',yellow:'#f59e0b',red:'#ef4444',purple:'#a78bfa'};
+Chart.defaults.color='#6b7280';Chart.defaults.borderColor='#1e2d4a';Chart.defaults.font.family="'Segoe UI',system-ui,sans-serif";
+
+new Chart(document.getElementById('chart-auctions'),{type:'bar',data:{labels:['Reverse','Dutch','Japanese','Forward'],datasets:[{label:'Avg Savings %',data:[12,8,10,0],backgroundColor:[cc.blue,cc.green,cc.yellow,cc.red+'66'],borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1e2d4a'},title:{display:true,text:'% Savings vs. Baseline',color:'#6b7280'}},y:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chart-kraljic-auction'),{type:'doughnut',data:{labels:['Leverage (Auctions ideal)','Non-Critical (Auctions OK)','Strategic (Not recommended)','Bottleneck (Not suitable)'],datasets:[{data:[45,25,20,10],backgroundColor:[cc.green,cc.blue,cc.yellow,cc.red],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:14,usePointStyle:true,pointStyleWidth:10}}}}});
+
+new Chart(document.getElementById('chart-qcds'),{type:'doughnut',data:{labels:['Quality (35%)','Delivery (30%)','Cost (20%)','Service (15%)'],datasets:[{data:[35,30,20,15],backgroundColor:[cc.blue,cc.green,cc.yellow,cc.purple],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:14,usePointStyle:true,pointStyleWidth:10}}}}});
+
+new Chart(document.getElementById('chart-suppliers'),{type:'radar',data:{labels:['Quality','Cost','Delivery','Service','Innovation','Risk'],datasets:[{label:'Supplier A',data:[92,75,95,80,70,85],borderColor:cc.blue,backgroundColor:cc.blue+'15',pointBackgroundColor:cc.blue,borderWidth:2},{label:'Supplier B',data:[80,90,78,85,60,70],borderColor:cc.yellow,backgroundColor:cc.yellow+'15',pointBackgroundColor:cc.yellow,borderWidth:2},{label:'Supplier C',data:[88,82,88,75,90,80],borderColor:cc.green,backgroundColor:cc.green+'15',pointBackgroundColor:cc.green,borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true}}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#1e2d4a'},angleLines:{color:'#1e2d4a'},pointLabels:{font:{size:11}},ticks:{display:false}}}}});
+
+new Chart(document.getElementById('chart-compete'),{type:'radar',data:{labels:['Sourcing Events','Auction Tools','Supplier Discovery','Direct Materials RFx','Template Library','Collaboration Tools'],datasets:[{label:'Jaggaer',data:[88,82,78,95,80,90],borderColor:cc.blue,backgroundColor:cc.blue+'15',pointBackgroundColor:cc.blue,borderWidth:2},{label:'SAP Ariba',data:[82,80,92,65,85,72],borderColor:cc.yellow,backgroundColor:cc.yellow+'15',pointBackgroundColor:cc.yellow,borderWidth:2},{label:'Coupa',data:[78,75,80,55,88,76],borderColor:cc.red,backgroundColor:cc.red+'15',pointBackgroundColor:cc.red,borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:20,usePointStyle:true}}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#1e2d4a'},angleLines:{color:'#1e2d4a'},pointLabels:{font:{size:11}},ticks:{display:false}}}}});
+
+// Quiz
+const quizData=[
+  {q:'What are the three types of RFx used in strategic sourcing?',opts:['RFA, RFB, RFC','RFI, RFP, RFQ','RFD, RFE, RFF','ROI, ROP, ROQ'],ans:1,explain:'RFI (Request for Information) for discovery, RFP (Request for Proposal) for detailed evaluation, and RFQ (Request for Quote) for price competition are the three standard instruments in strategic sourcing.'},
+  {q:'How long can a complex manufacturing sourcing event take from need identification to contract execution?',opts:['1-2 weeks','1-2 months','3-6 months','1-2 years'],ans:2,explain:'Complex manufacturing sourcing events typically take 3-6 months from need identification to contract execution, especially when engineering specifications, quality qualifications, and site audits are required.'},
+  {q:'In a reverse auction, what happens to the price over time?',opts:['Price increases as buyers compete','Price stays fixed','Price decreases as suppliers compete','Price is set by the auctioneer'],ans:2,explain:'In a reverse auction, suppliers bid downward — the price decreases over time as suppliers compete to offer the lowest price. This is the most common auction type in procurement, accounting for 80%+ of e-auctions.'},
+  {q:'What does QCDS stand for in supplier evaluation?',opts:['Quantity, Compliance, Data, Security','Quality, Cost, Delivery, Service','Qualification, Certification, Documentation, Standards','Quote, Contract, Delivery, Settlement'],ans:1,explain:'QCDS stands for Quality, Cost, Delivery, and Service — the four pillars of supplier evaluation. In manufacturing, Quality and Delivery typically carry the highest weighting.'},
+  {q:'Which certification is specific to automotive manufacturing suppliers?',opts:['ISO 9001','AS9100','IATF 16949','ISO 14001'],ans:2,explain:'IATF 16949 is the automotive-specific quality management system standard. AS9100 is for aerospace, ISO 9001 is general quality, and ISO 14001 is environmental management.'},
+  {q:'E-auctions are best suited for which Kraljic Matrix quadrant?',opts:['Strategic items','Bottleneck items','Leverage items','All quadrants equally'],ans:2,explain:'E-auctions work best for Leverage items (high profit impact, low supply risk) where multiple qualified suppliers exist and specifications are well-defined. They are NOT recommended for Strategic or Bottleneck items.'},
+  {q:'What additional savings do e-auctions typically achieve beyond standard RFQ pricing?',opts:['1-2%','5-15%','25-30%','40-50%'],ans:1,explain:'E-auctions typically drive 5-15% additional savings beyond the best RFQ price through real-time competitive pressure. Reverse auctions, the most common type, average around 10-12% savings.'},
+  {q:'For direct materials, supplier qualification cycles can take how long?',opts:['1-2 days','2-4 weeks','3-12 months','2-3 years'],ans:2,explain:'Qualifying a new direct materials supplier for critical components takes 3-12 months, including capability audits, sample submission, testing, pilot production, and formal approval processes like PPAP (automotive) or FAI (aerospace).'},
+  {q:'What is Jaggaer\'s strongest sourcing advantage over both Ariba and Coupa?',opts:['Largest supplier network','Lowest pricing','Best user interface','Direct materials RFx capabilities'],ans:3,explain:'Jaggaer scores highest on Direct Materials RFx capabilities (95 vs Ariba\'s 65 and Coupa\'s 55). Its deep BOM integration and manufacturing-specific sourcing templates give it a clear edge for complex manufacturing procurement.'},
+  {q:'What drives purchase requirements in manufacturing sourcing?',opts:['Department budgets','Executive approval','Bills of Materials (BOMs)','Marketing forecasts'],ans:2,explain:'Bills of Materials (BOMs) drive purchase requirements in manufacturing sourcing. Every component, material, and sub-assembly is specified in the BOM with exact part numbers, quantities, and engineering specifications.'}
+];
+const letters=['A','B','C','D'];let qzIdx=0,qzScore=0,qzAnswered=false,qzUserAnswers=[];
+function renderQuiz(){qzAnswered=false;const q=quizData[qzIdx];document.getElementById('qz-progress').style.width=(qzIdx/quizData.length*100)+'%';document.getElementById('qz-card').innerHTML='<div class="quiz-qnum">Question '+(qzIdx+1)+' of '+quizData.length+'</div><div class="quiz-qtext">'+q.q+'</div><div class="quiz-options" id="qz-opts">'+q.opts.map((o,i)=>'<div class="quiz-opt" onclick="qzSelect('+i+')"><span class="quiz-letter">'+letters[i]+'</span><span>'+o+'</span></div>').join('')+'</div><div class="quiz-explanation" id="qz-explain">'+q.explain+'</div>';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-results').style.display='none';}
+function qzSelect(idx){if(qzAnswered)return;qzAnswered=true;const q=quizData[qzIdx],correct=idx===q.ans;if(correct)qzScore++;qzUserAnswers.push({selected:idx,correct:q.ans,isCorrect:correct});const opts=document.querySelectorAll('#qz-opts .quiz-opt');opts.forEach((o,i)=>{if(i===q.ans)o.classList.add('correct');else if(i===idx&&!correct)o.classList.add('incorrect');else o.classList.add('dimmed');});document.getElementById('qz-explain').classList.add('visible');const btn=document.getElementById('qz-next');btn.textContent=qzIdx<quizData.length-1?'Next':'See Results';btn.classList.add('visible');}
+function qzNext(){qzIdx++;if(qzIdx<quizData.length)renderQuiz();else{document.getElementById('qz-card').style.display='none';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-progress').style.width='100%';showQzResults();}}
+function showQzResults(){const pct=Math.round(qzScore/quizData.length*100);let grade,msg;if(pct===100){grade='perfect';msg='Perfect! You\'ve mastered strategic sourcing.';}else if(pct>=80){grade='great';msg='Excellent grasp of sourcing fundamentals.';}else if(pct>=70){grade='ok';msg='Good enough to proceed. Review misses below.';}else{grade='low';msg='Review the material and try again.';}let rv=qzUserAnswers.map((ua,i)=>{const q=quizData[i],tc=ua.isCorrect?'c':'w',tt=ua.isCorrect?'Correct':'Incorrect',dt=ua.isCorrect?'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]:'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]+' — Correct: '+letters[ua.correct]+') '+q.opts[ua.correct];return'<div class="qr-item"><div class="qr-tag '+tc+'">'+tt+'</div><div class="qr-q">'+(i+1)+'. '+q.q+'</div><div class="qr-d">'+dt+'</div></div>';}).join('');document.getElementById('qz-results').style.display='block';document.getElementById('qz-results').innerHTML='<div class="quiz-results"><div class="qr-circle '+grade+'"><div class="qr-score">'+qzScore+'/'+quizData.length+'</div><div class="qr-label">Score</div></div><h3>'+pct+'%'+(pct>=70?' — Passed!':' — Keep Studying')+'</h3><p>'+msg+'</p><div><button class="btn-restart" onclick="qzRestart()">Retake Quiz</button></div><div class="qr-review">'+rv+'</div></div>';}
+function qzRestart(){qzIdx=0;qzScore=0;qzAnswered=false;qzUserAnswers=[];document.getElementById('qz-card').style.display='block';document.getElementById('qz-results').style.display='none';renderQuiz();}
+renderQuiz();
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
