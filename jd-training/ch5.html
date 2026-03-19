@@ -106,20 +106,18 @@
       <p class="sec-body">An Advanced Shipping Notice (ASN) is a structured electronic message a supplier sends to the buyer <strong>before or when goods are shipped</strong> — containing exactly what is being shipped, when, in what packaging, and how it's being transported. In SAP/EDI terms the ASN is transmitted as a <strong>DESADV</strong> IDOC (Dispatch Advice).</p>
       <p class="sec-body" style="margin-top:14px;">Without an ASN, the receiving warehouse doesn't know what's coming until the truck arrives. With an ASN, the warehouse pre-plans unloading, assigns dock doors, creates inbound delivery documents in SAP, and can post goods receipt <em>automatically</em> when the shipment is confirmed via barcode scan.</p>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717494/9d0c51e0-752b-4d5c-aaf7-bbb4f9579225"
+        <img src="images/ch5-worklist-orders.png"
              alt="ASN Pure Worklist — supplier order schedule view in JD portal"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>ASN Pure — Worklist (Orders view). Supplier sees all open order schedules with handover dates, quantities, and status. Red = overdue, yellow = due within 8 days.</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717494/1.+Worklist" target="_blank" rel="noopener">Confluence ↗</a>
         </div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717494/09070f28-863c-4468-8ab4-12e2f451680a"
+        <img src="images/ch5-worklist-calloffs.png"
              alt="ASN Pure Worklist — Call-offs view in JD portal"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>ASN Pure — Worklist (Call-offs view). Shows scheduling agreement delivery lines alongside standard orders — same interface, supplier confirms and creates delivery notes from here.</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717494/1.+Worklist" target="_blank" rel="noopener">Confluence ↗</a>
@@ -152,20 +150,18 @@
         </div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717508/4dcac402-036f-49be-86cd-e5efd4d17f17"
+        <img src="images/ch5-delivery-notes-list.png"
              alt="Open Delivery Notes overview in JD supplier portal"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>Open Delivery Notes overview — supplier sees all generated delivery notes ready for processing. From here the supplier creates pickups or transports.</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717508/2.+Delivery+notes" target="_blank" rel="noopener">Confluence ↗</a>
         </div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717508/289ba2d9-9b62-4f54-8c71-09c4a9285589"
+        <img src="images/ch5-delivery-note-detail.png"
              alt="Delivery note detail view — General tab showing header fields"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>Delivery note detail — General tab. Supplier maintains delivery note number, goods worth, and shipping reference. This forms Level 2 of the ASN hierarchy.</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717508/2.+Delivery+notes" target="_blank" rel="noopener">Confluence ↗</a>
@@ -189,40 +185,36 @@
         <div class="step"><div class="step-num">7</div><div class="step-content"><h4>RECADV back to supplier</h4><p>JD sends a Receiving Advice to the supplier portal confirming what was received — closing the loop.</p></div></div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717527/d4e69daa-c615-4a52-a52e-df0847a5892d"
+        <img src="images/ch5-pickup-list.png"
              alt="Open Pickup Orders overview in JD supplier portal"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>Open Pickup Orders — supplier creates a pickup after the delivery note is ready. Carrier is selected here and notified to collect the goods (Step 3–4 in the process above).</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717527/3.+Pickup" target="_blank" rel="noopener">Confluence ↗</a>
         </div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717571/43119590-e6f6-44ab-8661-d3fd3357cafd"
+        <img src="images/ch5-transport-overview.png"
              alt="Open Transports overview in JD portal"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>Open Transports overview — once the carrier advises the transport, a DESADV is sent to SAP creating the Inbound Delivery (Step 3). Unique transport number is auto-generated.</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717571/4.+Transports" target="_blank" rel="noopener">Confluence ↗</a>
         </div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717604/60e10cc5-61c3-4374-bf3e-eb06ac327e50"
+        <img src="images/ch5-packaging.png"
              alt="Delivery note item packaging view — Level 3 packaging hierarchy"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>Delivery note packaging — supplier assigns items to handling units (pallets/boxes) with SSCC barcodes. This is Level 3 of the ASN hierarchy and enables automated GR by scan.</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717604/5.+Packaging" target="_blank" rel="noopener">Confluence ↗</a>
         </div>
       </div>
       <div class="screenshot-wrap">
-        <img src="https://jira-jaggaer.atlassian.net/wiki/download/file/contentId-68717637/7bc2eca1-2a04-42dc-9da6-123a49a1fae8"
+        <img src="images/ch5-customer-dashboard.png"
              alt="ASN Pure customer dashboard view"
-             loading="lazy"
-             onerror="this.style.display='none'">
+             loading="lazy">
         <div class="screenshot-caption">
           <span>Customer view — ASN Pure Dashboard (SCM/ERP → ASN Pure). Buyer sees all open delivery notes, pickups, and transports from all suppliers in one place (Steps 4–7).</span>
           <a href="https://jira-jaggaer.atlassian.net/wiki/spaces/JDDTM/pages/68717637/8.+Customer+view" target="_blank" rel="noopener">Confluence ↗</a>
