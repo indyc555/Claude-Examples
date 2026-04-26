@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaggaer S2P Masterclass | Chapter 9: Manufacturing Subsegments &amp; Direct Spend Workflows</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0e1a;color:#c9d1d9;line-height:1.7}
+    a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+    .topnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1e2d4a;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
+    .topnav-brand{font-weight:800;font-size:1.1rem;color:#fff}.topnav-brand span{color:#00b4d8}
+    .topnav-chapters{display:flex;gap:6px;align-items:center}
+    .ch-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;background:#1a2240;color:#4a5568;border:2px solid #2a3558;cursor:pointer;transition:all .3s;text-decoration:none}
+    .ch-dot.active{background:#00b4d8;color:#fff;border-color:#00b4d8}.ch-dot.completed{background:#10b981;color:#fff;border-color:#10b981}
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;background:linear-gradient(180deg,#0a0e1a 0%,#0d1b2a 50%,#0a0e1a 100%);position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.08) 0%,transparent 70%)}
+    .hero-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.25);margin-bottom:20px}
+    .hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:900;color:#fff;line-height:1.15;max-width:800px;margin-bottom:16px;letter-spacing:-.03em}
+    .hero h1 em{font-style:normal;color:#00b4d8}
+    .hero-sub{font-size:1.15rem;color:#8b95a5;max-width:640px;margin-bottom:40px;line-height:1.7}
+    .hero-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;border-radius:12px;font-size:1.05rem;font-weight:700;background:linear-gradient(135deg,#00b4d8,#0077b6);color:#fff;border:none;cursor:pointer;transition:transform .15s,box-shadow .3s;box-shadow:0 4px 24px rgba(0,180,216,.25)}
+    .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,180,216,.35)}
+    .container{max-width:960px;margin:0 auto;padding:0 24px}section{padding:80px 0}
+    .section-label{font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#00b4d8;margin-bottom:8px}
+    .section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.25;letter-spacing:-.02em}
+    .section-desc{color:#8b95a5;max-width:640px;margin-bottom:40px;font-size:1.05rem}
+    .divider{border:none;border-top:1px solid #1e2d4a;margin:0}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+    .stat-card{text-align:center;padding:28px 16px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .stat-num{font-size:2.2rem;font-weight:900;color:#fff;line-height:1}.stat-num span{color:#00b4d8}
+    .stat-label{font-size:.85rem;color:#6b7280;margin-top:6px}
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px}@media(max-width:700px){.chart-grid{grid-template-columns:1fr}}
+    .chart-box{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .chart-box h4{font-size:.95rem;font-weight:700;color:#e2e8f0;margin-bottom:16px}
+    .chart-box canvas{width:100%!important;max-height:300px}
+    .callout{padding:28px 32px;border-radius:14px;border-left:4px solid #f59e0b;background:rgba(245,158,11,.06);margin:40px 0}
+    .callout h4{color:#f59e0b;font-size:1.05rem;margin-bottom:8px}.callout p{color:#8b95a5;font-size:.95rem}
+    /* Subsegment cards */
+    .seg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:40px}
+    .seg-card{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;cursor:pointer;transition:all .2s}
+    .seg-card:hover{border-color:#3a4568;background:#0d1f35}
+    .seg-card.active{border-color:#00b4d8;background:#0d1f35}
+    .seg-icon{font-size:1.6rem;margin-bottom:8px}
+    .seg-card h5{color:#fff;font-size:1rem;margin-bottom:6px}
+    .seg-card p{color:#8b95a5;font-size:.85rem;margin-bottom:10px}
+    .seg-tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;background:rgba(0,180,216,.12);color:#00b4d8}
+    /* Tabs */
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+    .tab{padding:10px 20px;border-radius:10px;font-size:.88rem;font-weight:600;background:#1a2240;color:#6b7280;border:1px solid #2a3558;cursor:pointer;transition:all .2s}
+    .tab:hover{color:#c9d1d9;border-color:#3a4568}.tab.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+    .tab-content{padding:28px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .tab-content h4{color:#fff;font-size:1.1rem;margin-bottom:12px}
+    .tab-content ul{padding-left:20px}.tab-content li{margin-bottom:8px;color:#8b95a5;font-size:.95rem}.tab-content li strong{color:#e2e8f0}
+    .tab-metric{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:700;background:rgba(0,180,216,.12);color:#00b4d8;margin-top:12px}
+    /* Workflow */
+    .workflow-wrapper{overflow-x:auto;padding:20px 0}
+    .workflow{display:flex;align-items:stretch;gap:0;min-width:700px}
+    .wf-phase{flex:1}.wf-phase-label{text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px;border-radius:8px 8px 0 0;color:#fff;background:#0077b6}
+    .wf-steps{display:flex;flex-direction:column;gap:6px;padding:12px 8px;background:#111827;border:1px solid #1e2d4a;border-top:none;border-radius:0 0 8px 8px}
+    .wf-step{padding:10px 12px;border-radius:8px;font-size:.82rem;font-weight:600;color:#c9d1d9;background:#1a2240;border:1px solid transparent;cursor:pointer;transition:all .2s;text-align:center}
+    .wf-step:hover{border-color:#00b4d8;background:#0d1f35}.wf-step.active{border-color:#00b4d8;background:#0d1f35;color:#fff}
+    .wf-arrow{display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#2a3558;padding:0 4px;align-self:center}
+    .wf-detail{margin-top:24px;padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;display:none}
+    .wf-detail.visible{display:block}.wf-detail h4{color:#00b4d8;font-size:1rem;margin-bottom:8px}.wf-detail p{font-size:.92rem;color:#8b95a5;line-height:1.7}
+    /* Pain grid */
+    .pain-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:600px){.pain-grid{grid-template-columns:1fr}}
+    .pain-card{padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a}
+    .pain-card h5{color:#00b4d8;font-size:.95rem;margin-bottom:8px}.pain-card p{font-size:.88rem;color:#8b95a5}
+    .pain-card .pain-tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;margin-bottom:10px}
+    .pain-card .pain-tag.auto{background:rgba(0,180,216,.12);color:#00b4d8}
+    .pain-card .pain-tag.aero{background:rgba(167,139,250,.12);color:#a78bfa}
+    .pain-card .pain-tag.chem{background:rgba(245,158,11,.12);color:#f59e0b}
+    .pain-card .pain-tag.elec{background:rgba(16,185,129,.12);color:#10b981}
+    .pain-card .pain-tag.med{background:rgba(239,68,68,.12);color:#ef4444}
+    .pain-card .pain-tag.food{background:rgba(251,191,36,.12);color:#fbbf24}
+    /* Quiz */
+    .quiz-wrapper{max-width:720px;margin:0 auto}
+    .quiz-progress{height:6px;background:#1e2d4a;border-radius:3px;margin-bottom:28px;overflow:hidden}
+    .quiz-progress-fill{height:100%;background:#00b4d8;border-radius:3px;transition:width .4s}
+    .quiz-card{padding:36px;border-radius:16px;background:#111827;border:1px solid #1e2d4a}
+    .quiz-qnum{font-size:.8rem;font-weight:700;color:#4a5568;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+    .quiz-qtext{font-size:1.15rem;font-weight:700;color:#fff;line-height:1.5;margin-bottom:24px}
+    .quiz-options{display:flex;flex-direction:column;gap:10px}
+    .quiz-opt{display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:10px;font-size:.95rem;background:#0a0e1a;border:2px solid #1e2d4a;cursor:pointer;transition:all .2s;color:#c9d1d9}
+    .quiz-opt:hover{border-color:#3a4568;background:#131b30}
+    .quiz-opt.correct{border-color:#10b981;background:rgba(16,185,129,.1);cursor:default}
+    .quiz-opt.incorrect{border-color:#ef4444;background:rgba(239,68,68,.08);cursor:default}
+    .quiz-opt.dimmed{opacity:.4;cursor:default}
+    .quiz-letter{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0;background:#1e2d4a;color:#6b7280}
+    .quiz-opt.correct .quiz-letter{background:#10b981;color:#fff}.quiz-opt.incorrect .quiz-letter{background:#ef4444;color:#fff}
+    .quiz-explanation{margin-top:20px;padding:16px 20px;border-radius:10px;background:#0a0e1a;border-left:4px solid #00b4d8;font-size:.92rem;color:#8b95a5;line-height:1.7;display:none}
+    .quiz-explanation.visible{display:block}
+    .quiz-nav{display:flex;justify-content:flex-end;margin-top:20px}
+    .quiz-btn{padding:12px 32px;border-radius:10px;font-size:.95rem;font-weight:700;background:#00b4d8;color:#fff;border:none;cursor:pointer;transition:background .2s;display:none}
+    .quiz-btn.visible{display:inline-block}.quiz-btn:hover{background:#0096b7}
+    .quiz-results{text-align:center;padding:48px 32px}
+    .qr-circle{width:130px;height:130px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;border:5px solid #1e2d4a}
+    .qr-circle.perfect{border-color:#10b981}.qr-circle.great{border-color:#00b4d8}.qr-circle.ok{border-color:#f59e0b}.qr-circle.low{border-color:#ef4444}
+    .qr-score{font-size:2.2rem;font-weight:900;color:#fff}.qr-label{font-size:.75rem;color:#4a5568;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .quiz-results h3{color:#fff;font-size:1.3rem;margin-bottom:6px}.quiz-results p{color:#6b7280;margin-bottom:28px}
+    .qr-review{text-align:left;margin-top:28px;display:flex;flex-direction:column;gap:12px}
+    .qr-item{padding:16px;border-radius:10px;background:#0a0e1a;border:1px solid #1e2d4a}
+    .qr-item .qr-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}.qr-item .qr-tag.c{color:#10b981}.qr-item .qr-tag.w{color:#ef4444}
+    .qr-item .qr-q{font-weight:600;color:#e2e8f0;font-size:.92rem;margin-bottom:4px}.qr-item .qr-d{font-size:.85rem;color:#6b7280}
+    .btn-restart{padding:12px 28px;border-radius:10px;font-size:.9rem;font-weight:700;background:#1e2d4a;color:#c9d1d9;border:none;cursor:pointer;transition:background .2s;margin-right:10px}.btn-restart:hover{background:#2a3558}
+    footer{text-align:center;padding:40px 24px;color:#4a5568;font-size:.82rem;border-top:1px solid #1e2d4a}
+    .fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}.fade-in.visible{opacity:1;transform:translateY(0)}
+    @media(max-width:600px){.topnav{padding:0 16px}section{padding:48px 0}.quiz-card{padding:24px 18px}.seg-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
+  <div class="topnav-chapters">
+    <a href="index.html" class="ch-dot completed">1</a><a href="chapter2.html" class="ch-dot completed">2</a><a href="chapter3.html" class="ch-dot completed">3</a><a href="chapter4.html" class="ch-dot completed">4</a><a href="chapter5.html" class="ch-dot completed">5</a><a href="chapter6.html" class="ch-dot completed">6</a><a href="chapter7.html" class="ch-dot completed">7</a><a href="chapter8.html" class="ch-dot completed">8</a><a href="chapter9.html" class="ch-dot active">9</a>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="hero-badge">Chapter 9 of 9</div>
+  <h1>Manufacturing <em>Subsegments</em> &amp; Direct Spend Workflows</h1>
+  <p class="hero-sub">Not all manufacturing is created equal. Each subsegment has unique procurement patterns, compliance requirements, and direct spend workflows that demand tailored S2P strategies.</p>
+  <button class="hero-cta" onclick="document.getElementById('landscape').scrollIntoView({behavior:'smooth'})">Begin Learning &#8595;</button>
+</section><hr class="divider">
+
+<!-- SUBSEGMENT LANDSCAPE -->
+<section id="landscape"><div class="container fade-in">
+  <div class="section-label">The Landscape</div>
+  <div class="section-title">Manufacturing Is Not Monolithic</div>
+  <p class="section-desc">A $2B automotive OEM and a $2B pharmaceutical manufacturer both "procure direct materials" &mdash; but their workflows, compliance burdens, and supplier dynamics are radically different.</p>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num">6</div><div class="stat-label">major manufacturing subsegments</div></div>
+    <div class="stat-card"><div class="stat-num">60-80<span>%</span></div><div class="stat-label">of revenue spent on direct materials</div></div>
+    <div class="stat-card"><div class="stat-num">3-18<span>mo</span></div><div class="stat-label">supplier qualification range across segments</div></div>
+  </div>
+  <div class="seg-grid" id="seg-cards">
+    <div class="seg-card active" onclick="showSeg(0,this)">
+      <div class="seg-icon">&#9881;</div>
+      <h5>Automotive</h5>
+      <p>JIT/JIS delivery, tiered supply chains, IATF 16949, PPAP, high-volume stamping and assembly.</p>
+      <div class="seg-tag">65-75% direct spend</div>
+    </div>
+    <div class="seg-card" onclick="showSeg(1,this)">
+      <div class="seg-icon">&#9992;</div>
+      <h5>Aerospace &amp; Defense</h5>
+      <p>AS9100, ITAR/EAR, long-lead forgings, extreme traceability, FAI, low-volume high-precision.</p>
+      <div class="seg-tag">55-65% direct spend</div>
+    </div>
+    <div class="seg-card" onclick="showSeg(2,this)">
+      <div class="seg-icon">&#9889;</div>
+      <h5>Electronics &amp; High-Tech</h5>
+      <p>Component shortages, end-of-life management, rapid design cycles, contract manufacturers (EMS/ODM).</p>
+      <div class="seg-tag">60-70% direct spend</div>
+    </div>
+    <div class="seg-card" onclick="showSeg(3,this)">
+      <div class="seg-icon">&#9879;</div>
+      <h5>Chemicals &amp; Process</h5>
+      <p>Formula-based BOMs, batch vs. continuous, hazmat compliance, commodity price exposure.</p>
+      <div class="seg-tag">50-65% direct spend</div>
+    </div>
+    <div class="seg-card" onclick="showSeg(4,this)">
+      <div class="seg-icon">&#9764;</div>
+      <h5>Medical Devices &amp; Pharma</h5>
+      <p>FDA 21 CFR Part 820, ISO 13485, validated suppliers, lot traceability, sterilization.</p>
+      <div class="seg-tag">40-55% direct spend</div>
+    </div>
+    <div class="seg-card" onclick="showSeg(5,this)">
+      <div class="seg-icon">&#127860;</div>
+      <h5>Food &amp; Beverage</h5>
+      <p>Perishable ingredients, shelf life tracking, FSMA/HACCP, seasonal commodities, co-packers.</p>
+      <div class="seg-tag">50-70% direct spend</div>
+    </div>
+  </div>
+  <div class="wf-detail visible" id="seg-detail"></div>
+</div></section><hr class="divider">
+
+<!-- DIRECT SPEND WORKFLOWS BY SUBSEGMENT -->
+<section id="workflows"><div class="container fade-in">
+  <div class="section-label">Deep Dive</div>
+  <div class="section-title">Direct Spend Workflows by Subsegment</div>
+  <p class="section-desc">Each subsegment follows a distinct procurement cycle. Select a subsegment, then click any step in the workflow diagram to see details.</p>
+  <div class="tabs" id="wf-tabs">
+    <div class="tab active" onclick="showWf(0,this)">Automotive</div>
+    <div class="tab" onclick="showWf(1,this)">Aerospace</div>
+    <div class="tab" onclick="showWf(2,this)">Electronics</div>
+    <div class="tab" onclick="showWf(3,this)">Chemicals</div>
+    <div class="tab" onclick="showWf(4,this)">Med Devices</div>
+    <div class="tab" onclick="showWf(5,this)">Food &amp; Bev</div>
+  </div>
+  <div id="wf-diagram-area"></div>
+  <p style="text-align:center;color:#4a5568;font-size:.82rem;margin-top:8px">Click any step for details</p>
+  <div class="wf-detail" id="wf-detail-box"><h4 id="wf-detail-title"></h4><p id="wf-detail-text"></p></div>
+  <div id="wf-metric-bar" style="margin-top:16px"></div>
+  <div class="callout">
+    <h4>CMO Insight: Subsegment Messaging</h4>
+    <p>Generic "procurement transformation" messaging falls flat. A VP of Supply Chain at a medical device company cares about FDA audit trails, not JIT sequencing. <strong>Jaggaer's competitive edge is the ability to configure workflows for each subsegment</strong> &mdash; and your marketing must speak each subsegment's language.</p>
+  </div>
+</div></section><hr class="divider">
+
+<!-- WORKFLOW COMPARISON CHARTS -->
+<section id="comparison"><div class="container fade-in">
+  <div class="section-label">Side-by-Side</div>
+  <div class="section-title">Procurement Complexity Across Subsegments</div>
+  <p class="section-desc">Each subsegment stresses different parts of the S2P lifecycle. These comparisons reveal where Jaggaer's depth matters most.</p>
+  <div class="chart-grid">
+    <div class="chart-box"><h4>Supplier Qualification Complexity</h4><canvas id="chart-qual"></canvas></div>
+    <div class="chart-box"><h4>Direct Spend as % of Revenue</h4><canvas id="chart-spend"></canvas></div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-box"><h4>Procurement Priorities by Subsegment</h4><canvas id="chart-priorities"></canvas></div>
+    <div class="chart-box"><h4>Typical Supplier Lead Times (Weeks)</h4><canvas id="chart-lead"></canvas></div>
+  </div>
+</div></section><hr class="divider">
+
+<!-- SUBSEGMENT PAIN POINTS & JAGGAER POSITIONING -->
+<section id="positioning"><div class="container fade-in">
+  <div class="section-label">Positioning</div>
+  <div class="section-title">Subsegment Pain Points &amp; Jaggaer's Answer</div>
+  <p class="section-desc">Every subsegment has a "hair-on-fire" problem. Position Jaggaer as the answer to each one.</p>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-tag auto">Automotive</div>
+      <h5>Line-stop risk from supply disruption</h5>
+      <p><strong>Pain:</strong> A single late shipment can halt a $50M/day assembly line. OEMs demand JIT/JIS delivery with zero tolerance for failure.<br><strong>Jaggaer:</strong> Real-time supplier delivery tracking, automated ASN management, and multi-tier visibility down to tier-2/3 suppliers prevent line stops before they happen.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-tag aero">Aerospace</div>
+      <h5>Counterfeit parts &amp; compliance exposure</h5>
+      <p><strong>Pain:</strong> A single counterfeit fastener can ground a fleet. ITAR violations carry $1M+ fines per incident. Traceability must be airtight.<br><strong>Jaggaer:</strong> Full lot-level traceability, ITAR/EAR compliance workflows, and digital certificates of conformance (C of C) linked to every PO and receipt.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-tag elec">Electronics</div>
+      <h5>Component obsolescence &amp; allocation crises</h5>
+      <p><strong>Pain:</strong> 450K+ components reach end-of-life annually. During shortages, lead times balloon from 8 weeks to 52+ weeks overnight.<br><strong>Jaggaer:</strong> BOM-to-supplier mapping with lifecycle monitoring, automated last-time-buy alerts, and AVL (Approved Vendor List) management across EMS partners.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-tag chem">Chemicals</div>
+      <h5>Commodity price volatility destroying margins</h5>
+      <p><strong>Pain:</strong> Ethylene, propylene, and specialty chemicals swing 30-40% in a year. Fixed-price contracts lock in losses; spot buying is chaos.<br><strong>Jaggaer:</strong> Index-linked contract management, automated repricing triggers tied to ICIS/Platts indices, and spend analytics showing real-time commodity exposure.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-tag med">Medical Devices</div>
+      <h5>FDA audit trail gaps</h5>
+      <p><strong>Pain:</strong> FDA 483 observations for supplier control failures can shut down production. Every supplier change requires a design history file (DHF) update.<br><strong>Jaggaer:</strong> Validated supplier qualification workflows (IQ/OQ/PQ), immutable audit trails, and automated supplier change control notifications linked to quality systems.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-tag food">Food &amp; Beverage</div>
+      <h5>Ingredient traceability &amp; recall readiness</h5>
+      <p><strong>Pain:</strong> FSMA requires full traceability in 24 hours. A contamination event demands instant lot-level recall capability across the supply chain.<br><strong>Jaggaer:</strong> Supplier quality document management (COAs, allergen statements, spec sheets), lot tracking from receipt to finished goods, and one-click recall trace reports.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <h4>The Subsegment Strategy Playbook</h4>
+    <p><strong>Automotive:</strong> Lead with JIT integration and multi-tier visibility. <strong>Aerospace:</strong> Lead with compliance and traceability. <strong>Electronics:</strong> Lead with BOM lifecycle management. <strong>Chemicals:</strong> Lead with commodity index contracts. <strong>Med Devices:</strong> Lead with validated workflows and audit trails. <strong>Food &amp; Bev:</strong> Lead with recall readiness and supplier quality docs. One platform, six different value propositions.</p>
+  </div>
+</div></section><hr class="divider">
+
+<!-- QUIZ -->
+<section id="quiz"><div class="container fade-in">
+  <div class="section-label">Test Your Knowledge</div>
+  <div class="section-title">Chapter 9 Quiz</div>
+  <p class="section-desc">10 questions on manufacturing subsegments and their direct spend workflows. Score 70% or higher to advance.</p>
+  <div class="quiz-wrapper">
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="qz-progress"></div></div>
+    <div class="quiz-card" id="qz-card"></div>
+    <div class="quiz-nav"><button class="quiz-btn" id="qz-next" onclick="qzNext()">Next</button></div>
+    <div id="qz-results" style="display:none"></div>
+  </div>
+</div></section>
+
+<footer><div class="container">Jaggaer S2P Masterclass &mdash; Chapter 9 of 9<br><a href="chapter8.html">&larr; Chapter 8</a> &nbsp;|&nbsp; <strong>Course Complete</strong></div></footer>
+
+<script>
+// Subsegment details
+const segData=[
+  {t:'Automotive Manufacturing',p:'<strong>Industry profile:</strong> $3T+ global market. Tiered supply chain (OEM → Tier 1 → Tier 2 → Tier 3). Extreme cost pressure with annual price-down expectations of 2-5%.<br><br><strong>Key procurement characteristics:</strong><br>&#8226; <strong>JIT/JIS delivery:</strong> Parts arrive at the line in exact sequence, often within a 2-hour window. Late = line stop = $50K-$150K per minute.<br>&#8226; <strong>PPAP (Production Part Approval Process):</strong> 18-element qualification required before any new part enters production. Takes 3-6 months.<br>&#8226; <strong>Annual price-downs:</strong> OEMs contractually require 2-5% annual cost reductions from suppliers — procurement must deliver or absorb.<br>&#8226; <strong>Tooling ownership:</strong> OEMs typically own the tooling but suppliers manage it — creates complex asset tracking requirements.<br>&#8226; <strong>EDI-driven:</strong> 830 forecasts, 862 shipping schedules, 856 ASNs — all automated via EDI. Jaggaer integrates these natively.<br><br><strong>Jaggaer fit:</strong> Strongest subsegment for Jaggaer. Deep BOM integration, supplier quality management, and multi-ERP support (SAP + Oracle + Infor) across acquired divisions.'},
+  {t:'Aerospace & Defense',p:'<strong>Industry profile:</strong> $900B+ global market. Extremely regulated (FAA, EASA, DoD). Programs run 10-30 years. Supplier relationships are measured in decades, not quarters.<br><br><strong>Key procurement characteristics:</strong><br>&#8226; <strong>AS9100 / NADCAP:</strong> Mandatory quality certifications. Only ~15,000 AS9100-certified suppliers globally — small pool of qualified sources.<br>&#8226; <strong>ITAR/EAR compliance:</strong> International Traffic in Arms Regulations restrict who can see technical data. Supplier portals must enforce access controls by nationality.<br>&#8226; <strong>Long-lead forgings &amp; castings:</strong> Titanium forgings for landing gear can require 18-24 month lead times. Procurement must plan 2+ years ahead.<br>&#8226; <strong>FAI (First Article Inspection):</strong> Every first production part must be inspected against every drawing dimension. AS9102 defines the process.<br>&#8226; <strong>Counterfeit prevention:</strong> AS6174 standard requires documented chains of custody. One counterfeit part can ground an entire fleet.<br>&#8226; <strong>Progress payments:</strong> Large programs use milestone-based payments rather than standard Net 30/60. Unique invoicing requirements.<br><br><strong>Jaggaer fit:</strong> Strong positioning on traceability and supplier collaboration. Compliance workflow automation is a key differentiator vs. generic S2P platforms.'},
+  {t:'Electronics & High-Tech',p:'<strong>Industry profile:</strong> $600B+ component market. Fastest design cycles (6-18 months). Most volatile supply chain — semiconductor shortages in 2020-2023 exposed fragility.<br><br><strong>Key procurement characteristics:</strong><br>&#8226; <strong>AVL (Approved Vendor List) management:</strong> Engineering approves specific manufacturers and part numbers. Procurement can only source from the AVL.<br>&#8226; <strong>Component lifecycle monitoring:</strong> 450,000+ components reach end-of-life annually. Active lifecycle management prevents production stoppages.<br>&#8226; <strong>EMS/ODM partnerships:</strong> Many OEMs outsource manufacturing to Electronics Manufacturing Services (Foxconn, Flex, Jabil). Procurement spans OEM + EMS.<br>&#8226; <strong>Allocation management:</strong> During shortages, suppliers allocate limited inventory. Procurement must manage allocation across product lines and customers.<br>&#8226; <strong>BOM-to-supplier mapping:</strong> A single product BOM may have 500-2,000 line items across 50-200 suppliers. Cross-referencing is critical.<br>&#8226; <strong>Last-time-buy decisions:</strong> When a component goes EOL, procurement must calculate lifetime demand and execute a final bulk purchase.<br><br><strong>Jaggaer fit:</strong> BOM integration and supplier collaboration portal are strong differentiators. AVL management and component lifecycle tracking are high-value features for this segment.'},
+  {t:'Chemicals & Process Manufacturing',p:'<strong>Industry profile:</strong> $4T+ global market. Process-based (not discrete) manufacturing. BOMs are formulas/recipes, not assemblies. Commodity-driven cost structures.<br><br><strong>Key procurement characteristics:</strong><br>&#8226; <strong>Formula-based BOMs:</strong> Instead of discrete parts, BOMs specify raw materials by weight/volume with yield percentages and loss factors.<br>&#8226; <strong>Index-linked pricing:</strong> Contracts tied to published commodity indices (ICIS, Platts, CRU). Automated repricing at monthly/quarterly intervals.<br>&#8226; <strong>Hazmat &amp; regulatory:</strong> REACH, GHS, TSCA compliance. Every raw material needs Safety Data Sheets (SDS). Transport regulations (DOT, IMDG) add complexity.<br>&#8226; <strong>Tank/silo logistics:</strong> Bulk chemicals arrive by tanker truck, railcar, or ISO container. Receiving is weight-based, not count-based — different GRN processes.<br>&#8226; <strong>Batch traceability:</strong> Every production batch must trace back to specific raw material lots for quality and recall purposes.<br>&#8226; <strong>Consignment inventory:</strong> Suppliers often own inventory in customer-side tanks until consumed. Payment triggers on drawdown, not delivery.<br><br><strong>Jaggaer fit:</strong> Contract management with index-linked pricing is a key capability. Supplier quality document management (SDS, COAs) differentiates vs. Coupa/Ariba.'},
+  {t:'Medical Devices & Pharmaceuticals',p:'<strong>Industry profile:</strong> $600B+ medical devices, $1.5T+ pharma. Most heavily regulated manufacturing sector. FDA and EU MDR govern everything from design to disposal.<br><br><strong>Key procurement characteristics:</strong><br>&#8226; <strong>Validated suppliers:</strong> FDA 21 CFR Part 820 (devices) and Part 211 (pharma) require documented supplier qualification. Changes require formal change control.<br>&#8226; <strong>Design History File (DHF):</strong> Every component and supplier is linked to the product\'s design history. Supplier changes trigger regulatory submissions.<br>&#8226; <strong>IQ/OQ/PQ validation:</strong> Installation, Operational, and Performance Qualification required for production equipment AND the S2P software itself.<br>&#8226; <strong>Lot traceability:</strong> Every raw material lot must be traceable from supplier through production to patient/customer. UDI (Unique Device Identification) requirements.<br>&#8226; <strong>Supplier audits:</strong> Regular on-site audits required by regulation, not just best practice. Audit findings must be tracked to closure with CAPA (Corrective and Preventive Action).<br>&#8226; <strong>Sterilization supply chain:</strong> For sterile devices, the sterilization contractor is a critical supplier with unique qualification requirements (ISO 11135, 11137).<br><br><strong>Jaggaer fit:</strong> Supplier qualification workflows with audit trail capabilities are essential. The ability to validate the Jaggaer platform itself (IQ/OQ/PQ) is a differentiator that Coupa lacks.'},
+  {t:'Food & Beverage Manufacturing',p:'<strong>Industry profile:</strong> $7T+ global market. Highest volume, lowest margin manufacturing. Perishable inputs create unique urgency. Heavily regulated (FDA FSMA, USDA, EU food safety).<br><br><strong>Key procurement characteristics:</strong><br>&#8226; <strong>Perishable ingredient management:</strong> Shelf life constraints dictate order quantities and delivery schedules. FIFO (First In, First Out) is mandatory, not optional.<br>&#8226; <strong>Seasonal commodity procurement:</strong> Crops, dairy, proteins — prices and availability fluctuate with seasons, weather, and harvest cycles. Forward contracts are essential.<br>&#8226; <strong>FSMA compliance:</strong> FDA Food Safety Modernization Act requires preventive controls, supplier verification programs, and intentional adulteration prevention.<br>&#8226; <strong>Allergen management:</strong> Every ingredient must be screened for 9 major allergens. Cross-contamination risk assessment is part of supplier qualification.<br>&#8226; <strong>Co-packer management:</strong> Many brands outsource manufacturing to co-packers. Procurement must manage both raw material suppliers and co-packer relationships.<br>&#8226; <strong>Certificate of Analysis (COA):</strong> Every incoming lot requires a COA verifying specifications (moisture, pH, microbial counts). Automated COA matching saves hours.<br><br><strong>Jaggaer fit:</strong> Supplier quality document management (COAs, allergen declarations, organic/kosher/halal certifications) is high-value. Recall traceability and FSMA compliance workflows differentiate vs. generic S2P.'}
+];
+function showSeg(idx,el){document.querySelectorAll('.seg-card').forEach(s=>s.classList.remove('active'));el.classList.add('active');const d=segData[idx],box=document.getElementById('seg-detail');box.innerHTML='<h4>'+d.t+'</h4><p>'+d.p+'</p>';box.classList.add('visible');}
+showSeg(0,document.querySelector('.seg-card'));
+
+// Workflow diagrams
+const wfData=[
+  {title:'Automotive Direct Spend Workflow',metric:'Cycle: Daily releases, 2-hour delivery windows, auto-pay on receipt',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Demand Signal',detail:'MRP explodes production schedule against multi-level BOMs, generating planned orders for raw materials, stampings, castings, and sub-assemblies. Demand is driven by OEM production schedules that change weekly.'},
+      {name:'Source Selection',detail:'Commodity buyers manage category strategies. New parts go through full RFQ with PPAP requirements (18-element qualification, 3-6 months). Existing parts have blanket POs with annual price renegotiation targeting 2-5% cost-downs.'}
+    ]},
+    {label:'Execute',color:'#00b4d8',steps:[
+      {name:'Release & Scheduling',detail:'EDI 830 forecasts sent weekly. EDI 862 shipping schedules sent daily. Suppliers plan production to OEM\'s rolling 12-week forecast. Release quantities adjust daily based on actual vs. planned production.'},
+      {name:'Supplier Manufacturing',detail:'Tier 1 suppliers manage their own tier-2/3 supply chains. Quality governed by IATF 16949 process controls, FMEA, and control plans. OEMs have limited visibility beyond tier 1.'},
+      {name:'JIT/JIS Delivery',detail:'Just-in-Time delivery to dock or line-side within 2-hour windows. Just-in-Sequence (JIS) for assembly lines — parts arrive in exact build order. ASN (EDI 856) triggers receiving. Milk runs optimize freight across suppliers.'}
+    ]},
+    {label:'Receive & Pay',color:'#10b981',steps:[
+      {name:'Receiving & Quality',detail:'Dock-to-stock for qualified parts (no inspection). Incoming inspection only for new or flagged suppliers. SPC data reviewed against control limits. Reject rates tracked as PPM (parts per million).'},
+      {name:'Auto-Payment (ERS)',detail:'Evaluated Receipt Settlement (ERS) — auto-pay on receipt confirmation with no invoice needed. Or standard 3-way match for non-ERS suppliers. Payment terms: Net 45-90 with early-pay discount programs.'}
+    ]}
+  ]},
+  {title:'Aerospace Direct Spend Workflow',metric:'Cycle: 18-24 month lead times, decade-long contracts, milestone payments',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Program Planning',detail:'Long-range procurement plans tied to aircraft program schedules spanning 5-15 year horizons. Material requirements driven by production rate decisions (e.g., 42 aircraft/month). Planning starts years before first delivery.'},
+      {name:'Source Selection',detail:'Qualified Supplier Lists (QSL) restrict sourcing to pre-approved sources only. New supplier qualification takes 12-18 months including NADCAP special process certification and AS9100 quality system audits.'},
+      {name:'Long-Lead Ordering',detail:'Titanium forgings, specialty alloys, and castings ordered 18-24 months ahead. Raw material is locked in before detailed design is finalized. Purchase commitments made against preliminary engineering data.'}
+    ]},
+    {label:'Execute',color:'#a78bfa',steps:[
+      {name:'LTA Contracts',detail:'Long-Term Agreements (LTAs) spanning 5-10 years with annual pricing adjustments. Progress payments based on manufacturing milestones, not delivery. Contract values can exceed $100M per supplier.'},
+      {name:'FAI & Inspection',detail:'First Article Inspection (FAI) per AS9102 — every dimension on the drawing verified on the first production part. Source inspection at supplier site for critical parts. Certificates of Conformance required with every shipment.'}
+    ]},
+    {label:'Trace & Pay',color:'#10b981',steps:[
+      {name:'Traceability & ITAR',detail:'Full material certification chain from mill to finished part. ITAR-controlled data managed through restricted-access supplier portals with nationality-based access controls. Every transaction must be auditable for decades.'},
+      {name:'Milestone Payments',detail:'Complex goods receipt with documentation verification. Progress payments, milestone payments, and retainage. Invoice matching includes contract milestone verification — not simple 3-way match.'}
+    ]}
+  ]},
+  {title:'Electronics Direct Spend Workflow',metric:'Cycle: 8-52 week lead times, 500-2000 BOM line items, multi-channel sourcing',
+   phases:[
+    {label:'Design',color:'#0077b6',steps:[
+      {name:'Design-to-Source',detail:'Engineering selects components during design phase. AVL (Approved Vendor List) defines acceptable manufacturers and distributors. Procurement engaged at NPI (New Product Introduction) stage to validate availability and cost.'},
+      {name:'BOM Costing',detail:'Full BOM cost analysis across 500-2,000 line items. Component engineers validate availability and lifecycle status. Last-time-buy analysis for EOL components. Cross-reference BOMs against supplier allocation commitments.'}
+    ]},
+    {label:'Source',color:'#10b981',steps:[
+      {name:'Multi-Channel Sourcing',detail:'Direct from component manufacturers (TI, Intel, STMicro), through authorized distributors (Arrow, Avnet, Digi-Key), and spot market for allocation-constrained parts. Each channel has different pricing and risk profiles.'},
+      {name:'EMS Coordination',detail:'If outsourced, the EMS partner (Foxconn, Flex, Jabil) executes procurement against OEM-approved AVL. Consignment vs. turnkey model determines who buys components. Visibility across OEM + EMS inventory is critical.'},
+      {name:'Allocation Mgmt',detail:'During shortages, manage allocation quantities across product lines and customers. Escalation protocols with supplier executives. Alternative part qualification runs in parallel — takes 4-12 weeks.'}
+    ]},
+    {label:'Receive & Pay',color:'#00b4d8',steps:[
+      {name:'Counterfeit Detection',detail:'Counterfeit detection critical for broker/spot market purchases. X-ray, decap, and electrical testing for suspect components. SAE AS6171 counterfeit prevention standard. Authorized channels have lower risk.'},
+      {name:'Payment & Inventory',detail:'Standard invoicing for distributor purchases. Consignment accounting for EMS models. Buffer stock and safety stock strategies for long-lead components. E&O (excess and obsolete) management for EOL parts.'}
+    ]}
+  ]},
+  {title:'Chemicals Direct Spend Workflow',metric:'Cycle: Index-linked pricing, weight-based receiving, consignment inventory',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Formulation Demand',detail:'MRP based on production recipes (formulas), not discrete BOMs. Yield losses and batch sizes determine raw material quantities. Demand varies by grade and specification. Batch vs. continuous production drives order patterns.'},
+      {name:'Commodity Sourcing',detail:'Bulk chemicals bought through index-linked contracts (ICIS, Platts, CRU). Quarterly or monthly price adjustments. Hedging strategies for volatile feedstocks (ethylene, propylene, methanol). Spot vs. contract split varies by volatility.'}
+    ]},
+    {label:'Execute',color:'#f59e0b',steps:[
+      {name:'Contract & Consignment',detail:'Volume commitments with take-or-pay clauses. Consignment inventory where supplier owns material in customer tanks until consumed. Toll processing agreements for intermediate chemicals. Contract durations: 1-3 years.'},
+      {name:'Bulk Logistics',detail:'Bulk delivery by tanker truck (5,000-9,000 gal), railcar (20,000 gal), or ISO container. Weight-based receiving using calibrated scales and flow meters — replaces count-based GRNs. Scheduling around tank capacity.'},
+      {name:'Quality & Compliance',detail:'Certificate of Analysis (COA) required for every lot — testing for purity, moisture, contaminants. Safety Data Sheets (SDS) must be current. REACH/TSCA compliance documentation maintained for every raw material.'}
+    ]},
+    {label:'Handle & Pay',color:'#10b981',steps:[
+      {name:'Hazmat Handling',detail:'DOT/IMDG transport classification for every material. Storage compatibility matrices enforce separation rules (no oxidizers next to flammables). Emergency response planning required for each raw material on site.'},
+      {name:'Consumption Payment',detail:'Invoicing against measured consumption (tank gauging) for consignment. Standard 3-way match for delivered purchases. Commodity price true-ups at index reset dates — automated reconciliation against published indices.'}
+    ]}
+  ]},
+  {title:'Medical Devices Direct Spend Workflow',metric:'Cycle: 6-18 month qualification, change control = regulatory submission, 100% traceability',
+   phases:[
+    {label:'Design & Qualify',color:'#0077b6',steps:[
+      {name:'Design Inputs',detail:'Procurement requirements originate from Design Controls (FDA 21 CFR 820.30). Every material specification links to the Design History File (DHF). Supplier selection is a design decision — not just a procurement decision.'},
+      {name:'Supplier Qualification',detail:'Formal qualification process: supplier assessment questionnaire \u2192 desk audit \u2192 on-site audit \u2192 qualification samples \u2192 IQ/OQ/PQ validation. Takes 6-18 months for critical components. Cannot be shortcut.'},
+      {name:'Change Control',detail:'Any supplier change (new supplier, material change, process change) triggers formal change control. May require 510(k) supplement or PMA amendment submission to FDA. Implementation takes months, not days.'}
+    ]},
+    {label:'Control',color:'#ef4444',steps:[
+      {name:'Purchasing Controls',detail:'Approved Supplier List (ASL) is a controlled document with revision history. POs must reference specific material specifications and revision levels. Deviations from spec require formal disposition: use-as-is, rework, or scrap.'},
+      {name:'Incoming Inspection',detail:'Risk-based inspection per ANSI/ASQ Z1.4 sampling plans. Some critical components require 100% inspection. Lot acceptance tied to supplier quality history and component risk classification (critical, major, minor).'}
+    ]},
+    {label:'Trace & Monitor',color:'#10b981',steps:[
+      {name:'Lot Traceability',detail:'Device History Record (DHR) traces every component lot to finished device serial numbers. UDI (Unique Device Identification) requirements flow upstream to component level. Full chain: supplier lot \u2192 incoming lot \u2192 production batch \u2192 device serial.'},
+      {name:'Supplier Monitoring',detail:'Ongoing supplier quality metrics: PPM defect rates, on-time delivery, CAPA closure rate. Annual re-qualification audits required. FDA and EU MDR expect documented, continuous supplier monitoring programs — not just initial qualification.'}
+    ]}
+  ]},
+  {title:'Food & Beverage Direct Spend Workflow',metric:'Cycle: Seasonal contracts, COA on every lot, 24-hour recall readiness',
+   phases:[
+    {label:'Plan',color:'#0077b6',steps:[
+      {name:'Seasonal Planning',detail:'Ingredient procurement planned around growing seasons, harvest cycles, and production calendars. Forward contracts locked in 3-12 months ahead for key commodities (sugar, cocoa, dairy, proteins). Weather and crop reports drive planning.'},
+      {name:'Supplier Approval',detail:'Food safety audits using GFSI-benchmarked standards (SQF, BRC, FSSC 22000). Allergen management programs verified. Organic, kosher, halal certifications validated. Full supplier approval takes 2-6 months.'},
+      {name:'Spec Management',detail:'Detailed ingredient specifications covering physical (particle size, color, viscosity), chemical (moisture, pH, fat content), and microbiological (TPC, yeast/mold, pathogens) parameters. Specs are living documents.'}
+    ]},
+    {label:'Execute',color:'#fbbf24',steps:[
+      {name:'Ordering & Logistics',detail:'Temperature-controlled transport for perishables. FIFO enforcement mandatory at receiving dock. Shelf-life validation against production schedules — reject if remaining shelf life is too short. Bulk and packaged ingredient handling.'},
+      {name:'Receiving & COA',detail:'COA matching against specifications for every incoming lot — automated where possible. Hold-and-release protocol for microbiological testing (24-72 hour results). Rejected lots require immediate disposition and supplier notification.'}
+    ]},
+    {label:'Trace & Pay',color:'#10b981',steps:[
+      {name:'Recall Traceability',detail:'FSMA requires one-up/one-back traceability achievable within 24 hours. Mock recall exercises conducted annually. Lot codes link ingredients to finished product batches and distribution channels. One contamination event can cost $10M+.'},
+      {name:'Commodity Payment',detail:'Commodity-linked pricing for key ingredients (sugar, dairy, cocoa). Cooperative and exchange-based purchasing for some categories. Payment terms vary: Net 10-30 for perishables, Net 30-60 for shelf-stable ingredients.'}
+    ]}
+  ]}
+];
+let curWfIdx=0;
+function showWf(idx,el){
+  document.querySelectorAll('#wf-tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');curWfIdx=idx;
+  const d=wfData[idx],area=document.getElementById('wf-diagram-area');
+  // Build the visual diagram
+  let html='<div class="workflow-wrapper"><div class="workflow">';
+  let stepGlobal=0;
+  d.phases.forEach((ph,pi)=>{
+    html+='<div class="wf-phase"><div class="wf-phase-label" style="background:'+ph.color+'">'+ph.label+'</div><div class="wf-steps">';
+    ph.steps.forEach(st=>{
+      html+='<div class="wf-step" onclick="showWfStep('+idx+','+stepGlobal+',this)">'+st.name+'</div>';
+      stepGlobal++;
+    });
+    html+='</div></div>';
+    if(pi<d.phases.length-1) html+='<div class="wf-arrow">&#9654;</div>';
+  });
+  html+='</div></div>';
+  area.innerHTML=html;
+  // Set metric
+  document.getElementById('wf-metric-bar').innerHTML='<div class="tab-metric">'+d.metric+'</div>';
+  // Hide detail box
+  document.getElementById('wf-detail-box').classList.remove('visible');
+}
+function showWfStep(wfIdx,stepIdx,el){
+  document.querySelectorAll('#wf-diagram-area .wf-step').forEach(s=>s.classList.remove('active'));el.classList.add('active');
+  const d=wfData[wfIdx];let count=0,found=null;
+  for(let p=0;p<d.phases.length;p++){for(let s=0;s<d.phases[p].steps.length;s++){if(count===stepIdx){found=d.phases[p].steps[s];break;}count++;}if(found)break;}
+  if(!found)return;
+  document.getElementById('wf-detail-title').textContent=found.name;
+  document.getElementById('wf-detail-text').textContent=found.detail;
+  document.getElementById('wf-detail-box').classList.add('visible');
+}
+showWf(0,document.querySelector('#wf-tabs .tab'));
+
+// Charts
+const cc={blue:'#00b4d8',darkBlue:'#0077b6',green:'#10b981',yellow:'#f59e0b',red:'#ef4444',purple:'#a78bfa'};
+Chart.defaults.color='#6b7280';Chart.defaults.borderColor='#1e2d4a';Chart.defaults.font.family="'Segoe UI',system-ui,sans-serif";
+
+new Chart(document.getElementById('chart-qual'),{type:'bar',data:{labels:['Automotive','Aerospace','Electronics','Chemicals','Med Devices','Food & Bev'],datasets:[{label:'Qualification Time (months)',data:[5,15,3,4,12,4],backgroundColor:[cc.blue+'88',cc.purple+'88',cc.green+'88',cc.yellow+'88',cc.red+'88','#fbbf2488'],borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1e2d4a'},title:{display:true,text:'Months (avg)',color:'#6b7280'}},y:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chart-spend'),{type:'bar',data:{labels:['Automotive','Aerospace','Electronics','Chemicals','Med Devices','Food & Bev'],datasets:[{label:'Direct Spend (% Revenue)',data:[70,60,65,58,48,60],backgroundColor:[cc.blue+'88',cc.purple+'88',cc.green+'88',cc.yellow+'88',cc.red+'88','#fbbf2488'],borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#1e2d4a'},title:{display:true,text:'% of Revenue',color:'#6b7280'},max:80},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chart-priorities'),{type:'radar',data:{labels:['Cost Reduction','Quality Control','Compliance','Supply Continuity','Speed-to-Market','Traceability'],datasets:[{label:'Automotive',data:[90,85,70,95,75,60],borderColor:cc.blue,backgroundColor:cc.blue+'10',pointBackgroundColor:cc.blue,borderWidth:2},{label:'Aerospace',data:[60,95,95,80,40,98],borderColor:cc.purple,backgroundColor:cc.purple+'10',pointBackgroundColor:cc.purple,borderWidth:2},{label:'Med Devices',data:[55,95,98,75,50,98],borderColor:cc.red,backgroundColor:cc.red+'10',pointBackgroundColor:cc.red,borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true}}},scales:{r:{beginAtZero:true,max:100,grid:{color:'#1e2d4a'},angleLines:{color:'#1e2d4a'},pointLabels:{font:{size:10}},ticks:{display:false}}}}});
+
+new Chart(document.getElementById('chart-lead'),{type:'bar',data:{labels:['Automotive','Aerospace','Electronics','Chemicals','Med Devices','Food & Bev'],datasets:[{label:'Standard Lead Time',data:[4,52,12,3,8,2],backgroundColor:cc.blue+'88',borderRadius:4},{label:'Crisis Lead Time',data:[8,104,52,8,24,6],backgroundColor:cc.red+'88',borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true}}},scales:{y:{grid:{color:'#1e2d4a'},title:{display:true,text:'Weeks',color:'#6b7280'}},x:{grid:{display:false}}}}});
+
+// Quiz
+const quizData=[
+  {q:'Which manufacturing subsegment uses PPAP (Production Part Approval Process) as its primary supplier qualification method?',opts:['Aerospace & Defense','Automotive','Medical Devices','Food & Beverage'],ans:1,explain:'PPAP is the standard qualification process in automotive manufacturing, consisting of 18 elements that must be completed before a new part can enter production. It was developed by the AIAG (Automotive Industry Action Group).'},
+  {q:'In aerospace manufacturing, what is the typical lead time for titanium forgings used in landing gear?',opts:['4-6 weeks','3-6 months','18-24 months','3-5 years'],ans:2,explain:'Titanium forgings for aerospace applications like landing gear require 18-24 month lead times due to limited forging capacity, specialized tooling, and extensive testing and certification requirements.'},
+  {q:'What does AVL stand for in electronics manufacturing procurement?',opts:['Automated Vendor Liaison','Approved Vendor List','Advanced Volume Leverage','Annual Vendor Listing'],ans:1,explain:'AVL (Approved Vendor List) is the engineering-controlled list of approved component manufacturers and distributors. Procurement can only source from the AVL, which is managed by component engineers.'},
+  {q:'How does chemical manufacturing differ from discrete manufacturing in terms of BOMs?',opts:['Chemicals don\'t use BOMs','Chemical BOMs use formulas with weight/volume instead of discrete part counts','Chemical BOMs are simpler with fewer line items','Chemical BOMs are identical to discrete manufacturing BOMs'],ans:1,explain:'Chemical manufacturing uses formula-based BOMs that specify raw materials by weight or volume, with yield percentages and loss factors, rather than the discrete part counts used in automotive or electronics manufacturing.'},
+  {q:'What FDA regulation governs supplier controls for medical device manufacturers?',opts:['FDA 21 CFR Part 110','FDA 21 CFR Part 820','FDA 21 CFR Part 211','FSMA Section 204'],ans:1,explain:'FDA 21 CFR Part 820 (Quality System Regulation) governs medical device manufacturing, including requirements for purchasing controls, supplier evaluation, and component traceability.'},
+  {q:'What is the cost of an automotive assembly line stoppage per minute?',opts:['$1,000-$5,000','$10,000-$25,000','$50,000-$150,000','$500,000-$1M'],ans:2,explain:'Automotive assembly line stoppages cost $50,000-$150,000 per minute depending on the OEM and vehicle model. This extreme cost makes supply continuity the #1 procurement priority in automotive.'},
+  {q:'In food & beverage manufacturing, what does FSMA require for traceability?',opts:['Annual supplier audits','One-up/one-back traceability within 24 hours','100% incoming inspection','Monthly quality reporting'],ans:1,explain:'The FDA Food Safety Modernization Act (FSMA) requires food manufacturers to maintain one-up/one-back traceability — knowing where ingredients came from and where finished products went — achievable within 24 hours.'},
+  {q:'Which manufacturing subsegment uses index-linked contract pricing tied to published commodity indices like ICIS or Platts?',opts:['Automotive','Electronics','Chemicals & Process','Medical Devices'],ans:2,explain:'Chemicals and process manufacturers commonly use index-linked pricing tied to published indices (ICIS, Platts, CRU) for bulk commodity purchases, with automatic price adjustments at monthly or quarterly intervals.'},
+  {q:'What is the primary challenge that makes electronics procurement uniquely volatile?',opts:['Long supplier qualification cycles','Seasonal ingredient availability','Component obsolescence with 450K+ EOL annually','ITAR export restrictions'],ans:2,explain:'Electronics procurement faces unique volatility from component obsolescence — over 450,000 electronic components reach end-of-life annually, and during shortage cycles, lead times can balloon from 8 weeks to 52+ weeks overnight.'},
+  {q:'Why is Jaggaer\'s positioning strongest with subsegment-specific messaging rather than generic "procurement transformation" messaging?',opts:['Generic messaging is too expensive to produce','Each subsegment has different compliance, workflow, and pain point requirements','Subsegments don\'t overlap at all','Generic messaging only works for indirect spend'],ans:1,explain:'Each manufacturing subsegment has fundamentally different compliance requirements (IATF vs. AS9100 vs. FDA), workflow patterns (JIT vs. long-lead vs. seasonal), and "hair-on-fire" pain points. Subsegment-specific messaging resonates because it speaks to the buyer\'s actual daily challenges.'}
+];
+const letters=['A','B','C','D'];let qzIdx=0,qzScore=0,qzAnswered=false,qzUserAnswers=[];
+function renderQuiz(){qzAnswered=false;const q=quizData[qzIdx];document.getElementById('qz-progress').style.width=(qzIdx/quizData.length*100)+'%';document.getElementById('qz-card').innerHTML='<div class="quiz-qnum">Question '+(qzIdx+1)+' of '+quizData.length+'</div><div class="quiz-qtext">'+q.q+'</div><div class="quiz-options" id="qz-opts">'+q.opts.map((o,i)=>'<div class="quiz-opt" onclick="qzSelect('+i+')"><span class="quiz-letter">'+letters[i]+'</span><span>'+o+'</span></div>').join('')+'</div><div class="quiz-explanation" id="qz-explain">'+q.explain+'</div>';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-results').style.display='none';}
+function qzSelect(idx){if(qzAnswered)return;qzAnswered=true;const q=quizData[qzIdx],correct=idx===q.ans;if(correct)qzScore++;qzUserAnswers.push({selected:idx,correct:q.ans,isCorrect:correct});const opts=document.querySelectorAll('#qz-opts .quiz-opt');opts.forEach((o,i)=>{if(i===q.ans)o.classList.add('correct');else if(i===idx&&!correct)o.classList.add('incorrect');else o.classList.add('dimmed');});document.getElementById('qz-explain').classList.add('visible');const btn=document.getElementById('qz-next');btn.textContent=qzIdx<quizData.length-1?'Next':'See Results';btn.classList.add('visible');}
+function qzNext(){qzIdx++;if(qzIdx<quizData.length)renderQuiz();else{document.getElementById('qz-card').style.display='none';document.getElementById('qz-next').classList.remove('visible');document.getElementById('qz-progress').style.width='100%';showQzResults();}}
+function showQzResults(){const pct=Math.round(qzScore/quizData.length*100);let grade,msg;if(pct===100){grade='perfect';msg='Perfect! You\'ve mastered manufacturing subsegments.';}else if(pct>=80){grade='great';msg='Excellent grasp of subsegment workflows.';}else if(pct>=70){grade='ok';msg='Good enough to proceed. Review misses below.';}else{grade='low';msg='Review the material and try again.';}let rv=qzUserAnswers.map((ua,i)=>{const q=quizData[i],tc=ua.isCorrect?'c':'w',tt=ua.isCorrect?'Correct':'Incorrect',dt=ua.isCorrect?'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]:'You answered: '+letters[ua.selected]+') '+q.opts[ua.selected]+' — Correct: '+letters[ua.correct]+') '+q.opts[ua.correct];return'<div class="qr-item"><div class="qr-tag '+tc+'">'+tt+'</div><div class="qr-q">'+(i+1)+'. '+q.q+'</div><div class="qr-d">'+dt+'</div></div>';}).join('');document.getElementById('qz-results').style.display='block';document.getElementById('qz-results').innerHTML='<div class="quiz-results"><div class="qr-circle '+grade+'"><div class="qr-score">'+qzScore+'/'+quizData.length+'</div><div class="qr-label">Score</div></div><h3>'+pct+'%'+(pct>=70?' — Passed!':' — Keep Studying')+'</h3><p>'+msg+'</p><div><button class="btn-restart" onclick="qzRestart()">Retake Quiz</button></div><div class="qr-review">'+rv+'</div></div>';}
+function qzRestart(){qzIdx=0;qzScore=0;qzAnswered=false;qzUserAnswers=[];document.getElementById('qz-card').style.display='block';document.getElementById('qz-results').style.display='none';renderQuiz();}
+renderQuiz();
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.1});document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

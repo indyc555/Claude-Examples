@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 4: Supplier Management & Risk — JAGGAER S2P Masterclass</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0e1a;
+  color: #c9d1d9;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+a { color: #00b4d8; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Top Navigation */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: 60px;
+  background: rgba(10, 14, 26, .92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #1e2d4a;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+}
+.topnav-brand { font-size: 1.05rem; font-weight: 700; color: #c9d1d9; white-space: nowrap; }
+.topnav-brand span { color: #00b4d8; font-weight: 900; }
+.topnav-chapters { display: flex; gap: .6rem; }
+.ch-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; font-weight: 700;
+  background: #161b2e; border: 2px solid #1e2d4a;
+  color: #6b7280; cursor: pointer;
+  transition: all .25s; text-decoration: none;
+}
+.ch-dot:hover { border-color: #00b4d8; color: #00b4d8; text-decoration: none; }
+.ch-dot.completed { background: #00b4d8; border-color: #00b4d8; color: #0a0e1a; }
+.ch-dot.active { border-color: #00b4d8; color: #00b4d8; box-shadow: 0 0 12px rgba(0,180,216,.35); }
+
+/* Container */
+.container { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(0,180,216,.1) 0%, transparent 70%),
+              radial-gradient(ellipse at 80% 20%, rgba(16,185,129,.06) 0%, transparent 50%),
+              #0a0e1a;
+  padding: 80px 1.5rem 4rem;
+}
+.hero-chapter { font-size: .85rem; text-transform: uppercase; letter-spacing: .15em; color: #00b4d8; font-weight: 700; margin-bottom: .75rem; }
+.hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 1rem; }
+.hero h1 em { font-style: normal; color: #00b4d8; }
+.hero-sub { font-size: 1.15rem; color: #8b95a5; max-width: 640px; margin-bottom: 2rem; }
+.hero-arrow { margin-top: 2rem; animation: float 2s ease-in-out infinite; color: #00b4d8; font-size: 1.5rem; }
+@keyframes float { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(10px); } }
+
+/* Sections */
+.chapter-section { padding: 5rem 0; }
+.section-label { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: #00b4d8; font-weight: 700; margin-bottom: .5rem; }
+.section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: #fff; margin-bottom: .75rem; line-height: 1.2; }
+.section-desc { color: #8b95a5; font-size: 1.05rem; margin-bottom: 2rem; max-width: 720px; }
+
+/* Cards */
+.card {
+  background: #111827;
+  border: 1px solid #1e2d4a;
+  border-radius: 14px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  transition: transform .2s, border-color .2s;
+}
+.card:hover { border-color: #00b4d8; transform: translateY(-2px); }
+.card h3 { color: #fff; font-weight: 700; margin-bottom: .5rem; font-size: 1.15rem; }
+
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin: 2rem 0; }
+.stat-card {
+  background: #111827; border: 1px solid #1e2d4a; border-radius: 14px;
+  padding: 1.5rem; text-align: center;
+}
+.stat-num { font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1.2; }
+.stat-num span { color: #00b4d8; }
+.stat-label { color: #8b95a5; font-size: .88rem; margin-top: .25rem; }
+
+/* Callout */
+.callout {
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, .06);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 10px 10px 0;
+  margin: 1.5rem 0;
+  font-size: .97rem;
+}
+.callout strong { color: #f59e0b; }
+
+/* Lifecycle */
+.lifecycle-track {
+  display: flex; flex-wrap: wrap; gap: .75rem; margin: 2rem 0;
+  justify-content: center;
+}
+.lifecycle-phase {
+  flex: 1 1 140px; max-width: 160px;
+  background: #111827; border: 2px solid #1e2d4a; border-radius: 14px;
+  padding: 1.25rem 1rem; text-align: center; cursor: pointer;
+  transition: all .25s; position: relative;
+}
+.lifecycle-phase:hover, .lifecycle-phase.active {
+  border-color: #00b4d8;
+  box-shadow: 0 0 20px rgba(0,180,216,.15);
+}
+.lifecycle-phase .phase-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(0,180,216,.15); color: #00b4d8;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: .85rem; margin: 0 auto .6rem;
+}
+.lifecycle-phase.active .phase-num { background: #00b4d8; color: #0a0e1a; }
+.lifecycle-phase h4 { color: #fff; font-size: .88rem; font-weight: 700; }
+.lifecycle-arrow { color: #1e2d4a; align-self: center; font-size: 1.3rem; flex-shrink: 0; }
+.lifecycle-detail {
+  background: #111827; border: 1px solid #1e2d4a; border-radius: 14px;
+  padding: 1.75rem; margin-top: 1.5rem; min-height: 120px;
+}
+.lifecycle-detail h3 { color: #00b4d8; margin-bottom: .5rem; }
+
+/* Tabs */
+.tab-bar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.tab-btn {
+  padding: .6rem 1.25rem; border-radius: 8px;
+  background: #161b2e; border: 1px solid #1e2d4a;
+  color: #8b95a5; font-size: .88rem; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.tab-btn:hover { border-color: #00b4d8; color: #00b4d8; }
+.tab-btn.active { background: #00b4d8; color: #0a0e1a; border-color: #00b4d8; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Multi-tier diagram */
+.tier-diagram { display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: wrap; margin: 2rem 0; }
+.tier-node {
+  background: #111827; border: 2px solid #1e2d4a; border-radius: 14px;
+  padding: 1.25rem 1.5rem; text-align: center; min-width: 140px;
+}
+.tier-node h4 { color: #fff; font-size: .95rem; font-weight: 700; }
+.tier-node p { color: #8b95a5; font-size: .8rem; }
+.tier-node.highlight { border-color: #00b4d8; }
+.tier-node.dim { border-color: #1e2d4a; opacity: .6; }
+.tier-arrow { color: #1e2d4a; font-size: 1.5rem; }
+
+/* Chart wrapper */
+.chart-wrap { background: #111827; border: 1px solid #1e2d4a; border-radius: 14px; padding: 1.5rem; margin: 2rem 0; }
+.chart-wrap canvas { max-height: 380px; }
+
+/* Quiz */
+.quiz-container { margin-top: 2rem; }
+.quiz-question {
+  background: #111827; border: 1px solid #1e2d4a; border-radius: 14px;
+  padding: 1.5rem; margin-bottom: 1.25rem;
+}
+.quiz-question h4 { color: #fff; font-size: 1rem; margin-bottom: 1rem; }
+.quiz-question h4 .q-num { color: #00b4d8; }
+.quiz-options { display: flex; flex-direction: column; gap: .5rem; }
+.quiz-opt {
+  padding: .7rem 1rem; border-radius: 8px;
+  background: #161b2e; border: 1px solid #1e2d4a;
+  color: #c9d1d9; cursor: pointer; font-size: .92rem;
+  transition: all .2s;
+}
+.quiz-opt:hover { border-color: #00b4d8; }
+.quiz-opt.correct { background: rgba(16,185,129,.15); border-color: #10b981; color: #10b981; }
+.quiz-opt.incorrect { background: rgba(239,68,68,.12); border-color: #ef4444; color: #ef4444; }
+.quiz-opt.disabled { pointer-events: none; }
+.quiz-score {
+  text-align: center; padding: 2rem;
+  background: #111827; border: 1px solid #1e2d4a; border-radius: 14px;
+  margin-top: 2rem; display: none;
+}
+.quiz-score h3 { color: #fff; font-size: 1.6rem; margin-bottom: .5rem; }
+.quiz-score .score-num { color: #00b4d8; font-size: 2.6rem; font-weight: 900; }
+.quiz-result-bar { height: 8px; border-radius: 4px; background: #1e2d4a; margin: 1rem auto; max-width: 300px; overflow: hidden; }
+.quiz-result-fill { height: 100%; background: #00b4d8; border-radius: 4px; transition: width .6s; }
+.quiz-submit-btn {
+  display: inline-block; margin-top: 1.5rem; padding: .8rem 2.5rem;
+  border-radius: 10px; background: #00b4d8; color: #0a0e1a;
+  font-weight: 700; font-size: 1rem; border: none; cursor: pointer;
+  transition: background .2s;
+}
+.quiz-submit-btn:hover { background: #0096b7; }
+
+/* Nav bottom */
+.chapter-nav { display: flex; justify-content: space-between; padding: 3rem 0 4rem; }
+.nav-btn {
+  padding: .75rem 1.5rem; border-radius: 10px;
+  background: #111827; border: 1px solid #1e2d4a;
+  color: #c9d1d9; font-weight: 600; font-size: .95rem;
+  cursor: pointer; transition: all .2s; text-decoration: none;
+}
+.nav-btn:hover { border-color: #00b4d8; color: #00b4d8; text-decoration: none; }
+.nav-btn.primary { background: #00b4d8; color: #0a0e1a; border-color: #00b4d8; }
+.nav-btn.primary:hover { background: #0096b7; }
+
+/* Scroll animations */
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity .7s, transform .7s; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .topnav { padding: 0 1rem; }
+  .topnav-brand { font-size: .88rem; }
+  .ch-dot { width: 28px; height: 28px; font-size: .7rem; }
+  .lifecycle-track { gap: .5rem; }
+  .lifecycle-phase { min-width: 100px; padding: 1rem .5rem; }
+  .lifecycle-arrow { display: none; }
+  .tier-diagram { flex-direction: column; }
+  .tier-arrow { transform: rotate(90deg); }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
+  <div class="topnav-chapters">
+    <a href="index.html" class="ch-dot completed">1</a>
+    <a href="chapter2.html" class="ch-dot completed">2</a>
+    <a href="chapter3.html" class="ch-dot completed">3</a>
+    <a href="chapter4.html" class="ch-dot active">4</a>
+    <a href="chapter5.html" class="ch-dot">5</a>
+    <a href="chapter6.html" class="ch-dot">6</a>
+    <a href="chapter7.html" class="ch-dot">7</a>
+    <a href="chapter8.html" class="ch-dot">8</a>
+    <a href="chapter9.html" class="ch-dot">9</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-chapter">Chapter 4 of 9</div>
+  <h1>Supplier Management<br>&amp; <em>Risk</em></h1>
+  <p class="hero-sub">Master the end-to-end supplier lifecycle&mdash;from discovery to offboarding&mdash;while building resilient, multi-tier supply chains that withstand disruption, geopolitical volatility, and compliance complexity for $1B+ manufacturers.</p>
+  <div class="hero-arrow">&#8595;</div>
+</section>
+
+<!-- Section 1: Supplier Lifecycle -->
+<section class="chapter-section" id="lifecycle">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Supplier Lifecycle</div>
+      <div class="section-title">Six Phases of Strategic Supplier Management</div>
+      <p class="section-desc">From identifying potential partners to gracefully retiring relationships, each lifecycle phase demands specific tools, metrics, and manufacturing-grade rigor.</p>
+    </div>
+
+    <div class="lifecycle-track fade-in" id="lifecycleTrack">
+      <div class="lifecycle-phase active" data-phase="0">
+        <div class="phase-num">1</div>
+        <h4>Discovery</h4>
+      </div>
+      <div class="lifecycle-arrow">&#8594;</div>
+      <div class="lifecycle-phase" data-phase="1">
+        <div class="phase-num">2</div>
+        <h4>Qualification</h4>
+      </div>
+      <div class="lifecycle-arrow">&#8594;</div>
+      <div class="lifecycle-phase" data-phase="2">
+        <div class="phase-num">3</div>
+        <h4>Onboarding</h4>
+      </div>
+      <div class="lifecycle-arrow">&#8594;</div>
+      <div class="lifecycle-phase" data-phase="3">
+        <div class="phase-num">4</div>
+        <h4>Performance Mgmt</h4>
+      </div>
+      <div class="lifecycle-arrow">&#8594;</div>
+      <div class="lifecycle-phase" data-phase="4">
+        <div class="phase-num">5</div>
+        <h4>Development</h4>
+      </div>
+      <div class="lifecycle-arrow">&#8594;</div>
+      <div class="lifecycle-phase" data-phase="5">
+        <div class="phase-num">6</div>
+        <h4>Offboarding</h4>
+      </div>
+    </div>
+
+    <div class="lifecycle-detail fade-in" id="lifecycleDetail">
+      <h3>Discovery</h3>
+      <p>Identify and evaluate potential suppliers through market intelligence, supplier networks, and RFI processes. In manufacturing, discovery often starts with material-specific requirements&mdash;finding vendors who can meet tight tolerances, certifications (ISO 9001, AS9100, IATF 16949), and geographic proximity for JIT delivery. Jaggaer&rsquo;s supplier network connects you to 6M+ companies with deep category filtering for direct and indirect materials.</p>
+    </div>
+
+    <div class="stats-row fade-in">
+      <div class="stat-card">
+        <div class="stat-num"><span>30%</span></div>
+        <div class="stat-label">Production efficiency boost from transformed onboarding</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>6M+</span></div>
+        <div class="stat-label">Suppliers in Jaggaer network</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>47%</span></div>
+        <div class="stat-label">Reduction in supplier qualification time</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 2: Supplier Scorecards -->
+<section class="chapter-section" id="scorecards">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Supplier Scorecards</div>
+      <div class="section-title">The QCDS Framework: Measuring What Matters</div>
+      <p class="section-desc">Quality, Cost, Delivery, and Service&mdash;the four pillars that separate world-class supplier programs from spreadsheet chaos. Every $1B+ manufacturer needs quantified, automated scorecards.</p>
+    </div>
+
+    <div class="card fade-in">
+      <div class="tab-bar" id="scorecardTabs">
+        <button class="tab-btn active" data-tab="quality">Quality</button>
+        <button class="tab-btn" data-tab="cost">Cost</button>
+        <button class="tab-btn" data-tab="delivery">Delivery</button>
+        <button class="tab-btn" data-tab="service">Service</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-quality">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Quality Metrics</h3>
+        <p><strong style="color:#00b4d8;">Target Defect Rate:</strong> &lt;1% for critical components, &lt;0.1% for safety-critical parts. Leading manufacturers like Toyota operate at &lt;50 PPM (parts per million).</p>
+        <ul style="margin:1rem 0; padding-left:1.5rem; color:#8b95a5;">
+          <li><strong style="color:#c9d1d9;">Inspection Pass Rate:</strong> Percentage of incoming lots passing first inspection without rework</li>
+          <li><strong style="color:#c9d1d9;">Corrective Action Response Time:</strong> Average days from non-conformance report (NCR) to CAPA submission</li>
+          <li><strong style="color:#c9d1d9;">First Article Inspection (FAI):</strong> Pass/fail rate on new part introductions</li>
+          <li><strong style="color:#c9d1d9;">Warranty Claims:</strong> Field returns attributable to supplier quality</li>
+        </ul>
+        <p style="color:#8b95a5;">Jaggaer automates NCR workflows, tracks CAPA timelines, and aggregates quality data across plants for cross-facility supplier comparisons.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-cost">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Cost Metrics</h3>
+        <p><strong style="color:#00b4d8;">Price Competitiveness Index:</strong> Benchmarks supplier pricing against market indices and competing bids for the same commodity.</p>
+        <ul style="margin:1rem 0; padding-left:1.5rem; color:#8b95a5;">
+          <li><strong style="color:#c9d1d9;">Total Cost of Ownership (TCO):</strong> Includes purchase price, freight, quality costs, inventory carrying, and disposal</li>
+          <li><strong style="color:#c9d1d9;">Cost Reduction YoY:</strong> Annual negotiated savings vs. prior year baseline&mdash;target 3-5% for mature categories</li>
+          <li><strong style="color:#c9d1d9;">Invoice Accuracy:</strong> Percentage of invoices matching PO pricing without discrepancies</li>
+          <li><strong style="color:#c9d1d9;">Payment Term Compliance:</strong> Adherence to negotiated payment windows</li>
+        </ul>
+        <p style="color:#8b95a5;">Jaggaer&rsquo;s analytics engine surfaces hidden TCO drivers like expedited freight from late deliveries, connecting cost to quality and delivery performance.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-delivery">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Delivery Metrics</h3>
+        <p><strong style="color:#00b4d8;">On-Time Delivery (OTD) Target:</strong> 95%+ for standard materials, 98%+ for critical production line components. Every missed delivery can halt a production line costing $50K+/hour.</p>
+        <ul style="margin:1rem 0; padding-left:1.5rem; color:#8b95a5;">
+          <li><strong style="color:#c9d1d9;">Lead Time Accuracy:</strong> Promised vs. actual lead time&mdash;variance should be &lt;5%</li>
+          <li><strong style="color:#c9d1d9;">Fill Rate:</strong> Percentage of ordered quantity delivered complete on first shipment</li>
+          <li><strong style="color:#c9d1d9;">Expedite Frequency:</strong> How often emergency expedites are required&mdash;a proxy for planning reliability</li>
+          <li><strong style="color:#c9d1d9;">ASN Compliance:</strong> Accuracy and timeliness of Advanced Shipping Notices for dock scheduling</li>
+        </ul>
+        <p style="color:#8b95a5;">Jaggaer tracks OTD against PO promise dates automatically, flagging chronic late deliverers and correlating delivery failures to production impact.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-service">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Service Metrics</h3>
+        <p><strong style="color:#00b4d8;">Responsiveness:</strong> Average time to acknowledge and respond to RFQs, change orders, and issue escalations. Best-in-class: &lt;4 hours for critical items.</p>
+        <ul style="margin:1rem 0; padding-left:1.5rem; color:#8b95a5;">
+          <li><strong style="color:#c9d1d9;">Flexibility:</strong> Willingness to accommodate volume swings, engineering changes, and rush orders</li>
+          <li><strong style="color:#c9d1d9;">Communication Quality:</strong> Proactive vs. reactive communication&mdash;do they flag problems before you discover them?</li>
+          <li><strong style="color:#c9d1d9;">Innovation Contribution:</strong> Value engineering suggestions, new material proposals, process improvements</li>
+          <li><strong style="color:#c9d1d9;">Collaboration Index:</strong> Participation in joint planning sessions, QBRs, and continuous improvement programs</li>
+        </ul>
+        <p style="color:#8b95a5;">Jaggaer&rsquo;s supplier portal captures service metrics through structured surveys, communication logs, and collaboration activity tracking.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap fade-in">
+      <h3 style="color:#fff; margin-bottom:1rem; font-size:1.1rem;">Supplier Comparison: QCDS Radar</h3>
+      <canvas id="radarQCDS"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: Multi-Tier Visibility -->
+<section class="chapter-section" id="multitier">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Multi-Tier Supply Chain</div>
+      <div class="section-title">Seeing Beyond Tier 1: The Visibility Gap</div>
+      <p class="section-desc">Most manufacturers have a clear view of their direct suppliers. But the semiconductor shortage, Suez Canal blockage, and pandemic shutdowns proved that risk hides in the tiers you cannot see.</p>
+    </div>
+
+    <div class="tier-diagram fade-in">
+      <div class="tier-node highlight">
+        <h4 style="color:#00b4d8;">Your Factory</h4>
+        <p>OEM / Final Assembly</p>
+      </div>
+      <div class="tier-arrow">&#8594;</div>
+      <div class="tier-node highlight">
+        <h4>Tier 1</h4>
+        <p>Direct Suppliers<br><span style="color:#10b981;">95% visibility</span></p>
+      </div>
+      <div class="tier-arrow">&#8594;</div>
+      <div class="tier-node">
+        <h4>Tier 2</h4>
+        <p>Sub-suppliers<br><span style="color:#f59e0b;">42% visibility</span></p>
+      </div>
+      <div class="tier-arrow">&#8594;</div>
+      <div class="tier-node dim">
+        <h4>Tier 3</h4>
+        <p>Component Makers<br><span style="color:#ef4444;">15% visibility</span></p>
+      </div>
+      <div class="tier-arrow">&#8594;</div>
+      <div class="tier-node dim">
+        <h4>Raw Materials</h4>
+        <p>Mines, Refineries<br><span style="color:#ef4444;">&lt;10% visibility</span></p>
+      </div>
+    </div>
+
+    <div class="stats-row fade-in">
+      <div class="stat-card">
+        <div class="stat-num"><span>95%</span></div>
+        <div class="stat-label">Organizations with Tier-1 visibility</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>42%</span></div>
+        <div class="stat-label">Have Tier-2+ visibility</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>82%</span></div>
+        <div class="stat-label">Affected by tariffs &amp; geopolitical risk</div>
+      </div>
+    </div>
+
+    <div class="callout fade-in">
+      <strong>The &ldquo;10-Cent Component&rdquo; Problem:</strong> A $0.10 capacitor from a single Tier-3 supplier in Shenzhen can halt a $50M production line. During the 2021 chip crisis, automakers lost an estimated $210B in revenue&mdash;all because of components costing a fraction of a dollar. Multi-tier mapping isn&rsquo;t a luxury; it&rsquo;s a survival strategy.
+    </div>
+
+    <div class="card fade-in">
+      <h3>Geopolitical Risk in the Supply Chain</h3>
+      <p style="margin:.5rem 0; color:#8b95a5;">82% of organizations report that tariffs and trade policy shifts directly affect their supply chains. For manufacturers, 20-40% of a typical supply chain is impacted by geopolitical factors&mdash;from CHIPS Act reshoring incentives to EU CBAM carbon tariffs to China+1 diversification strategies.</p>
+      <p style="color:#8b95a5;">Jaggaer maps supplier locations at every tier, overlays risk data (sanctions, natural disasters, political instability), and triggers automated alerts when your supply chain intersects with geopolitical hotspots.</p>
+    </div>
+
+    <div class="chart-wrap fade-in">
+      <h3 style="color:#fff; margin-bottom:1rem; font-size:1.1rem;">Supply Chain Visibility by Tier</h3>
+      <canvas id="tierVisChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Section 4: Risk Management -->
+<section class="chapter-section" id="risk">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Risk Management</div>
+      <div class="section-title">Five Dimensions of Supply Chain Risk</div>
+      <p class="section-desc">Risk is not a single variable. Manufacturers face an interconnected web of financial, geopolitical, cyber, operational, and ESG/compliance threats that demand continuous, automated monitoring.</p>
+    </div>
+
+    <div class="card fade-in">
+      <div class="tab-bar" id="riskTabs">
+        <button class="tab-btn active" data-tab="financial">Financial</button>
+        <button class="tab-btn" data-tab="geopolitical">Geopolitical</button>
+        <button class="tab-btn" data-tab="cyber">Cyber</button>
+        <button class="tab-btn" data-tab="operational">Operational</button>
+        <button class="tab-btn" data-tab="esg">ESG / Compliance</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-financial">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Financial Risk</h3>
+        <p><strong style="color:#ef4444;">The Threat:</strong> Supplier bankruptcy, credit deterioration, or cash flow crises that interrupt your supply. The average manufacturer loses 3-5 critical suppliers per year to financial distress.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#00b4d8;">Key Stats:</strong> 1 in 4 suppliers show early warning signs of financial stress 6-12 months before failure. 67% of procurement teams discover supplier financial problems only after a disruption occurs.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#10b981;">How Jaggaer Helps:</strong> Continuous monitoring of supplier financial health through credit scoring APIs, Dun &amp; Bradstreet integration, and automated alerts when a supplier&rsquo;s risk score drops below threshold. Pre-built contingency workflows activate backup suppliers automatically.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-geopolitical">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Geopolitical Risk</h3>
+        <p><strong style="color:#ef4444;">The Threat:</strong> Tariffs, trade wars, sanctions, and regulatory shifts that reshape cost structures overnight. The US-China tariff regime added 7-25% cost to thousands of manufactured components.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#00b4d8;">Key Stats:</strong> 82% of organizations say tariffs affect their supply chains. 20-40% of a typical manufacturing supply chain is exposed to geopolitical risk factors.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#10b981;">How Jaggaer Helps:</strong> Geographic risk overlays on supplier maps, tariff tracking with automated duty calculation, and dual-sourcing recommendation engines that identify alternative suppliers in lower-risk regions.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-cyber">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Cyber Risk</h3>
+        <p><strong style="color:#ef4444;">The Threat:</strong> Ransomware, data breaches, and supply chain attacks that exploit supplier connections as entry points. The SolarWinds and Kaseya attacks demonstrated that attackers target the weakest link.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#00b4d8;">Key Stats:</strong> 431% surge in supply chain cyber attacks from 2021 to 2023. 62% of network intrusions originate from a supply chain partner. Average breach cost: $4.45M.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#10b981;">How Jaggaer Helps:</strong> Supplier cybersecurity assessments during onboarding, continuous dark-web monitoring for supplier data exposure, SOC2/ISO 27001 compliance verification, and automated risk scoring that factors in a supplier&rsquo;s digital hygiene.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-operational">
+        <h3 style="color:#fff; margin-bottom:.75rem;">Operational Risk</h3>
+        <p><strong style="color:#ef4444;">The Threat:</strong> Capacity constraints, quality failures, natural disasters, and logistics disruptions that interrupt production. A single supplier&rsquo;s factory fire can cascade across your entire BOM.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#00b4d8;">Key Stats:</strong> 45% of procurement leaders cite supplier disruptions as their #1 operational risk. Average disruption costs 6-10% of annual revenue. Mean time to recover: 22 weeks.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#10b981;">How Jaggaer Helps:</strong> Real-time disruption monitoring using news feeds and IoT signals, capacity tracking dashboards, automated notification chains, and scenario planning tools that model the impact of losing any single supplier.</p>
+      </div>
+
+      <div class="tab-panel" id="tab-esg">
+        <h3 style="color:#fff; margin-bottom:.75rem;">ESG &amp; Compliance Risk</h3>
+        <p><strong style="color:#ef4444;">The Threat:</strong> Regulatory non-compliance with UFLPA (forced labor), Modern Slavery Act, EU CSRD, GDPR, and sector-specific regulations (REACH, RoHS, conflict minerals) that carry criminal penalties and brand damage.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#00b4d8;">Key Stats:</strong> 73% of consumers say they would switch brands over ESG concerns. EU CSRD mandates supply chain sustainability reporting for 50,000+ companies starting 2025. UFLPA has blocked $2B+ in goods at US ports.</p>
+        <p style="margin-top:.75rem;"><strong style="color:#10b981;">How Jaggaer Helps:</strong> Automated ESG questionnaires during qualification, continuous compliance monitoring against global regulatory databases, supplier self-assessment portals with evidence collection, and audit trail documentation that satisfies regulators.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap fade-in">
+      <h3 style="color:#fff; margin-bottom:1rem; font-size:1.1rem;">Supply Chain Risk Frequency by Type</h3>
+      <canvas id="riskBarChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Section 5: Supplier Onboarding -->
+<section class="chapter-section" id="onboarding">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Supplier Onboarding</div>
+      <div class="section-title">The Make-or-Break Moment in Supplier Relationships</div>
+      <p class="section-desc">Supplier onboarding is the #1 reason CPOs switch S2P platforms. Get it wrong, and you lose both suppliers and internal credibility. Get it right, and you unlock 30% production efficiency gains.</p>
+    </div>
+
+    <div class="stats-row fade-in">
+      <div class="stat-card">
+        <div class="stat-num"><span>82%</span></div>
+        <div class="stat-label">CPOs report &ldquo;buyer&rsquo;s remorse&rdquo; with current onboarding</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>#1</span></div>
+        <div class="stat-label">Reason for switching S2P platforms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>30%</span></div>
+        <div class="stat-label">Efficiency boost from best-in-class onboarding</div>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <h3>Best Practices for Manufacturing Onboarding</h3>
+      <ul style="margin:1rem 0; padding-left:1.5rem; color:#8b95a5; line-height:2;">
+        <li><strong style="color:#c9d1d9;">EDI/API Setup:</strong> Configure electronic data interchange for POs, ASNs, invoices, and payment remittances&mdash;critical for high-volume direct material suppliers</li>
+        <li><strong style="color:#c9d1d9;">Compliance Verification:</strong> Automated collection and validation of ISO certifications, insurance certificates, tax IDs, banking details, and regulatory compliance documents</li>
+        <li><strong style="color:#c9d1d9;">Catalog Integration:</strong> Punchout catalog setup for indirect materials; price list validation against contracted rates for direct materials</li>
+        <li><strong style="color:#c9d1d9;">Quality Agreement Execution:</strong> Define inspection protocols, defect thresholds, CAPA timelines, and escalation procedures before the first PO</li>
+        <li><strong style="color:#c9d1d9;">Capacity &amp; Lead Time Confirmation:</strong> Validate production capacity, standard lead times, and surge capacity commitments</li>
+        <li><strong style="color:#c9d1d9;">Logistics Setup:</strong> Define shipping methods, incoterms, packaging specifications, and labeling requirements</li>
+      </ul>
+    </div>
+
+    <div class="callout fade-in">
+      <strong>Manufacturing Spotlight &mdash; Global Compliance Complexity:</strong> A $1B+ manufacturer onboarding a new fastener supplier in Vietnam must simultaneously verify: US CTPAT security compliance, EU REACH chemical restrictions, UFLPA forced labor attestation, local factory audit results, ISO 9001 certification, export license requirements, and customs tariff classifications. Jaggaer&rsquo;s onboarding workflows automate these multi-jurisdiction compliance checks in parallel, reducing onboarding from 12 weeks to 3.
+    </div>
+  </div>
+</section>
+
+<!-- Section 6: Competitive Comparison -->
+<section class="chapter-section" id="competitive">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Competitive Landscape</div>
+      <div class="section-title">Supplier Management: Jaggaer vs. Ariba vs. Coupa</div>
+      <p class="section-desc">Each platform has distinct strengths in supplier management. Here is how they compare across the capabilities that matter most for $1B+ manufacturers.</p>
+    </div>
+
+    <div class="chart-wrap fade-in">
+      <h3 style="color:#fff; margin-bottom:1rem; font-size:1.1rem;">Supplier Management Capabilities Radar</h3>
+      <canvas id="competitiveRadar"></canvas>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:1.25rem;" class="fade-in">
+      <div class="card">
+        <h3 style="color:#00b4d8;">Jaggaer</h3>
+        <p style="color:#8b95a5;">Strongest in <strong style="color:#fff;">collaboration portals</strong> (92/100) and <strong style="color:#fff;">scorecard tools</strong> (90/100). Deep manufacturing DNA with configurable QCDS frameworks, real-time supplier performance dashboards, and multi-tier risk mapping. The supplier portal enables true two-way collaboration&mdash;not just data collection.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:#10b981;">SAP Ariba</h3>
+        <p style="color:#8b95a5;">Dominates in <strong style="color:#fff;">supplier network size</strong> (95/100) with 5.5M+ connected companies. Strong ERP integration for SAP shops. However, onboarding speed (55/100) and collaboration depth lag behind Jaggaer, especially for complex manufacturing use cases.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:#f59e0b;">Coupa</h3>
+        <p style="color:#8b95a5;">Solid onboarding speed (82/100) and growing risk capabilities (80/100) through Community.ai benchmarking. Supplier management is improving but still leans indirect-heavy. Less depth in multi-tier visibility (72/100) for manufacturing environments.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 7: Quiz -->
+<section class="chapter-section" id="quiz">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Knowledge Check</div>
+      <div class="section-title">Chapter 4 Quiz</div>
+      <p class="section-desc">Test your understanding of supplier management and risk concepts. Score 80%+ to master this chapter.</p>
+    </div>
+
+    <div class="quiz-container fade-in" id="quizContainer"></div>
+
+    <div class="quiz-score" id="quizScore">
+      <div class="score-num" id="scoreNum">0/10</div>
+      <h3>Chapter 4 Complete</h3>
+      <div class="quiz-result-bar"><div class="quiz-result-fill" id="scoreFill"></div></div>
+      <p style="color:#8b95a5;" id="scoreMsg"></p>
+      <a href="chapter5.html" class="quiz-submit-btn" style="text-decoration:none; display:inline-block; margin-top:1.5rem;">Continue to Chapter 5 &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- Chapter Navigation -->
+<div class="container">
+  <div class="chapter-nav">
+    <a href="chapter3.html" class="nav-btn">&larr; Chapter 3</a>
+    <a href="chapter5.html" class="nav-btn primary">Chapter 5 &rarr;</a>
+  </div>
+</div>
+
+<script>
+// Chart defaults
+Chart.defaults.color = '#6b7280';
+Chart.defaults.borderColor = '#1e2d4a';
+
+// ── Lifecycle Interactivity ──
+const phaseData = [
+  { title: 'Discovery', desc: 'Identify and evaluate potential suppliers through market intelligence, supplier networks, and RFI processes. In manufacturing, discovery often starts with material-specific requirements\u2014finding vendors who can meet tight tolerances, certifications (ISO 9001, AS9100, IATF 16949), and geographic proximity for JIT delivery. Jaggaer\u2019s supplier network connects you to 6M+ companies with deep category filtering for direct and indirect materials.' },
+  { title: 'Qualification', desc: 'Assess supplier capabilities through structured evaluation: financial health checks, site audits, sample testing, and compliance verification. For manufacturers, qualification includes first article inspection (FAI), process capability studies (Cpk analysis), and capacity validation. Jaggaer automates qualification questionnaires with weighted scoring models tailored to your commodity strategy.' },
+  { title: 'Onboarding', desc: 'Activate new suppliers in your procurement ecosystem: master data setup, EDI/API configuration, catalog integration, compliance document collection, and quality agreement execution. This is the #1 pain point in S2P\u201482% of CPOs report buyer\u2019s remorse with their current onboarding. Jaggaer\u2019s guided onboarding workflows reduce time-to-first-PO from 12 weeks to 3.' },
+  { title: 'Performance Management', desc: 'Continuously measure supplier performance against QCDS scorecards. Automate data collection from ERPs, quality systems, and logistics platforms. Trigger corrective actions when thresholds are breached. Jaggaer\u2019s real-time dashboards give commodity managers instant visibility into supplier performance across all plants and categories.' },
+  { title: 'Development', desc: 'Invest in strategic suppliers to improve their capabilities. Joint improvement programs, technology sharing, capacity expansion planning, and innovation partnerships. For manufacturers, this includes value engineering collaborations that reduce component costs by 5-15% annually. Jaggaer\u2019s development module tracks improvement initiatives with milestone tracking and ROI measurement.' },
+  { title: 'Offboarding', desc: 'Gracefully retire supplier relationships when they no longer meet requirements. Ensure continuity: transfer tooling, validate alternative sources, complete open POs, archive records for audit trails. Manufacturing offboarding requires careful orchestration to avoid production gaps. Jaggaer manages the transition with automated checklists and stakeholder notifications.' }
+];
+
+document.querySelectorAll('.lifecycle-phase').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.lifecycle-phase').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const idx = parseInt(el.dataset.phase);
+    const detail = document.getElementById('lifecycleDetail');
+    detail.innerHTML = '<h3>' + phaseData[idx].title + '</h3><p>' + phaseData[idx].desc + '</p>';
+  });
+});
+
+// ── Scorecard Tabs ──
+document.querySelectorAll('#scorecardTabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#scorecardTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#scorecardTabs ~ .tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Risk Tabs ──
+document.querySelectorAll('#riskTabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#riskTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#riskTabs ~ .tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── QCDS Radar Chart ──
+new Chart(document.getElementById('radarQCDS'), {
+  type: 'radar',
+  data: {
+    labels: ['Quality', 'Cost', 'Delivery', 'Service'],
+    datasets: [
+      { label: 'Supplier A (Strategic)', data: [92, 78, 95, 88], borderColor: '#00b4d8', backgroundColor: 'rgba(0,180,216,.12)', pointBackgroundColor: '#00b4d8', borderWidth: 2 },
+      { label: 'Supplier B (Preferred)', data: [85, 88, 82, 75], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.12)', pointBackgroundColor: '#10b981', borderWidth: 2 },
+      { label: 'Supplier C (Probationary)', data: [65, 90, 60, 55], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.12)', pointBackgroundColor: '#f59e0b', borderWidth: 2 }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 }, grid: { color: '#1e2d4a' }, angleLines: { color: '#1e2d4a' }, pointLabels: { color: '#c9d1d9', font: { size: 13, weight: 600 } } } },
+    plugins: { legend: { labels: { color: '#c9d1d9', padding: 16 } } }
+  }
+});
+
+// ── Tier Visibility Bar Chart ──
+new Chart(document.getElementById('tierVisChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Tier 1', 'Tier 2', 'Tier 3', 'Raw Materials'],
+    datasets: [{
+      label: 'Visibility %',
+      data: [95, 42, 15, 8],
+      backgroundColor: ['#00b4d8', '#f59e0b', '#ef4444', '#ef4444'],
+      borderRadius: 6,
+      barThickness: 48
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: {
+      x: { max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e2d4a' } },
+      y: { grid: { display: false }, ticks: { color: '#c9d1d9', font: { weight: 600 } } }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ── Risk Frequency Horizontal Bar ──
+new Chart(document.getElementById('riskBarChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Operational Disruptions', 'Geopolitical / Tariffs', 'Cyber Attacks', 'Financial Distress', 'ESG / Compliance'],
+    datasets: [{
+      label: '% of Organizations Affected',
+      data: [45, 82, 38, 34, 29],
+      backgroundColor: ['#ef4444', '#f59e0b', '#00b4d8', '#10b981', '#8b5cf6'],
+      borderRadius: 6,
+      barThickness: 36
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: {
+      x: { max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e2d4a' } },
+      y: { grid: { display: false }, ticks: { color: '#c9d1d9', font: { size: 12, weight: 600 } } }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ── Competitive Radar ──
+new Chart(document.getElementById('competitiveRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Supplier Network Size', 'Onboarding Speed', 'Risk Monitoring', 'Scorecard Tools', 'Multi-tier Visibility', 'Collaboration Portal'],
+    datasets: [
+      { label: 'Jaggaer', data: [70, 80, 88, 90, 85, 92], borderColor: '#00b4d8', backgroundColor: 'rgba(0,180,216,.1)', pointBackgroundColor: '#00b4d8', borderWidth: 2 },
+      { label: 'SAP Ariba', data: [95, 55, 75, 72, 68, 70], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.1)', pointBackgroundColor: '#10b981', borderWidth: 2 },
+      { label: 'Coupa', data: [75, 82, 80, 78, 72, 74], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.1)', pointBackgroundColor: '#f59e0b', borderWidth: 2 }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 }, grid: { color: '#1e2d4a' }, angleLines: { color: '#1e2d4a' }, pointLabels: { color: '#c9d1d9', font: { size: 11, weight: 600 } } } },
+    plugins: { legend: { labels: { color: '#c9d1d9', padding: 16 } } }
+  }
+});
+
+// ── Quiz ──
+const quizData = [
+  { q: 'What are the 4 pillars of supplier scorecards (QCDS)?', opts: ['Quality, Cost, Delivery, Service', 'Quantity, Compliance, Demand, Speed', 'Quality, Compliance, Distribution, Safety', 'Quotation, Contract, Delivery, Support'], correct: 0 },
+  { q: 'What percentage of organizations have tier-2+ supplier visibility?', opts: ['78%', '42%', '65%', '23%'], correct: 1 },
+  { q: 'By what percentage did supply chain cyber attacks surge from 2021 to 2023?', opts: ['125%', '210%', '431%', '300%'], correct: 2 },
+  { q: 'What is the #1 reason CPOs switch S2P platforms?', opts: ['Poor analytics', 'High licensing costs', 'Poor supplier onboarding', 'Lack of mobile support'], correct: 2 },
+  { q: 'What on-time delivery rate should manufacturers target for critical materials?', opts: ['80%+', '90%+', '95%+', '99%+'], correct: 2 },
+  { q: 'What percentage of organizations say tariffs affect their supply chains?', opts: ['65%', '74%', '82%', '91%'], correct: 2 },
+  { q: 'Effective supplier onboarding can boost production efficiency by what amount?', opts: ['15%', '20%', '25%', '30%'], correct: 3 },
+  { q: 'What defect rate do leading manufacturers target?', opts: ['Under 5%', 'Under 3%', 'Under 1%', 'Under 0.01%'], correct: 2 },
+  { q: 'Which competitor has the largest supplier network?', opts: ['Jaggaer with 6M+ companies', 'SAP Ariba with 5.5M+ companies', 'Coupa with 10M+ companies', 'Oracle with 4M+ companies'], correct: 1 },
+  { q: "Jaggaer's strongest supplier management advantage is:", opts: ['Lowest price per license', 'Supplier collaboration portal and scorecard tools', 'Largest supplier network', 'Best mobile experience'], correct: 1 }
+];
+
+let quizAnswered = 0, quizCorrect = 0;
+const quizContainer = document.getElementById('quizContainer');
+
+quizData.forEach((item, qi) => {
+  const div = document.createElement('div');
+  div.className = 'quiz-question';
+  div.innerHTML = '<h4><span class="q-num">Q' + (qi + 1) + '.</span> ' + item.q + '</h4><div class="quiz-options">' +
+    item.opts.map((o, oi) => '<div class="quiz-opt" data-q="' + qi + '" data-o="' + oi + '">' + o + '</div>').join('') + '</div>';
+  quizContainer.appendChild(div);
+});
+
+quizContainer.addEventListener('click', function(e) {
+  const opt = e.target.closest('.quiz-opt');
+  if (!opt || opt.classList.contains('disabled')) return;
+  const qi = parseInt(opt.dataset.q);
+  const oi = parseInt(opt.dataset.o);
+  const question = opt.closest('.quiz-question');
+  question.querySelectorAll('.quiz-opt').forEach(o => {
+    o.classList.add('disabled');
+    if (parseInt(o.dataset.o) === quizData[qi].correct) o.classList.add('correct');
+  });
+  if (oi !== quizData[qi].correct) opt.classList.add('incorrect');
+  else quizCorrect++;
+  quizAnswered++;
+  if (quizAnswered === quizData.length) showScore();
+});
+
+function showScore() {
+  const scoreEl = document.getElementById('quizScore');
+  scoreEl.style.display = 'block';
+  document.getElementById('scoreNum').textContent = quizCorrect + '/10';
+  document.getElementById('scoreFill').style.width = (quizCorrect * 10) + '%';
+  const msg = quizCorrect >= 8 ? 'Excellent! You\'ve mastered Supplier Management & Risk.' :
+              quizCorrect >= 6 ? 'Good work! Review the sections you missed and try again.' :
+              'Keep studying! Re-read the chapter and retake the quiz.';
+  document.getElementById('scoreMsg').textContent = msg;
+  scoreEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── Scroll Fade-in ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

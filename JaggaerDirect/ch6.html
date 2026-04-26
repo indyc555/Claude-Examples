@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chapter 6: Electronic Invoicing | JD Training</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0e1a; color: #c9d1d9; }
+    nav { position:fixed; top:0; left:0; right:0; height:60px; background:rgba(10,14,26,.92); backdrop-filter:blur(12px); border-bottom:1px solid #1e2d4a; display:flex; align-items:center; justify-content:space-between; padding:0 32px; z-index:1000; }
+    .nav-brand { font-size:1.05rem; font-weight:700; color:#fff; text-decoration:none; }
+    .nav-chapters { display:flex; gap:8px; }
+    .ch-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; text-decoration:none; color:#8b95a5; background:#1a2240; transition:transform .15s; }
+    .ch-dot:hover { transform:scale(1.15); }
+    .ch-dot.active { background:#00b4d8; color:#fff; }
+    .ch-dot.done { background:#10b981; color:#fff; }
+    main { padding-top:60px; }
+    .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+    section.sec { padding:64px 0; }
+    .sec + .sec { border-top:1px solid #1e2d4a; }
+    .hero { text-align:center; padding:80px 24px 64px; background:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,180,216,.12), transparent); }
+    .badge { display:inline-block; background:rgba(0,180,216,.15); color:#00b4d8; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:5px 14px; border-radius:20px; border:1px solid rgba(0,180,216,.3); margin-bottom:20px; }
+    .hero h1 { font-size:clamp(2rem,4vw,3.2rem); font-weight:800; color:#fff; line-height:1.15; margin-bottom:18px; }
+    .hero h1 em { font-style:normal; color:#00b4d8; }
+    .hero p { font-size:1.1rem; color:#8b95a5; max-width:660px; margin:0 auto; line-height:1.7; }
+    .sec-label { font-size:.72rem; font-weight:700; letter-spacing:.12em; color:#00b4d8; text-transform:uppercase; margin-bottom:10px; }
+    .sec-title { font-size:clamp(1.5rem,2.5vw,2rem); font-weight:800; color:#fff; margin-bottom:14px; }
+    .sec-body { color:#c9d1d9; line-height:1.75; max-width:820px; }
+    .flow-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-top:28px; }
+    .flow-card { background:#111827; border:1px solid #1e2d4a; border-radius:14px; padding:22px; }
+    .flow-card h4 { color:#00b4d8; font-weight:700; font-size:.95rem; margin-bottom:10px; }
+    .flow-card ol { list-style:none; display:flex; flex-direction:column; gap:8px; }
+    .flow-card ol li { display:flex; gap:10px; font-size:.875rem; color:#c9d1d9; line-height:1.5; }
+    .flow-card ol li::before { content:counter(step); counter-increment:step; background:#1a2240; color:#00b4d8; font-weight:700; font-size:.75rem; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .flow-card { counter-reset:step; }
+    .match-box { background:#111827; border:1px solid #1e2d4a; border-radius:14px; padding:28px; margin-top:28px; text-align:center; }
+    .match-triangle { display:flex; justify-content:center; gap:40px; align-items:center; margin:24px 0; flex-wrap:wrap; }
+    .match-node { background:#1a2240; border:1px solid #00b4d8; border-radius:12px; padding:16px 24px; text-align:center; }
+    .match-node h5 { color:#00b4d8; font-weight:700; font-size:.85rem; margin-bottom:4px; }
+    .match-node p { color:#8b95a5; font-size:.8rem; }
+    .match-center { background:rgba(16,185,129,.1); border:2px solid #10b981; border-radius:50%; width:80px; height:80px; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+    .match-center span { color:#10b981; font-weight:800; font-size:.8rem; line-height:1.3; text-align:center; }
+    .gloss-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:28px; }
+    .gloss-card { background:#111827; border:1px solid #1e2d4a; border-radius:14px; padding:18px 20px; }
+    .gloss-term { font-size:.8rem; font-weight:700; color:#00b4d8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    .gloss-def { font-size:.875rem; color:#c9d1d9; line-height:1.6; }
+    .pain-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; margin-top:28px; }
+    .pain-card { background:#111827; border:1px solid #1e2d4a; border-radius:14px; padding:24px; }
+    .pain-problem { font-size:.875rem; color:#f59e0b; font-weight:600; margin-bottom:10px; }
+    .pain-solution { font-size:.875rem; color:#c9d1d9; line-height:1.6; border-left:3px solid #10b981; padding-left:14px; margin-top:10px; }
+    .chart-wrap { background:#111827; border:1px solid #1e2d4a; border-radius:14px; padding:28px; margin-top:28px; }
+    .chart-wrap canvas { max-height:320px; }
+    .quiz-wrap { background:#111827; border:1px solid #1e2d4a; border-radius:14px; padding:32px; margin-top:28px; }
+    .quiz-header { display:flex; justify-content:space-between; margin-bottom:24px; }
+    .quiz-progress { font-size:.82rem; color:#8b95a5; }
+    .quiz-q { font-size:1rem; font-weight:600; color:#fff; margin-bottom:20px; line-height:1.55; }
+    .quiz-options { display:flex; flex-direction:column; gap:10px; }
+    .quiz-opt { background:#0a0e1a; border:1px solid #1e2d4a; border-radius:10px; padding:13px 18px; cursor:pointer; font-size:.9rem; color:#c9d1d9; text-align:left; transition:border-color .15s; }
+    .quiz-opt:hover { border-color:#00b4d8; }
+    .quiz-opt.correct { border-color:#10b981; background:rgba(16,185,129,.1); color:#10b981; }
+    .quiz-opt.wrong { border-color:#ef4444; background:rgba(239,68,68,.1); color:#ef4444; }
+    .quiz-explanation { margin-top:16px; padding:14px 16px; background:rgba(0,180,216,.07); border-left:3px solid #00b4d8; border-radius:0 8px 8px 0; font-size:.875rem; color:#c9d1d9; line-height:1.6; display:none; }
+    .quiz-nav { display:flex; gap:12px; justify-content:flex-end; margin-top:24px; }
+    .quiz-btn { padding:10px 24px; border-radius:10px; font-weight:700; font-size:.875rem; cursor:pointer; border:none; }
+    .quiz-btn.primary { background:#00b4d8; color:#fff; }
+    .quiz-btn.secondary { background:#1a2240; color:#c9d1d9; }
+    .quiz-score { text-align:center; padding:24px 0; display:none; }
+    .score-num { font-size:3rem; font-weight:800; color:#00b4d8; }
+    .ch-nav { display:flex; justify-content:space-between; align-items:center; padding:40px 0; flex-wrap:wrap; gap:16px; }
+    .ch-nav a { text-decoration:none; color:#00b4d8; font-weight:600; font-size:.9rem; padding:10px 20px; border:1px solid #1e2d4a; border-radius:10px; transition:border-color .15s; }
+    .ch-nav a:hover { border-color:#00b4d8; }
+    .ch-nav a.home { color:#8b95a5; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-brand">JAGGAER <span style="color:#00b4d8">Direct</span> Training</a>
+  <div class="nav-chapters">
+    <a href="ch1.html" class="ch-dot done">1</a>
+    <a href="ch2.html" class="ch-dot done">2</a>
+    <a href="ch3.html" class="ch-dot done">3</a>
+    <a href="ch4.html" class="ch-dot done">4</a>
+    <a href="ch5.html" class="ch-dot done">5</a>
+    <a href="ch6.html" class="ch-dot active">6</a>
+    <a href="ch7.html" class="ch-dot">7</a>
+    <a href="ch8.html" class="ch-dot">8</a>
+  </div>
+</nav>
+<main>
+  <div class="hero">
+    <div class="badge">Chapter 6 of 8</div>
+    <h1>Electronic <em>Invoicing</em></h1>
+    <p>Understand how JD digitizes the full invoice-to-pay process — self-billing (ERS), 3-way matching, credit notes, and payment confirmation.</p>
+  </div>
+
+  <section class="sec">
+    <div class="container">
+      <div class="sec-label">Invoice Flows</div>
+      <h2 class="sec-title">Three Invoice Processing Paths</h2>
+      <p class="sec-body">JD supports multiple invoice flows. In all cases the goal is identical: eliminate paper, reduce processing time, ensure accuracy, and comply with local regulations.</p>
+      <div class="flow-grid">
+        <div class="flow-card">
+          <h4>Flow A — Supplier-Submitted Invoice</h4>
+          <ol>
+            <li>Supplier creates invoice in JD portal</li>
+            <li>JD validates against PO and GR (3-way match)</li>
+            <li>INVOIC IDOC sent to SAP FI</li>
+            <li>SAP posts invoice and schedules payment</li>
+            <li>REMADV sent back to supplier on payment</li>
+          </ol>
+        </div>
+        <div class="flow-card">
+          <h4>Flow B — Self-Billing (ERS)</h4>
+          <ol>
+            <li>SAP posts goods receipt (GR)</li>
+            <li>SAP auto-creates invoice based on GR data</li>
+            <li>INVOIC IDOC sent to JD</li>
+            <li>Supplier sees invoice created on their behalf</li>
+            <li>No supplier action needed — verify only</li>
+          </ol>
+        </div>
+        <div class="flow-card">
+          <h4>Flow C — EDI Invoice</h4>
+          <ol>
+            <li>Supplier's ERP sends EDIFACT INVOIC message</li>
+            <li>JD receives and processes the EDI file</li>
+            <li>Same 3-way match validation applies</li>
+            <li>INVOIC IDOC forwarded to SAP FI</li>
+            <li>Payment and REMADV as normal</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="container">
+      <div class="sec-label">Core Concept</div>
+      <h2 class="sec-title">3-Way Matching</h2>
+      <p class="sec-body">3-way matching ensures every invoice is validated against what was ordered and what was received — catching discrepancies before they reach the payment run.</p>
+      <div class="match-box">
+        <div class="match-triangle">
+          <div class="match-node"><h5>Purchase Order</h5><p>What was ordered:<br>material, qty, price</p></div>
+          <div class="match-center"><span>3-Way<br>Match ✓</span></div>
+          <div class="match-node"><h5>Goods Receipt</h5><p>What was received:<br>qty, date, material</p></div>
+        </div>
+        <div style="text-align:center;margin-top:16px;">
+          <div class="match-node" style="display:inline-block;"><h5>Invoice</h5><p>What supplier is charging:<br>qty, price, tax</p></div>
+        </div>
+        <p style="margin-top:20px;font-size:.875rem;color:#8b95a5;">All three match → <span style="color:#10b981;font-weight:700;">Auto-approved</span> &nbsp;|&nbsp; Discrepancy → <span style="color:#f59e0b;font-weight:700;">Tolerance check → Buyer review</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="container">
+      <div class="sec-label">Terminology</div>
+      <h2 class="sec-title">Key Invoice Terms</h2>
+      <div class="gloss-grid">
+        <div class="gloss-card"><div class="gloss-term">INVOIC</div><div class="gloss-def">SAP IDOC type and EDIFACT message for invoices — used in both directions (supplier to buyer and ERS/self-billing).</div></div>
+        <div class="gloss-card"><div class="gloss-term">ERS</div><div class="gloss-def">Evaluated Receipt Settlement — self-billing model. Buyer generates invoice based on GR; no supplier submission required.</div></div>
+        <div class="gloss-card"><div class="gloss-term">Credit Note</div><div class="gloss-def">A negative invoice — used to correct overpayments, process returns, or apply pricing corrections.</div></div>
+        <div class="gloss-card"><div class="gloss-term">3-Way Match</div><div class="gloss-def">Validation that Purchase Order, Goods Receipt, and Invoice agree on material, quantity, and price.</div></div>
+        <div class="gloss-card"><div class="gloss-term">Tolerance</div><div class="gloss-def">Acceptable deviation between PO and invoice (e.g. ±2% price, ±0% qty). Out-of-tolerance requires buyer review.</div></div>
+        <div class="gloss-card"><div class="gloss-term">REMADV</div><div class="gloss-def">Remittance Advice IDOC — payment notification sent to supplier after payment is processed, showing which invoices were paid.</div></div>
+        <div class="gloss-card"><div class="gloss-term">Invoice Dispute</div><div class="gloss-def">When supplier disagrees with a posted ERS invoice, or when an invoice fails matching. Managed via JD's dispute workflow.</div></div>
+        <div class="gloss-card"><div class="gloss-term">Payment Terms</div><div class="gloss-def">Agreed payment timeline (e.g. Net 30, 2/10 Net 30). Captured in SAP and displayed in JD for supplier visibility.</div></div>
+        <div class="gloss-card"><div class="gloss-term">Straight-Through Rate</div><div class="gloss-def">Percentage of invoices that pass 3-way match and are auto-approved without human intervention. Target: 90%+.</div></div>
+        <div class="gloss-card"><div class="gloss-term">Archiving</div><div class="gloss-def">Legal requirement in many countries to retain invoice data for 7–10 years. JD supports compliant digital archiving.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="container">
+      <div class="sec-label">Business Value</div>
+      <h2 class="sec-title">Pain Points Electronic Invoicing Solves</h2>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="pain-problem">⚠ "Processing paper/PDF invoices takes 15+ days and costs €15–25 each"</div>
+          <div class="pain-solution">Electronic invoicing via JD reduces processing time to 1–3 days and cost to under €3 per invoice — with automated 3-way matching for straight-through processing.</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-problem">⚠ "Suppliers invoice wrong quantities or prices — staff spend hours investigating"</div>
+          <div class="pain-solution">JD validates every invoice against PO and GR before it reaches SAP. Mismatches are flagged immediately with clear error detail and routed for correction.</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-problem">⚠ "With ERS, suppliers have no visibility into invoices created on their behalf"</div>
+          <div class="pain-solution">JD shows all ERS invoices in the supplier portal with full detail — suppliers verify, flag disputes, and track resolution status in real time.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="container">
+      <div class="sec-label">Benchmarks</div>
+      <h2 class="sec-title">Traditional vs Electronic Invoicing</h2>
+      <div class="chart-wrap">
+        <canvas id="invChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="container">
+      <div class="sec-label">Knowledge Check</div>
+      <h2 class="sec-title">Chapter 6 Quiz</h2>
+      <div class="quiz-wrap">
+        <div id="quiz-container">
+          <div class="quiz-header"><span id="quiz-progress" class="quiz-progress">Question 1 of 5</span></div>
+          <div id="quiz-q" class="quiz-q"></div>
+          <div id="quiz-options" class="quiz-options"></div>
+          <div id="quiz-explanation" class="quiz-explanation"></div>
+          <div class="quiz-nav">
+            <button class="quiz-btn secondary" id="quiz-prev" onclick="quizNav(-1)" style="display:none">← Prev</button>
+            <button class="quiz-btn primary" id="quiz-next" onclick="quizNav(1)">Next →</button>
+          </div>
+        </div>
+        <div class="quiz-score" id="quiz-final">
+          <div class="score-num" id="final-score"></div>
+          <p id="final-msg"></p>
+          <button class="quiz-btn primary" style="margin-top:20px;" onclick="restartQuiz()">Retake</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="ch-nav">
+      <a href="ch5.html">← ASN</a>
+      <a href="index.html" class="home">⌂ Home</a>
+      <a href="ch7.html">Next: Sourcing &amp; eAuctions →</a>
+    </div>
+  </div>
+</main>
+
+<script>
+new Chart(document.getElementById('invChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: ['Processing Cost\n(€/invoice)', 'Processing Time\n(days)', 'Exception Rate\n(%)', 'Straight-Through\nRate (%)'],
+    datasets: [
+      { label: 'Traditional Paper', data: [22, 15, 25, 40], backgroundColor: '#8b95a5', borderRadius: 6 },
+      { label: 'JD Electronic', data: [3, 2, 4, 96], backgroundColor: '#00b4d8', borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#c9d1d9' } },
+      title: { display: true, text: 'Invoice Processing: Traditional vs JD Electronic', color: '#fff', font: { size: 14, weight: '700' }, padding: { bottom: 20 } }
+    },
+    scales: {
+      x: { ticks: { color: '#8b95a5', font: { size: 11 } }, grid: { color: '#1e2d4a' } },
+      y: { ticks: { color: '#8b95a5' }, grid: { color: '#1e2d4a' } }
+    }
+  }
+});
+
+const questions = [
+  { q: 'What is ERS (Evaluated Receipt Settlement)?', opts: ['An electronic reconciliation system for supplier statements', 'A self-billing model where the buyer generates the invoice based on goods receipt', 'An early payment discount program', 'An SAP report for invoice exceptions'], ans: 1, exp: 'ERS eliminates the need for suppliers to submit invoices. The buyer auto-creates the invoice when GR is posted, reducing admin for both sides.' },
+  { q: 'In 3-way matching, what three documents are compared?', opts: ['PO, Delivery Note, and Payment', 'Purchase Order, Goods Receipt, and Invoice', 'Contract, ASN, and Credit Note', 'Supplier Quote, PO, and GR'], ans: 1, exp: '3-way match ensures the invoice matches what was ordered (PO) and what was received (GR) in terms of material, quantity, and price.' },
+  { q: 'What is a Credit Note in electronic invoicing?', opts: ['A payment confirmation to the supplier', 'A positive invoice for additional services', 'A negative invoice used to correct overpayments, returns, or pricing errors', 'A type of payment reminder'], ans: 2, exp: 'Credit notes reduce the amount owed. Common reasons: price correction, goods returned, quality deduction.' },
+  { q: 'Which IDOC type is used for invoice exchange between JD and SAP?', opts: ['ORDERS', 'DESADV', 'DELFOR', 'INVOIC'], ans: 3, exp: 'INVOIC is the SAP IDOC type (and EDIFACT message) used for invoices flowing both ways — supplier submissions and ERS self-billing.' },
+  { q: 'What does REMADV communicate to the supplier?', opts: ['A request to submit a missing invoice', 'A notification that payment has been processed', 'A reminder of open purchase orders', 'A shipping instruction'], ans: 1, exp: 'REMADV (Remittance Advice) is sent after payment, telling the supplier which invoices were paid and for what amounts — closing the invoice-to-pay cycle.' }
+];
+let current = 0, answered = [];
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('quiz-progress').textContent = `Question ${current+1} of ${questions.length}`;
+  document.getElementById('quiz-q').textContent = q.q;
+  const opts = document.getElementById('quiz-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = o;
+    if (answered[current] !== undefined) {
+      if (i === q.ans) btn.classList.add('correct');
+      else if (i === answered[current] && answered[current] !== q.ans) btn.classList.add('wrong');
+      btn.disabled = true;
+    }
+    btn.onclick = () => { if (answered[current] === undefined) { answered[current] = i; renderQuestion(); } };
+    opts.appendChild(btn);
+  });
+  document.getElementById('quiz-explanation').textContent = q.exp;
+  document.getElementById('quiz-explanation').style.display = answered[current] !== undefined ? 'block' : 'none';
+  document.getElementById('quiz-prev').style.display = current > 0 ? 'inline-block' : 'none';
+  const next = document.getElementById('quiz-next');
+  next.textContent = current === questions.length - 1 ? 'See Results' : 'Next →';
+  next.disabled = answered[current] === undefined;
+  next.style.opacity = next.disabled ? '.5' : '1';
+}
+function quizNav(dir) {
+  if (dir === 1 && current === questions.length - 1) {
+    const score = answered.filter((a, i) => a === questions[i].ans).length;
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('quiz-final').style.display = 'block';
+    document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+    document.getElementById('final-msg').textContent = score >= 4 ? 'Excellent! Invoicing mastered.' : 'Keep reviewing and retake.';
+    return;
+  }
+  current = Math.max(0, Math.min(questions.length - 1, current + dir));
+  renderQuestion();
+}
+function restartQuiz() { current = 0; answered = []; document.getElementById('quiz-container').style.display = 'block'; document.getElementById('quiz-final').style.display = 'none'; renderQuestion(); }
+renderQuestion();
+</script>
+</body>
+</html>

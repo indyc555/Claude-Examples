@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 6: Invoice &amp; Payment Management | JAGGAER S2P Masterclass</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e1a;color:#c9d1d9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.7;overflow-x:hidden}
+a{color:#00b4d8;text-decoration:none}
+.container{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* ── Top Nav ── */
+.topnav{position:fixed;top:0;left:0;width:100%;height:60px;background:rgba(10,14,26,.92);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:999;border-bottom:1px solid #1e2d4a}
+.topnav-brand{font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:.02em}
+.topnav-brand span{color:#00b4d8}
+.topnav-chapters{display:flex;gap:10px}
+.ch-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;border:2px solid #1e2d4a;color:#6b7280;background:transparent;transition:.3s;text-decoration:none}
+.ch-dot.completed{background:#00b4d8;color:#fff;border-color:#00b4d8}
+.ch-dot.active{border-color:#00b4d8;color:#00b4d8;box-shadow:0 0 12px rgba(0,180,216,.35)}
+.ch-dot:hover{border-color:#00b4d8;color:#00b4d8}
+
+/* ── Hero ── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;background:radial-gradient(ellipse at 50% 0%,rgba(0,180,216,.10) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(16,185,129,.06) 0%,transparent 50%),#0a0e1a}
+.hero-chip{display:inline-block;padding:6px 18px;border:1px solid #00b4d8;border-radius:99px;font-size:.82rem;color:#00b4d8;letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:#00b4d8}
+.hero p{max-width:640px;margin:0 auto;font-size:1.12rem;color:#8b95a5}
+
+/* ── Section Pattern ── */
+.section{padding:100px 0}
+.section-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:#00b4d8;font-weight:700;margin-bottom:8px}
+.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:#fff;margin-bottom:14px;line-height:1.2}
+.section-desc{color:#8b95a5;font-size:1.05rem;max-width:700px;margin-bottom:40px}
+
+/* ── Cards ── */
+.card{background:#111827;border:1px solid #1e2d4a;border-radius:14px;padding:32px;margin-bottom:24px}
+.card h3{font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:10px}
+.card p{color:#8b95a5}
+
+/* ── Stat Cards ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:32px 0}
+.stat-card{background:#111827;border:1px solid #1e2d4a;border-radius:14px;padding:28px 20px;text-align:center}
+.stat-num{font-size:2.2rem;font-weight:900;color:#fff;line-height:1.1;margin-bottom:4px}
+.stat-num span{color:#00b4d8}
+.stat-label{font-size:.88rem;color:#8b95a5}
+
+/* ── Callout ── */
+.callout{border-left:4px solid #f59e0b;background:rgba(245,158,11,.06);padding:20px 24px;border-radius:0 12px 12px 0;margin:32px 0}
+.callout strong{color:#f59e0b}
+.callout p{margin:0;color:#c9d1d9}
+
+/* ── Tabs ── */
+.tab-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.pain-tab{padding:10px 22px;border-radius:10px;border:1px solid #1e2d4a;background:transparent;color:#8b95a5;font-size:.9rem;font-weight:600;cursor:pointer;transition:.25s;font-family:inherit}
+.pain-tab:hover{border-color:#00b4d8;color:#c9d1d9}
+.pain-tab.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Lifecycle Diagram ── */
+.lifecycle-track{display:flex;gap:0;margin:40px 0;flex-wrap:wrap;justify-content:center}
+.lc-step{flex:1;min-width:130px;position:relative;cursor:pointer;text-align:center;padding:20px 12px 28px;transition:.3s}
+.lc-step::after{content:'';position:absolute;top:36px;right:-10px;width:20px;height:2px;background:#1e2d4a}
+.lc-step:last-child::after{display:none}
+.lc-icon{width:48px;height:48px;border-radius:50%;background:#162032;border:2px solid #1e2d4a;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.1rem;transition:.3s}
+.lc-step.active .lc-icon,.lc-step:hover .lc-icon{border-color:#00b4d8;background:rgba(0,180,216,.12);box-shadow:0 0 16px rgba(0,180,216,.25)}
+.lc-step-label{font-size:.82rem;color:#8b95a5;font-weight:600;transition:.3s}
+.lc-step.active .lc-step-label,.lc-step:hover .lc-step-label{color:#00b4d8}
+.lc-detail{background:#111827;border:1px solid #1e2d4a;border-radius:14px;padding:28px 32px;margin-top:12px;min-height:120px}
+.lc-detail h4{color:#00b4d8;font-size:1.05rem;margin-bottom:8px}
+.lc-detail p{color:#8b95a5;font-size:.95rem}
+
+/* ── Three-Way Match Diagram ── */
+.match-diagram{display:flex;align-items:center;justify-content:center;gap:24px;margin:40px 0;flex-wrap:wrap}
+.match-node{background:#111827;border:2px solid #00b4d8;border-radius:14px;padding:24px 28px;text-align:center;min-width:180px}
+.match-node h4{color:#00b4d8;margin-bottom:4px}
+.match-node p{color:#8b95a5;font-size:.85rem}
+.match-arrow{color:#00b4d8;font-size:1.6rem;font-weight:700}
+
+/* ── Chart Wrapper ── */
+.chart-wrap{background:#111827;border:1px solid #1e2d4a;border-radius:14px;padding:28px;margin:28px 0}
+.chart-wrap h4{color:#fff;font-weight:700;margin-bottom:16px;font-size:1.05rem}
+.chart-box{position:relative;width:100%;max-width:600px;margin:0 auto}
+
+/* ── Fraud Cards ── */
+.fraud-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin:24px 0}
+.fraud-card{background:#111827;border:1px solid #1e2d4a;border-radius:14px;padding:24px}
+.fraud-card .fraud-icon{font-size:1.5rem;margin-bottom:10px}
+.fraud-card h4{color:#fff;font-weight:700;margin-bottom:6px}
+.fraud-card p{color:#8b95a5;font-size:.9rem}
+
+/* ── Radar Chart ── */
+.chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:28px 0}
+@media(max-width:700px){.chart-2col{grid-template-columns:1fr}}
+
+/* ── Scroll Animations ── */
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* ── Quiz ── */
+.quiz-section{padding:100px 0}
+.quiz-progress{height:6px;background:#1e2d4a;border-radius:99px;margin-bottom:28px;overflow:hidden}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,#00b4d8,#10b981);border-radius:99px;transition:width .4s ease}
+.quiz-card{background:#111827;border:1px solid #1e2d4a;border-radius:14px;padding:36px;min-height:320px}
+.quiz-q-num{font-size:.82rem;color:#00b4d8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.quiz-question{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:28px;line-height:1.5}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-opt{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:12px;border:1px solid #1e2d4a;cursor:pointer;transition:.25s;background:transparent}
+.quiz-opt:hover:not(.disabled){border-color:#00b4d8;background:rgba(0,180,216,.04)}
+.quiz-opt .letter{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;border:2px solid #1e2d4a;color:#6b7280;flex-shrink:0;transition:.25s}
+.quiz-opt .opt-text{color:#c9d1d9;font-size:.97rem}
+.quiz-opt.correct{border-color:#10b981;background:rgba(16,185,129,.08)}
+.quiz-opt.correct .letter{background:#10b981;border-color:#10b981;color:#fff}
+.quiz-opt.incorrect{border-color:#ef4444;background:rgba(239,68,68,.08)}
+.quiz-opt.incorrect .letter{background:#ef4444;border-color:#ef4444;color:#fff}
+.quiz-opt.dimmed{opacity:.45;pointer-events:none}
+.quiz-opt.disabled{pointer-events:none}
+.quiz-explanation{margin-top:20px;padding:18px 22px;background:rgba(0,180,216,.06);border-radius:12px;border:1px solid rgba(0,180,216,.15);display:none}
+.quiz-explanation p{color:#c9d1d9;font-size:.93rem}
+.quiz-explanation strong{color:#00b4d8}
+.quiz-nav{display:flex;justify-content:flex-end;margin-top:20px}
+.quiz-btn{padding:12px 32px;border-radius:10px;border:none;background:#00b4d8;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit;transition:.25s}
+.quiz-btn:hover{background:#0096b7}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Quiz Results ── */
+.quiz-results{text-align:center;padding:40px 20px}
+.score-circle{width:140px;height:140px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;border:6px solid #1e2d4a;position:relative}
+.score-circle .score-val{font-size:2.4rem;font-weight:900;color:#fff}
+.score-circle .score-of{font-size:.82rem;color:#8b95a5}
+.score-circle.excellent{border-color:#10b981}
+.score-circle.good{border-color:#00b4d8}
+.score-circle.needs-work{border-color:#f59e0b}
+.score-msg{font-size:1.1rem;color:#fff;font-weight:700;margin-bottom:8px}
+.score-sub{color:#8b95a5;margin-bottom:32px}
+.review-list{text-align:left;max-width:640px;margin:0 auto}
+.review-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #1e2d4a}
+.review-item .r-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.8rem;font-weight:700;color:#fff}
+.review-item .r-icon.r-correct{background:#10b981}
+.review-item .r-icon.r-wrong{background:#ef4444}
+.review-item .r-text{font-size:.93rem}
+.review-item .r-text .r-q{color:#fff;font-weight:600}
+.review-item .r-text .r-a{color:#8b95a5;font-size:.85rem;margin-top:2px}
+.quiz-restart{margin-top:28px}
+
+/* ── Responsive ── */
+@media(max-width:640px){.topnav{padding:0 16px}.topnav-brand{font-size:.88rem}.ch-dot{width:28px;height:28px;font-size:.72rem}.lifecycle-track{flex-direction:column;align-items:center}.lc-step::after{display:none}.match-diagram{flex-direction:column}.match-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<!-- ── Top Nav ── -->
+<nav class="topnav">
+  <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
+  <div class="topnav-chapters">
+    <a href="index.html" class="ch-dot completed">1</a>
+    <a href="chapter2.html" class="ch-dot completed">2</a>
+    <a href="chapter3.html" class="ch-dot completed">3</a>
+    <a href="chapter4.html" class="ch-dot completed">4</a>
+    <a href="chapter5.html" class="ch-dot completed">5</a>
+    <a href="chapter6.html" class="ch-dot active">6</a>
+    <a href="chapter7.html" class="ch-dot">7</a>
+    <a href="chapter8.html" class="ch-dot">8</a>
+    <a href="chapter9.html" class="ch-dot">9</a>
+  </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero" id="hero">
+  <div>
+    <div class="hero-chip">Chapter 6 of 9</div>
+    <h1>Invoice &amp; <em>Payment</em> Management</h1>
+    <p>Automate the last mile of procurement to capture every dollar of savings, accelerate cash flow, and prevent the fraud that costs enterprises billions each year.</p>
+  </div>
+</section>
+
+<!-- ══════════════ INVOICE LIFECYCLE ══════════════ -->
+<section class="section" id="lifecycle">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">The Invoice Lifecycle</div>
+      <div class="section-title">From Receipt to Payment in Six Steps</div>
+      <p class="section-desc">Manufacturing invoices are uniquely complex: partial deliveries, hundreds of line items, multi-currency transactions, and quality hold complications. Understanding each stage is critical.</p>
+    </div>
+
+    <div class="fade-in">
+      <div class="lifecycle-track" id="lcTrack">
+        <div class="lc-step active" data-step="0">
+          <div class="lc-icon">1</div>
+          <div class="lc-step-label">Invoice<br>Receipt</div>
+        </div>
+        <div class="lc-step" data-step="1">
+          <div class="lc-icon">2</div>
+          <div class="lc-step-label">Data<br>Capture</div>
+        </div>
+        <div class="lc-step" data-step="2">
+          <div class="lc-icon">3</div>
+          <div class="lc-step-label">Three-Way<br>Match</div>
+        </div>
+        <div class="lc-step" data-step="3">
+          <div class="lc-icon">4</div>
+          <div class="lc-step-label">Exception<br>Handling</div>
+        </div>
+        <div class="lc-step" data-step="4">
+          <div class="lc-icon">5</div>
+          <div class="lc-step-label">Approval<br>Workflow</div>
+        </div>
+        <div class="lc-step" data-step="5">
+          <div class="lc-icon">6</div>
+          <div class="lc-step-label">Payment<br>Execution</div>
+        </div>
+      </div>
+
+      <div class="lc-detail" id="lcDetail">
+        <h4 id="lcDetailTitle">1. Invoice Receipt</h4>
+        <p id="lcDetailText">Invoices arrive through multiple channels: EDI, email, supplier portals, or even paper/fax. In manufacturing, a single PO can generate dozens of partial invoices as shipments arrive over weeks. Jaggaer consolidates all channels into a single digital intake, eliminating the risk of lost or duplicated invoices.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ THREE-WAY MATCHING ══════════════ -->
+<section class="section" id="matching">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Three-Way Matching Deep-Dive</div>
+      <div class="section-title">The Core Engine That Prevents Overpayment</div>
+      <p class="section-desc">Three-way matching compares three critical documents to ensure you only pay for what you ordered and actually received, at the price you agreed upon.</p>
+    </div>
+
+    <div class="fade-in">
+      <div class="match-diagram">
+        <div class="match-node">
+          <h4>Invoice</h4>
+          <p>Supplier's bill with<br>line items &amp; amounts</p>
+        </div>
+        <div class="match-arrow">&harr;</div>
+        <div class="match-node">
+          <h4>Purchase Order</h4>
+          <p>Agreed quantities,<br>prices &amp; terms</p>
+        </div>
+        <div class="match-arrow">&harr;</div>
+        <div class="match-node">
+          <h4>Goods Receipt Note</h4>
+          <p>What was actually<br>received &amp; inspected</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="card">
+        <h3>What Gets Matched</h3>
+        <p><strong style="color:#00b4d8">Quantity:</strong> Does the invoiced quantity match what was ordered and received?<br>
+        <strong style="color:#10b981">Price:</strong> Does the unit price match the PO terms? Are there unexpected surcharges?<br>
+        <strong style="color:#f59e0b">Terms:</strong> Do payment terms, currency, and tax calculations align?<br>
+        <strong style="color:#ef4444">Line Items:</strong> Do all line items on the invoice correspond to PO lines and receipt lines?</p>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="card">
+        <h3>Tolerance Thresholds</h3>
+        <p>Not every minor variance should trigger an exception. Organizations set tolerance thresholds &mdash; typically 1&ndash;3% for price variances and +/- 5% for quantity variances. Invoices within tolerance auto-approve; those outside get routed for review. In manufacturing, tolerances must account for yield loss, packaging rounding, and weight-based billing.</p>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="callout">
+        <p><strong>Manufacturing Complexity:</strong> Partial shipments mean one PO might generate 5&ndash;15 invoices over weeks. Backorders, quality holds, and rejected lots add further matching challenges. Without automation, AP teams spend hours reconciling these manually.</p>
+      </div>
+    </div>
+
+    <div class="stat-grid fade-in">
+      <div class="stat-card">
+        <div class="stat-num"><span>2&ndash;5%</span></div>
+        <div class="stat-label">Overpayments prevented by three-way matching</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">$<span>20K&ndash;50K</span></div>
+        <div class="stat-label">Saved per $1M in supplier spend</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>85%</span></div>
+        <div class="stat-label">Auto-match rate with quality data</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ AP AUTOMATION IMPACT ══════════════ -->
+<section class="section" id="ap-automation">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">AP Automation Impact</div>
+      <div class="section-title">The Numbers That Justify the Investment</div>
+      <p class="section-desc">Accounts payable automation delivers some of the most measurable ROI in all of enterprise software. The improvements are dramatic and fast.</p>
+    </div>
+
+    <div class="chart-2col fade-in">
+      <div class="chart-wrap">
+        <h4>Manual vs. Automated AP Processing</h4>
+        <div class="chart-box"><canvas id="chartManualVsAuto"></canvas></div>
+      </div>
+      <div class="chart-wrap">
+        <h4>Where AP Staff Time Goes (Manual)</h4>
+        <div class="chart-box"><canvas id="chartTimeAlloc"></canvas></div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="callout">
+        <p><strong>ROI Spotlight:</strong> Organizations deploying AP automation see an average <strong style="color:#10b981">240% ROI</strong>, typically recouped within <strong>6&ndash;9 months</strong>. For a $1B manufacturer processing 50,000+ invoices annually, the savings exceed $1M per year in processing costs alone.</p>
+      </div>
+    </div>
+
+    <div class="stat-grid fade-in">
+      <div class="stat-card">
+        <div class="stat-num">$<span>2.78</span></div>
+        <div class="stat-label">Best-in-class cost per invoice</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>80%</span></div>
+        <div class="stat-label">Cost reduction vs. manual</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>95%</span></div>
+        <div class="stat-label">On-time payment rate achieved</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ DYNAMIC DISCOUNTING ══════════════ -->
+<section class="section" id="discounting">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Dynamic Discounting &amp; Early Payment</div>
+      <div class="section-title">Turn Payables Into a Profit Center</div>
+      <p class="section-desc">Early payment discounts are the procurement team's secret weapon &mdash; but only if invoices are processed fast enough to capture them.</p>
+    </div>
+
+    <div class="fade-in">
+      <div class="card">
+        <h3>How 2/10 Net 30 Works</h3>
+        <p>The supplier offers a <strong style="color:#10b981">2% discount</strong> if you pay within <strong>10 days</strong>, otherwise the full amount is due in <strong>30 days</strong>. On a $100,000 invoice, that is $2,000 saved &mdash; simply for paying 20 days early.</p>
+        <div style="display:flex;gap:20px;margin-top:20px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px;padding:20px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;text-align:center">
+            <div style="font-size:1.6rem;font-weight:900;color:#ef4444">20+ days</div>
+            <div style="font-size:.85rem;color:#8b95a5;margin-top:4px">Manual processing time</div>
+            <div style="font-size:.82rem;color:#ef4444;margin-top:6px">Discount window missed</div>
+          </div>
+          <div style="flex:1;min-width:200px;padding:20px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:12px;text-align:center">
+            <div style="font-size:1.6rem;font-weight:900;color:#10b981">3&ndash;4 days</div>
+            <div style="font-size:.85rem;color:#8b95a5;margin-top:4px">Automated processing time</div>
+            <div style="font-size:.82rem;color:#10b981;margin-top:6px">6&ndash;7 days to capture discount</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="chart-wrap">
+        <h4>Annualized Return on Early Payment Discounts</h4>
+        <div class="chart-box"><canvas id="chartDiscount"></canvas></div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="card">
+        <h3>Supply Chain Financing Options</h3>
+        <p>Beyond static early-pay discounts, dynamic discounting platforms allow buyers and suppliers to negotiate sliding-scale discounts based on payment timing. Supply chain financing (reverse factoring) lets a third-party finance provider pay the supplier early while the buyer pays on standard terms &mdash; a win-win that strengthens the supply chain without impacting working capital.</p>
+      </div>
+    </div>
+
+    <div class="callout fade-in">
+      <p><strong>$1B Manufacturer Impact:</strong> Capturing just 1% in early payment discounts across your spend base equals <strong style="color:#10b981">$6&ndash;8M annually</strong> in direct bottom-line savings. This often exceeds the total cost of the AP automation platform.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAYMENT FRAUD ══════════════ -->
+<section class="section" id="fraud">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Payment Fraud Prevention</div>
+      <div class="section-title">Defending the Treasury Against Growing Threats</div>
+      <p class="section-desc">79% of companies were targets of payment fraud in 2024. Automation is the most effective defense against increasingly sophisticated attacks.</p>
+    </div>
+
+    <div class="stat-grid fade-in">
+      <div class="stat-card">
+        <div class="stat-num"><span>79%</span></div>
+        <div class="stat-label">Companies targeted by payment fraud (2024)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">$<span>2.7B</span></div>
+        <div class="stat-label">Lost to business email compromise annually</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>1&ndash;3%</span></div>
+        <div class="stat-label">Of invoices are duplicates in manual processes</div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div class="tab-bar" id="fraudTabs">
+        <button class="pain-tab active" data-fraud="0">Invoice Fraud</button>
+        <button class="pain-tab" data-fraud="1">BEC Attacks</button>
+        <button class="pain-tab" data-fraud="2">Duplicate Payments</button>
+        <button class="pain-tab" data-fraud="3">Ghost Vendors</button>
+      </div>
+
+      <div class="tab-panel active" data-fraud-panel="0">
+        <div class="card">
+          <h3>Invoice Fraud</h3>
+          <p>Fraudsters submit fake invoices for goods or services never delivered, often mimicking real vendor names and formats. In large AP departments processing thousands of invoices, these can easily slip through manual review.</p>
+          <p style="margin-top:12px"><strong style="color:#10b981">How Automation Helps:</strong> AI-powered invoice validation cross-references every invoice against POs, contracts, and vendor master data. Any invoice without a matching PO or from an unverified vendor is automatically flagged and quarantined for investigation.</p>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-fraud-panel="1">
+        <div class="card">
+          <h3>Business Email Compromise (BEC)</h3>
+          <p>Sophisticated attackers impersonate executives or vendors via email, requesting urgent wire transfers or bank account changes. BEC attacks cost organizations $2.7B annually and are the #1 financial cybercrime.</p>
+          <p style="margin-top:12px"><strong style="color:#10b981">How Automation Helps:</strong> Automated systems enforce multi-level approval workflows for bank detail changes, require dual authorization for large payments, and flag unusual patterns. Vendor bank account verification prevents misdirected payments even if an email is compromised.</p>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-fraud-panel="2">
+        <div class="card">
+          <h3>Duplicate Payments</h3>
+          <p>The same invoice gets paid twice &mdash; once from the original and once from a copy or resubmission. This is often accidental but can also be intentional fraud. Duplicate payments account for 1&ndash;3% of all invoices in manual AP processes.</p>
+          <p style="margin-top:12px"><strong style="color:#10b981">How Automation Helps:</strong> AI duplicate detection scans invoice numbers, amounts, dates, and vendor details across the entire payment history. Even slight variations (INV-001 vs INV001) are caught through fuzzy matching algorithms.</p>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-fraud-panel="3">
+        <div class="card">
+          <h3>Ghost Vendors</h3>
+          <p>Fraudulent vendor accounts are created in the master data &mdash; often by insiders &mdash; to siphon payments to fictitious companies. These "ghost vendors" may share addresses, bank accounts, or phone numbers with employees.</p>
+          <p style="margin-top:12px"><strong style="color:#10b981">How Automation Helps:</strong> Vendor verification workflows require tax ID validation, bank account confirmation, and conflict-of-interest screening. AI continuously monitors the vendor master for suspicious patterns: vendors with employee addresses, dormant vendors suddenly receiving payments, or vendors with no business activity history.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ COMPETITIVE COMPARISON ══════════════ -->
+<section class="section" id="competitive">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Competitive Comparison</div>
+      <div class="section-title">Invoice &amp; Payment Capabilities</div>
+      <p class="section-desc">How Jaggaer, SAP Ariba, and Coupa stack up on invoice and payment management for manufacturers.</p>
+    </div>
+
+    <div class="chart-wrap fade-in">
+      <h4>Invoice &amp; Payment Capabilities Radar</h4>
+      <div class="chart-box"><canvas id="chartRadar"></canvas></div>
+    </div>
+
+    <div class="fade-in">
+      <div class="card">
+        <h3>Key Takeaway</h3>
+        <p><strong style="color:#00b4d8">Coupa</strong> has invested heavily in invoice management AI and dynamic discounting, leading in several categories. <strong style="color:#10b981">Jaggaer</strong> leads decisively on supplier portal capabilities &mdash; critical for manufacturing where close supplier collaboration on invoicing reduces exceptions by 40&ndash;60%. <strong style="color:#f59e0b">SAP Ariba</strong> offers solid payment automation leveraging its massive network.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section class="quiz-section" id="quiz">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Knowledge Check</div>
+      <div class="section-title">Chapter 6 Quiz</div>
+      <p class="section-desc">Test your understanding of invoice and payment management concepts.</p>
+    </div>
+
+    <div class="quiz-progress fade-in"><div class="quiz-progress-fill" id="quizProgress" style="width:10%"></div></div>
+    <div class="quiz-card fade-in" id="quizCard">
+      <!-- Quiz content injected by JS -->
+    </div>
+  </div>
+</section>
+
+<div style="height:80px"></div>
+
+<script>
+/* ── Chart Defaults ── */
+Chart.defaults.color='#6b7280';
+Chart.defaults.borderColor='#1e2d4a';
+
+/* ── Scroll Fade-In ── */
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+/* ── Lifecycle Interactive ── */
+const lcData=[
+  {title:'1. Invoice Receipt',text:'Invoices arrive through multiple channels: EDI, email, supplier portals, or even paper/fax. In manufacturing, a single PO can generate dozens of partial invoices as shipments arrive over weeks. Jaggaer consolidates all channels into a single digital intake, eliminating the risk of lost or duplicated invoices.'},
+  {title:'2. Data Capture',text:'OCR and AI extract header and line-item data from invoices, regardless of format. For manufacturing, this includes part numbers, lot codes, unit-of-measure conversions, and tax calculations across jurisdictions. AI models trained on your invoice patterns achieve 95%+ straight-through extraction accuracy.'},
+  {title:'3. Three-Way Match',text:'The extracted invoice data is automatically compared against the Purchase Order and Goods Receipt Note. The system checks quantities, prices, terms, and line items. Matches within configurable tolerance thresholds are auto-approved; exceptions are routed for human review.'},
+  {title:'4. Exception Handling',text:'When a mismatch is found (price variance, quantity discrepancy, missing GRN), the system creates a structured exception workflow. In manufacturing, common exceptions include partial shipment variances, quality hold adjustments, and engineering change order price impacts. AI suggests resolutions based on historical patterns.'},
+  {title:'5. Approval Workflow',text:'Invoices requiring approval are routed based on configurable rules: amount thresholds, cost centers, exception types, or commodity categories. Mobile approvals and delegation rules ensure invoices never sit in queues. Average approval cycle drops from 5 days to under 24 hours.'},
+  {title:'6. Payment Execution',text:'Approved invoices are scheduled for payment based on optimal timing: capturing early-pay discounts where available, otherwise paying on the latest date within terms. Payment methods (ACH, wire, virtual card, check) are selected to maximize rebates and minimize costs. Full remittance data is transmitted to suppliers automatically.'}
+];
+const lcTrack=document.getElementById('lcTrack');
+const lcTitle=document.getElementById('lcDetailTitle');
+const lcText=document.getElementById('lcDetailText');
+lcTrack.addEventListener('click',e=>{
+  const step=e.target.closest('.lc-step');
+  if(!step)return;
+  const i=parseInt(step.dataset.step);
+  document.querySelectorAll('.lc-step').forEach(s=>s.classList.remove('active'));
+  step.classList.add('active');
+  lcTitle.textContent=lcData[i].title;
+  lcText.textContent=lcData[i].text;
+});
+
+/* ── Fraud Tabs ── */
+document.getElementById('fraudTabs').addEventListener('click',e=>{
+  const tab=e.target.closest('.pain-tab');
+  if(!tab)return;
+  const idx=tab.dataset.fraud;
+  document.querySelectorAll('#fraudTabs .pain-tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  document.querySelectorAll('[data-fraud-panel]').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[data-fraud-panel="${idx}"]`).classList.add('active');
+});
+
+/* ── Charts ── */
+/* Manual vs Automated */
+new Chart(document.getElementById('chartManualVsAuto'),{
+  type:'bar',
+  data:{
+    labels:['Cost per Invoice','Processing Days','Error Rate %','Invoices / Hour'],
+    datasets:[
+      {label:'Manual',data:[21,17.4,2,5],backgroundColor:'rgba(239,68,68,.7)',borderRadius:6},
+      {label:'Automated',data:[3,3.1,0.3,30],backgroundColor:'rgba(0,180,216,.7)',borderRadius:6}
+    ]
+  },
+  options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,grid:{color:'#1e2d4a'}},x:{grid:{display:false}}}}
+});
+
+/* Time Allocation */
+new Chart(document.getElementById('chartTimeAlloc'),{
+  type:'doughnut',
+  data:{
+    labels:['Data Entry','Matching','Exception Handling','Approvals'],
+    datasets:[{data:[40,25,20,15],backgroundColor:['#00b4d8','#10b981','#f59e0b','#ef4444'],borderWidth:0}]
+  },
+  options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+});
+
+/* Discount Annualized Returns */
+new Chart(document.getElementById('chartDiscount'),{
+  type:'bar',
+  data:{
+    labels:['1/10 Net 30','2/10 Net 30','3/10 Net 30','1/10 Net 60','2/10 Net 60'],
+    datasets:[{
+      label:'Annualized Return %',
+      data:[18.4,36.7,55.1,7.3,14.6],
+      backgroundColor:['rgba(0,180,216,.6)','rgba(16,185,129,.8)','rgba(16,185,129,.6)','rgba(245,158,11,.6)','rgba(245,158,11,.5)'],
+      borderRadius:6
+    }]
+  },
+  options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#1e2d4a'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}
+});
+
+/* Radar */
+new Chart(document.getElementById('chartRadar'),{
+  type:'radar',
+  data:{
+    labels:['Invoice Capture AI','Three-Way Matching','Dynamic Discounting','Payment Automation','Fraud Detection','Supplier Portal'],
+    datasets:[
+      {label:'Jaggaer',data:[82,88,78,80,82,90],borderColor:'#00b4d8',backgroundColor:'rgba(0,180,216,.10)',pointBackgroundColor:'#00b4d8'},
+      {label:'SAP Ariba',data:[78,82,80,85,78,72],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',pointBackgroundColor:'#f59e0b'},
+      {label:'Coupa',data:[90,85,88,86,84,76],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',pointBackgroundColor:'#10b981'}
+    ]
+  },
+  options:{responsive:true,scales:{r:{min:50,max:100,ticks:{stepSize:10,backdropColor:'transparent'},grid:{color:'#1e2d4a'},angleLines:{color:'#1e2d4a'},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom'}}}
+});
+
+/* ══════════════ QUIZ ENGINE ══════════════ */
+const quizData=[
+  {q:'What three documents are compared in three-way matching?',opts:['Invoice, Purchase Order, Shipping Label','Invoice, Purchase Order, Goods Receipt Note','Invoice, Contract, Bank Statement','Purchase Order, Goods Receipt Note, Payment Voucher'],correct:1,explain:'Three-way matching compares the Invoice, Purchase Order (PO), and Goods Receipt Note (GRN) to verify quantities, prices, and delivery before authorizing payment.'},
+  {q:'What is the typical cost range for processing an invoice manually vs. with automation?',opts:['$5\u201310 vs. $0.50\u20131','$12\u201330 vs. $1\u20135','$50\u2013100 vs. $10\u201320','$1\u20135 vs. $0.10\u20130.50'],correct:1,explain:'Manual invoice processing costs $12\u201330 per invoice on average, while automated processing reduces this to $1\u20135 per invoice \u2014 an 80%+ cost reduction.'},
+  {q:'What does the payment term "2/10 Net 30" mean?',opts:['2% interest charged after 10 days, due in 30','2% discount if paid within 10 days, full amount due in 30 days','Pay 2 installments over 10 to 30 days','2 invoices per 10 items, net 30 day settlement'],correct:1,explain:'"2/10 Net 30" means the buyer receives a 2% discount if payment is made within 10 days; otherwise, the full invoice amount is due in 30 days.'},
+  {q:'What is the average ROI from AP automation, and how quickly is it typically recouped?',opts:['100% ROI, 12\u201318 months','240% ROI, 6\u20139 months','50% ROI, 2\u20133 years','500% ROI, 3\u20134 months'],correct:1,explain:'AP automation delivers an average 240% ROI, typically recouped within 6\u20139 months through reduced processing costs, captured discounts, and eliminated errors.'},
+  {q:'What percentage of companies were payment fraud targets in 2024?',opts:['45%','62%','79%','91%'],correct:2,explain:'According to AFP research, 79% of companies reported being targets of payment fraud in 2024, making automated fraud prevention essential.'},
+  {q:'What is the best-in-class cost to process a single invoice?',opts:['$0.50','$2.78','$5.00','$10.00'],correct:1,explain:'Best-in-class organizations achieve an invoice processing cost of $2.78 per invoice, compared to $12\u201330 for fully manual processes.'},
+  {q:'Manual invoice processing typically takes how many days, making early payment discounts nearly impossible to capture?',opts:['5\u20137 days','10\u201315 days','20+ days','30+ days'],correct:2,explain:'Manual invoice processing averages 17\u201320+ days from receipt to payment-ready, which exceeds the typical 10-day early payment discount window.'},
+  {q:'What is the annualized return of a standard 2/10 Net 30 early payment discount?',opts:['~18.4%','~24.5%','~36.7%','~48.2%'],correct:2,explain:'A 2/10 Net 30 discount yields approximately 36.7% annualized return (2% earned for paying 20 days early, annualized over 365 days).'},
+  {q:'On-time payment rates improve from approximately what to what with AP automation?',opts:['50% to 75%','60% to 85%','70% to 95%','80% to 99%'],correct:2,explain:'AP automation improves on-time payment rates from roughly 70% (manual) to 95%+ through faster processing, automated scheduling, and elimination of queue bottlenecks.'},
+  {q:'Three-way matching prevents approximately what percentage of invoice value in overpayments?',opts:['0.1\u20130.5%','2\u20135%','10\u201315%','20\u201325%'],correct:1,explain:'Three-way matching prevents 2\u20135% of total invoice value from being overpaid, translating to $20K\u2013$50K saved per $1M in supplier spend.'}
+];
+
+let currentQ=0,score=0,answers=[];
+const quizCard=document.getElementById('quizCard');
+const quizProgress=document.getElementById('quizProgress');
+
+function renderQuestion(){
+  if(currentQ>=quizData.length){renderResults();return}
+  const q=quizData[currentQ];
+  const letters=['A','B','C','D'];
+  quizProgress.style.width=((currentQ+1)/quizData.length*100)+'%';
+  quizCard.innerHTML=`
+    <div class="quiz-q-num">Question ${currentQ+1} of ${quizData.length}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">${q.opts.map((o,i)=>`
+      <div class="quiz-opt" data-idx="${i}">
+        <div class="letter">${letters[i]}</div>
+        <div class="opt-text">${o}</div>
+      </div>`).join('')}
+    </div>
+    <div class="quiz-explanation" id="quizExplain"><p></p></div>
+    <div class="quiz-nav"><button class="quiz-btn" id="quizNext" style="display:none">Next &rarr;</button></div>`;
+  quizCard.querySelectorAll('.quiz-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>handleAnswer(parseInt(opt.dataset.idx)));
+  });
+}
+
+function handleAnswer(idx){
+  const q=quizData[currentQ];
+  const opts=quizCard.querySelectorAll('.quiz-opt');
+  const isCorrect=idx===q.correct;
+  if(isCorrect)score++;
+  answers.push({qIdx:currentQ,selected:idx,correct:isCorrect});
+  opts.forEach((o,i)=>{
+    o.classList.add('disabled');
+    if(i===q.correct)o.classList.add('correct');
+    else if(i===idx&&!isCorrect)o.classList.add('incorrect');
+    else o.classList.add('dimmed');
+  });
+  const explain=document.getElementById('quizExplain');
+  explain.innerHTML=`<p><strong>${isCorrect?'Correct!':'Incorrect.'}</strong> ${q.explain}</p>`;
+  explain.style.display='block';
+  const btn=document.getElementById('quizNext');
+  btn.style.display='inline-block';
+  btn.textContent=currentQ<quizData.length-1?'Next \u2192':'See Results';
+  btn.addEventListener('click',()=>{currentQ++;renderQuestion()});
+}
+
+function renderResults(){
+  const pct=Math.round(score/quizData.length*100);
+  let cls='needs-work',msg='Keep studying!',sub='Review the chapter and try again.';
+  if(pct>=90){cls='excellent';msg='Outstanding!';sub='You have mastered Invoice & Payment Management.'}
+  else if(pct>=70){cls='good';msg='Great job!';sub='A few areas to revisit, but strong overall.'}
+  quizProgress.style.width='100%';
+  quizCard.innerHTML=`
+    <div class="quiz-results">
+      <div class="score-circle ${cls}"><div class="score-val">${score}/${quizData.length}</div><div class="score-of">${pct}%</div></div>
+      <div class="score-msg">${msg}</div>
+      <div class="score-sub">${sub}</div>
+      <div class="review-list">${answers.map((a,i)=>{
+        const qd=quizData[a.qIdx];
+        const letters=['A','B','C','D'];
+        return `<div class="review-item">
+          <div class="r-icon ${a.correct?'r-correct':'r-wrong'}">${a.correct?'\u2713':'\u2717'}</div>
+          <div class="r-text"><div class="r-q">Q${i+1}: ${qd.q}</div><div class="r-a">${a.correct?'Correct':'Your answer: '+qd.opts[a.selected]+' \u2014 Correct: '+qd.opts[qd.correct]}</div></div>
+        </div>`}).join('')}
+      </div>
+      <button class="quiz-btn quiz-restart" onclick="currentQ=0;score=0;answers=[];renderQuestion()">Restart Quiz</button>
+    </div>`;
+}
+renderQuestion();
+</script>
+</body>
+</html>

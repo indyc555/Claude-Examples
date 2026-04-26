@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Apps</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #07071a;
+      color: #e8eaf6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+    h1 {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #4fc3f7, #66bb6a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: #7986cb;
+      font-size: 14px;
+      letter-spacing: 1px;
+      margin-bottom: 48px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+    }
+    a.card {
+      display: block;
+      background: #0d0d2b;
+      border: 1px solid #1c1c4a;
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .18s, border-color .18s, box-shadow .18s;
+    }
+    a.card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.4);
+    }
+    a.card.blue:hover  { border-color: #4fc3f7; box-shadow: 0 12px 40px rgba(79,195,247,.15); }
+    a.card.orange:hover { border-color: #ffa726; box-shadow: 0 12px 40px rgba(255,167,38,.15); }
+    a.card.green:hover  { border-color: #66bb6a; box-shadow: 0 12px 40px rgba(102,187,106,.15); }
+    .icon { font-size: 40px; margin-bottom: 16px; }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card-title.blue   { color: #4fc3f7; }
+    .card-title.orange { color: #ffa726; }
+    .card-title.green  { color: #66bb6a; }
+    .card-desc { font-size: 13px; color: #7986cb; line-height: 1.6; }
+    .tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .tag.blue   { background: rgba(79,195,247,.12);  color: #4fc3f7;  border: 1px solid rgba(79,195,247,.3);  }
+    .tag.orange { background: rgba(255,167,38,.12);  color: #ffa726;  border: 1px solid rgba(255,167,38,.3);  }
+    .tag.green  { background: rgba(102,187,106,.12); color: #66bb6a;  border: 1px solid rgba(102,187,106,.3); }
+    @media (max-width: 480px) { h1 { font-size: 26px; } }
+  </style>
+</head>
+<body>
+  <h1>MY APPS</h1>
+  <p class="subtitle">Click an app to open it</p>
+  <div class="grid">
+
+    <a class="card blue" href="WorkoutLog/">
+      <div class="icon">🏋️</div>
+      <div class="card-title blue">Iron Log</div>
+      <div class="card-desc">Track your workout weights, view progress charts, and log sets &amp; reps per session.</div>
+      <div class="tag blue">Workout Tracker</div>
+    </a>
+
+    <a class="card orange" href="S2PMasterclass/">
+      <div class="icon">📘</div>
+      <div class="card-title orange">Jaggaer S2P Masterclass</div>
+      <div class="card-desc">9-chapter deep-dive into Source-to-Pay: spend analysis, sourcing, supplier management, and more.</div>
+      <div class="tag orange">9 Chapters</div>
+    </a>
+
+    <a class="card green" href="JaggaerDirect/">
+      <div class="icon">🔗</div>
+      <div class="card-title green">Jaggaer Direct Training</div>
+      <div class="card-desc">8-chapter training on Jaggaer Direct: PO management, VMI, ASN, invoicing, sourcing, and eProcurement.</div>
+      <div class="tag green">8 Chapters</div>
+    </a>
+
+  </div>
+</body>
+</html>

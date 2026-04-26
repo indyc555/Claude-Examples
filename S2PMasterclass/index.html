@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaggaer S2P Masterclass | Chapter 1</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+      background:#0a0e1a;color:#c9d1d9;line-height:1.7;
+    }
+    a{color:#58a6ff;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* ===== NAVIGATION ===== */
+    .topnav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      background:rgba(10,14,26,.92);backdrop-filter:blur(12px);
+      border-bottom:1px solid #1e2d4a;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 32px;height:60px;
+    }
+    .topnav-brand{font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-.02em}
+    .topnav-brand span{color:#00b4d8}
+    .topnav-chapters{display:flex;gap:6px;align-items:center}
+    .ch-dot{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.75rem;font-weight:700;
+      background:#1a2240;color:#4a5568;border:2px solid #2a3558;
+      cursor:default;transition:all .3s;
+    }
+    .ch-dot.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+    .ch-dot.completed{background:#10b981;color:#fff;border-color:#10b981}
+
+    /* ===== HERO ===== */
+    .hero{
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;
+      padding:100px 24px 60px;
+      background:linear-gradient(180deg,#0a0e1a 0%,#0d1b2a 50%,#0a0e1a 100%);
+      position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);
+      width:600px;height:600px;border-radius:50%;
+      background:radial-gradient(circle,rgba(0,180,216,.08) 0%,transparent 70%);
+    }
+    .hero-badge{
+      display:inline-block;padding:6px 18px;border-radius:20px;
+      font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.25);
+      margin-bottom:20px;
+    }
+    .hero h1{
+      font-size:clamp(2rem,5vw,3.4rem);font-weight:900;color:#fff;
+      line-height:1.15;max-width:800px;margin-bottom:16px;letter-spacing:-.03em;
+    }
+    .hero h1 em{font-style:normal;color:#00b4d8}
+    .hero-sub{
+      font-size:1.15rem;color:#8b95a5;max-width:640px;margin-bottom:40px;line-height:1.7;
+    }
+    .hero-cta{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:16px 40px;border-radius:12px;font-size:1.05rem;font-weight:700;
+      background:linear-gradient(135deg,#00b4d8,#0077b6);color:#fff;
+      border:none;cursor:pointer;transition:transform .15s,box-shadow .3s;
+      box-shadow:0 4px 24px rgba(0,180,216,.25);
+    }
+    .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,180,216,.35)}
+
+    /* ===== LAYOUT ===== */
+    .container{max-width:960px;margin:0 auto;padding:0 24px}
+    section{padding:80px 0}
+    .section-label{
+      font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:#00b4d8;margin-bottom:8px;
+    }
+    .section-title{
+      font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:#fff;
+      margin-bottom:16px;line-height:1.25;letter-spacing:-.02em;
+    }
+    .section-desc{color:#8b95a5;max-width:640px;margin-bottom:40px;font-size:1.05rem}
+    .divider{border:none;border-top:1px solid #1e2d4a;margin:0}
+
+    /* ===== COURSE OUTLINE ===== */
+    .outline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .outline-card{
+      padding:24px;border-radius:14px;
+      background:#111827;border:1px solid #1e2d4a;
+      transition:border-color .3s,transform .2s;position:relative;overflow:hidden;
+    }
+    .outline-card:hover{border-color:#00b4d8;transform:translateY(-2px)}
+    .outline-card.current{border-color:#00b4d8;background:#0d1f35}
+    .outline-card.current::after{
+      content:'NOW';position:absolute;top:12px;right:12px;
+      font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:10px;
+      background:#00b4d8;color:#fff;letter-spacing:.06em;
+    }
+    .outline-num{
+      font-size:.75rem;font-weight:700;color:#4a5568;margin-bottom:8px;
+      letter-spacing:.08em;text-transform:uppercase;
+    }
+    .outline-card h3{font-size:1rem;font-weight:700;color:#e2e8f0;margin-bottom:6px}
+    .outline-card p{font-size:.85rem;color:#6b7280;line-height:1.5}
+
+    /* ===== S2P WORKFLOW DIAGRAM ===== */
+    .workflow-wrapper{overflow-x:auto;padding:20px 0}
+    .workflow{
+      display:flex;align-items:stretch;gap:0;min-width:800px;position:relative;
+    }
+    .wf-phase{flex:1;position:relative}
+    .wf-phase-label{
+      text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.1em;
+      text-transform:uppercase;padding:8px;border-radius:8px 8px 0 0;color:#fff;
+    }
+    .wf-phase:nth-child(1) .wf-phase-label{background:#0077b6}
+    .wf-phase:nth-child(2) .wf-phase-label{background:#00b4d8}
+    .wf-phase:nth-child(3) .wf-phase-label{background:#10b981}
+    .wf-steps{
+      display:flex;flex-direction:column;gap:6px;padding:12px 8px;
+      background:#111827;border:1px solid #1e2d4a;border-top:none;
+      border-radius:0 0 8px 8px;min-height:200px;
+    }
+    .wf-step{
+      padding:10px 12px;border-radius:8px;font-size:.82rem;font-weight:600;
+      color:#c9d1d9;background:#1a2240;border:1px solid transparent;
+      cursor:pointer;transition:all .2s;text-align:center;
+    }
+    .wf-step:hover{border-color:#00b4d8;background:#0d1f35}
+    .wf-step.active{border-color:#00b4d8;background:#0d1f35;color:#fff}
+    .wf-arrow{
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.4rem;color:#2a3558;padding:0 2px;align-self:center;
+    }
+    .wf-detail{
+      margin-top:24px;padding:24px;border-radius:14px;
+      background:#111827;border:1px solid #1e2d4a;
+      display:none;
+    }
+    .wf-detail.visible{display:block}
+    .wf-detail h4{color:#00b4d8;font-size:1rem;margin-bottom:8px}
+    .wf-detail p{font-size:.92rem;color:#8b95a5;line-height:1.7}
+    .wf-detail .tag{
+      display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;
+      font-weight:700;margin-right:6px;margin-top:8px;
+    }
+    .tag-direct{background:rgba(0,119,182,.2);color:#00b4d8}
+    .tag-indirect{background:rgba(16,185,129,.2);color:#10b981}
+    .tag-both{background:rgba(139,92,246,.2);color:#a78bfa}
+
+    /* ===== STATS CARDS ===== */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+    .stat-card{
+      text-align:center;padding:28px 16px;border-radius:14px;
+      background:#111827;border:1px solid #1e2d4a;
+    }
+    .stat-num{font-size:2.2rem;font-weight:900;color:#fff;line-height:1}
+    .stat-num span{color:#00b4d8}
+    .stat-label{font-size:.85rem;color:#6b7280;margin-top:6px}
+
+    /* ===== CHARTS ===== */
+    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px}
+    @media(max-width:700px){.chart-grid{grid-template-columns:1fr}}
+    .chart-box{
+      padding:24px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;
+    }
+    .chart-box h4{font-size:.95rem;font-weight:700;color:#e2e8f0;margin-bottom:16px}
+    .chart-box canvas{width:100%!important;max-height:280px}
+
+    /* ===== PAIN POINTS ===== */
+    .pain-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+    .pain-tab{
+      padding:10px 20px;border-radius:10px;font-size:.88rem;font-weight:600;
+      background:#1a2240;color:#6b7280;border:1px solid #2a3558;
+      cursor:pointer;transition:all .2s;
+    }
+    .pain-tab:hover{color:#c9d1d9;border-color:#3a4568}
+    .pain-tab.active{background:#00b4d8;color:#fff;border-color:#00b4d8}
+    .pain-content{
+      padding:28px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;
+    }
+    .pain-content h4{color:#fff;font-size:1.1rem;margin-bottom:12px}
+    .pain-content ul{padding-left:20px}
+    .pain-content li{margin-bottom:8px;color:#8b95a5;font-size:.95rem}
+    .pain-content li strong{color:#e2e8f0}
+    .pain-metric{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:700;
+      background:rgba(239,68,68,.12);color:#f87171;margin-top:12px;
+    }
+
+    /* ===== COMPETITOR PREVIEW ===== */
+    .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    @media(max-width:700px){.comp-grid{grid-template-columns:1fr}}
+    .comp-card{
+      padding:28px 24px;border-radius:14px;background:#111827;
+      border:1px solid #1e2d4a;text-align:center;transition:border-color .3s;
+    }
+    .comp-card:hover{border-color:#3a4568}
+    .comp-card.highlight{border-color:#00b4d8;background:#0d1f35}
+    .comp-logo{
+      font-size:1.6rem;font-weight:900;margin-bottom:8px;letter-spacing:-.02em;
+    }
+    .comp-card:nth-child(1) .comp-logo{color:#00b4d8}
+    .comp-card:nth-child(2) .comp-logo{color:#f59e0b}
+    .comp-card:nth-child(3) .comp-logo{color:#ef4444}
+    .comp-card .comp-type{font-size:.8rem;color:#6b7280;margin-bottom:12px}
+    .comp-card ul{text-align:left;padding-left:18px;list-style:none}
+    .comp-card li{font-size:.85rem;color:#8b95a5;margin-bottom:6px;position:relative;padding-left:14px}
+    .comp-card li::before{content:'>';position:absolute;left:0;color:#4a5568;font-weight:700}
+
+    /* ===== MANUFACTURING CALLOUT ===== */
+    .callout{
+      padding:28px 32px;border-radius:14px;border-left:4px solid #f59e0b;
+      background:rgba(245,158,11,.06);margin:40px 0;
+    }
+    .callout h4{color:#f59e0b;font-size:1.05rem;margin-bottom:8px}
+    .callout p{color:#8b95a5;font-size:.95rem}
+
+    /* ===== VIDEO LINKS ===== */
+    .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:24px}
+    .video-card{
+      padding:20px;border-radius:14px;background:#111827;border:1px solid #1e2d4a;
+      transition:border-color .3s;
+    }
+    .video-card:hover{border-color:#00b4d8}
+    .video-card .vid-icon{font-size:1.5rem;margin-bottom:8px}
+    .video-card h4{font-size:.95rem;color:#e2e8f0;margin-bottom:4px}
+    .video-card p{font-size:.82rem;color:#6b7280;margin-bottom:10px}
+    .video-card a{font-size:.85rem;font-weight:600}
+
+    /* ===== QUIZ ===== */
+    .quiz-wrapper{max-width:720px;margin:0 auto}
+    .quiz-progress{
+      height:6px;background:#1e2d4a;border-radius:3px;margin-bottom:28px;overflow:hidden;
+    }
+    .quiz-progress-fill{height:100%;background:#00b4d8;border-radius:3px;transition:width .4s}
+    .quiz-card{
+      padding:36px;border-radius:16px;background:#111827;border:1px solid #1e2d4a;
+    }
+    .quiz-qnum{font-size:.8rem;font-weight:700;color:#4a5568;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px}
+    .quiz-qtext{font-size:1.15rem;font-weight:700;color:#fff;line-height:1.5;margin-bottom:24px}
+    .quiz-options{display:flex;flex-direction:column;gap:10px}
+    .quiz-opt{
+      display:flex;align-items:center;gap:14px;
+      padding:16px 20px;border-radius:10px;font-size:.95rem;
+      background:#0a0e1a;border:2px solid #1e2d4a;
+      cursor:pointer;transition:all .2s;color:#c9d1d9;
+    }
+    .quiz-opt:hover{border-color:#3a4568;background:#131b30}
+    .quiz-opt.selected{border-color:#00b4d8;background:#0d1f35}
+    .quiz-opt.correct{border-color:#10b981;background:rgba(16,185,129,.1);cursor:default}
+    .quiz-opt.incorrect{border-color:#ef4444;background:rgba(239,68,68,.08);cursor:default}
+    .quiz-opt.dimmed{opacity:.4;cursor:default}
+    .quiz-letter{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:.82rem;flex-shrink:0;
+      background:#1e2d4a;color:#6b7280;
+    }
+    .quiz-opt.selected .quiz-letter{background:#00b4d8;color:#fff}
+    .quiz-opt.correct .quiz-letter{background:#10b981;color:#fff}
+    .quiz-opt.incorrect .quiz-letter{background:#ef4444;color:#fff}
+    .quiz-explanation{
+      margin-top:20px;padding:16px 20px;border-radius:10px;
+      background:#0a0e1a;border-left:4px solid #00b4d8;
+      font-size:.92rem;color:#8b95a5;line-height:1.7;display:none;
+    }
+    .quiz-explanation.visible{display:block}
+    .quiz-nav{display:flex;justify-content:flex-end;margin-top:20px}
+    .quiz-btn{
+      padding:12px 32px;border-radius:10px;font-size:.95rem;font-weight:700;
+      background:#00b4d8;color:#fff;border:none;cursor:pointer;
+      transition:background .2s;display:none;
+    }
+    .quiz-btn.visible{display:inline-block}
+    .quiz-btn:hover{background:#0096b7}
+
+    /* Quiz Results */
+    .quiz-results{text-align:center;padding:48px 32px}
+    .qr-circle{
+      width:130px;height:130px;border-radius:50%;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      margin:0 auto 24px;border:5px solid #1e2d4a;
+    }
+    .qr-circle.perfect{border-color:#10b981}
+    .qr-circle.great{border-color:#00b4d8}
+    .qr-circle.ok{border-color:#f59e0b}
+    .qr-circle.low{border-color:#ef4444}
+    .qr-score{font-size:2.2rem;font-weight:900;color:#fff}
+    .qr-label{font-size:.75rem;color:#4a5568;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .quiz-results h3{color:#fff;font-size:1.3rem;margin-bottom:6px}
+    .quiz-results p{color:#6b7280;margin-bottom:28px}
+    .qr-review{text-align:left;margin-top:28px;display:flex;flex-direction:column;gap:12px}
+    .qr-item{padding:16px;border-radius:10px;background:#0a0e1a;border:1px solid #1e2d4a}
+    .qr-item .qr-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .qr-item .qr-tag.c{color:#10b981}
+    .qr-item .qr-tag.w{color:#ef4444}
+    .qr-item .qr-q{font-weight:600;color:#e2e8f0;font-size:.92rem;margin-bottom:4px}
+    .qr-item .qr-d{font-size:.85rem;color:#6b7280}
+    .btn-restart{
+      padding:12px 28px;border-radius:10px;font-size:.9rem;font-weight:700;
+      background:#1e2d4a;color:#c9d1d9;border:none;cursor:pointer;
+      transition:background .2s;margin-right:10px;
+    }
+    .btn-restart:hover{background:#2a3558}
+
+    /* ===== FOOTER ===== */
+    footer{
+      text-align:center;padding:40px 24px;color:#4a5568;font-size:.82rem;
+      border-top:1px solid #1e2d4a;
+    }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
+    .fade-in.visible{opacity:1;transform:translateY(0)}
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:600px){
+      .topnav{padding:0 16px}
+      section{padding:48px 0}
+      .chart-grid{grid-template-columns:1fr}
+      .comp-grid{grid-template-columns:1fr}
+      .quiz-card{padding:24px 18px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAVIGATION -->
+<nav class="topnav">
+  <div class="topnav-brand"><span>JAGGAER</span> S2P Masterclass</div>
+  <div class="topnav-chapters">
+    <a href="index.html" class="ch-dot active" style="text-decoration:none;color:inherit">1</a>
+    <a href="chapter2.html" class="ch-dot" style="text-decoration:none;color:inherit">2</a>
+    <a href="chapter3.html" class="ch-dot" style="text-decoration:none;color:inherit">3</a>
+    <a href="chapter4.html" class="ch-dot" style="text-decoration:none;color:inherit">4</a>
+    <a href="chapter5.html" class="ch-dot" style="text-decoration:none;color:inherit">5</a>
+    <a href="chapter6.html" class="ch-dot" style="text-decoration:none;color:inherit">6</a>
+    <a href="chapter7.html" class="ch-dot" style="text-decoration:none;color:inherit">7</a>
+    <a href="chapter8.html" class="ch-dot" style="text-decoration:none;color:inherit">8</a><a href="chapter9.html" class="ch-dot" style="text-decoration:none;color:inherit">9</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-badge">Chapter 1 of 9</div>
+  <h1>The Source-to-Pay Landscape for <em>Enterprise Manufacturing</em></h1>
+  <p class="hero-sub">
+    A CMO's strategic guide to understanding procurement workflows, customer pain points,
+    and how Jaggaer competes in the $1B+ manufacturing space.
+  </p>
+  <button class="hero-cta" onclick="document.getElementById('outline').scrollIntoView({behavior:'smooth'})">
+    Begin Learning &#8595;
+  </button>
+</section>
+
+<hr class="divider">
+
+<!-- COURSE OUTLINE -->
+<section id="outline">
+  <div class="container fade-in">
+    <div class="section-label">Your Learning Path</div>
+    <div class="section-title">8 Chapters to S2P Mastery</div>
+    <p class="section-desc">Each chapter builds on the last. Complete the quiz at the end of every chapter to unlock the next.</p>
+    <div class="outline-grid">
+      <div class="outline-card current">
+        <div class="outline-num">Chapter 1</div>
+        <h3>The S2P Landscape</h3>
+        <p>What Source-to-Pay is, why it matters for $1B+ manufacturers, and who the key players are.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 2</div>
+        <h3>Spend Analysis &amp; Category Strategy</h3>
+        <p>Classifying direct vs. indirect spend, building category strategies, and leveraging data.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 3</div>
+        <h3>Strategic Sourcing</h3>
+        <p>RFx processes, e-auctions, supplier evaluation, and manufacturing-specific sourcing.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 4</div>
+        <h3>Supplier Management &amp; Risk</h3>
+        <p>Scorecards, multi-tier visibility, onboarding, quality management, and risk mitigation.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 5</div>
+        <h3>Procure-to-Pay Execution</h3>
+        <p>Requisitions, POs, guided buying, goods receipt, and manufacturing JIT workflows.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 6</div>
+        <h3>Invoice &amp; Payment Management</h3>
+        <p>Three-way matching, AP automation, dynamic discounting, and payment fraud prevention.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 7</div>
+        <h3>Competitive Deep-Dive</h3>
+        <p>Jaggaer vs. SAP Ariba vs. Coupa — features, pricing, strengths, and blind spots.</p>
+      </div>
+      <div class="outline-card">
+        <div class="outline-num">Chapter 8</div>
+        <h3>Analytics &amp; Continuous Improvement</h3>
+        <p>KPIs, dashboards, AI-driven insights, and building your S2P transformation roadmap.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHAT IS S2P -->
+<section id="what-is-s2p">
+  <div class="container fade-in">
+    <div class="section-label">The Foundation</div>
+    <div class="section-title">What Is Source-to-Pay?</div>
+    <p class="section-desc">
+      Source-to-Pay (S2P) is the end-to-end process that covers everything from finding and qualifying
+      suppliers to making final payment. For a $1B+ manufacturer, this process governs
+      <strong style="color:#fff">60&ndash;70% of total costs</strong>.
+    </p>
+
+    <!-- Interactive Workflow Diagram -->
+    <div class="workflow-wrapper">
+      <div class="workflow">
+        <div class="wf-phase">
+          <div class="wf-phase-label">Source-to-Contract</div>
+          <div class="wf-steps">
+            <div class="wf-step" data-detail="spend" onclick="showWfDetail(this,'spend')">Spend Analysis</div>
+            <div class="wf-step" data-detail="sourcing" onclick="showWfDetail(this,'sourcing')">Strategic Sourcing</div>
+            <div class="wf-step" data-detail="supplier" onclick="showWfDetail(this,'supplier')">Supplier Evaluation</div>
+            <div class="wf-step" data-detail="contract" onclick="showWfDetail(this,'contract')">Contract Negotiation</div>
+            <div class="wf-step" data-detail="onboard" onclick="showWfDetail(this,'onboard')">Supplier Onboarding</div>
+          </div>
+        </div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase">
+          <div class="wf-phase-label">Procure-to-Pay</div>
+          <div class="wf-steps">
+            <div class="wf-step" data-detail="req" onclick="showWfDetail(this,'req')">Requisition &amp; Approval</div>
+            <div class="wf-step" data-detail="po" onclick="showWfDetail(this,'po')">Purchase Orders</div>
+            <div class="wf-step" data-detail="receive" onclick="showWfDetail(this,'receive')">Goods Receipt &amp; QA</div>
+            <div class="wf-step" data-detail="invoice" onclick="showWfDetail(this,'invoice')">Invoice Matching</div>
+            <div class="wf-step" data-detail="payment" onclick="showWfDetail(this,'payment')">Payment Processing</div>
+          </div>
+        </div>
+        <div class="wf-arrow">&#9654;</div>
+        <div class="wf-phase">
+          <div class="wf-phase-label">Manage &amp; Optimize</div>
+          <div class="wf-steps">
+            <div class="wf-step" data-detail="perf" onclick="showWfDetail(this,'perf')">Supplier Performance</div>
+            <div class="wf-step" data-detail="clm" onclick="showWfDetail(this,'clm')">Contract Lifecycle</div>
+            <div class="wf-step" data-detail="analytics" onclick="showWfDetail(this,'analytics')">Spend Analytics</div>
+            <div class="wf-step" data-detail="risk" onclick="showWfDetail(this,'risk')">Risk Monitoring</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;color:#4a5568;font-size:.82rem;margin-top:8px">Click any step to see details</p>
+
+    <div class="wf-detail" id="wf-detail-box">
+      <h4 id="wf-detail-title"></h4>
+      <p id="wf-detail-text"></p>
+      <div id="wf-detail-tags"></div>
+    </div>
+
+    <div class="callout">
+      <h4>Manufacturing Spotlight</h4>
+      <p>
+        In manufacturing, S2P is mission-critical. A single missing component can halt an entire production line.
+        Unlike services companies, manufacturers must manage <strong>Bills of Materials (BOMs)</strong>,
+        <strong>quality inspections at receiving</strong>, <strong>MRP-driven demand signals</strong>, and
+        <strong>JIT delivery windows</strong> &mdash; all tightly integrated with ERP systems like SAP, Oracle, or Infor.
+        Over 450,000 electronic components reached end-of-life in 2023 alone, making BOM accuracy a constant battle.
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHY IT MATTERS -->
+<section id="why-it-matters">
+  <div class="container fade-in">
+    <div class="section-label">The Business Case</div>
+    <div class="section-title">Why S2P Matters for $1B+ Manufacturers</div>
+    <p class="section-desc">
+      Procurement is not a back-office function &mdash; it is the largest controllable cost in manufacturing.
+      Here's what the data says.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">60-70<span>%</span></div>
+        <div class="stat-label">of manufacturing costs go to procurement</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><span>$</span>12-30</div>
+        <div class="stat-label">cost to manually process one invoice</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">9<span>%</span></div>
+        <div class="stat-label">of revenue lost to poor contract management</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">82<span>%</span></div>
+        <div class="stat-label">of CPOs regret their S2P platform choice</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h4>Manufacturing Spend Breakdown</h4>
+        <canvas id="chart-spend"></canvas>
+      </div>
+      <div class="chart-box">
+        <h4>Manual vs. Automated Processing</h4>
+        <canvas id="chart-manual-vs-auto"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h4>S2P Automation Impact on Key Metrics</h4>
+        <canvas id="chart-impact"></canvas>
+      </div>
+      <div class="chart-box">
+        <h4>Where Savings Hide: Cost Reduction Opportunities</h4>
+        <canvas id="chart-savings"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PAIN POINTS -->
+<section id="pain-points">
+  <div class="container fade-in">
+    <div class="section-label">Customer Challenges</div>
+    <div class="section-title">The 6 Pain Points Keeping Procurement Leaders Up at Night</div>
+    <p class="section-desc">
+      These are the real-world problems your customers face daily. Understanding them is the foundation
+      of every marketing message, case study, and campaign you'll build.
+    </p>
+
+    <div class="pain-tabs" id="pain-tabs">
+      <div class="pain-tab active" onclick="showPain(0,this)">Maverick Spend</div>
+      <div class="pain-tab" onclick="showPain(1,this)">Supplier Risk</div>
+      <div class="pain-tab" onclick="showPain(2,this)">Invoice Chaos</div>
+      <div class="pain-tab" onclick="showPain(3,this)">Direct Materials</div>
+      <div class="pain-tab" onclick="showPain(4,this)">Tail Spend</div>
+      <div class="pain-tab" onclick="showPain(5,this)">Contract Leakage</div>
+    </div>
+    <div class="pain-content" id="pain-content"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DIRECT VS INDIRECT -->
+<section id="direct-indirect">
+  <div class="container fade-in">
+    <div class="section-label">Know the Difference</div>
+    <div class="section-title">Direct vs. Indirect Spend in Manufacturing</div>
+    <p class="section-desc">
+      Your marketing messages must speak differently to direct materials buyers and indirect procurement teams.
+      They have fundamentally different workflows, pain points, and success metrics.
+    </p>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h4>Direct Spend Characteristics</h4>
+        <ul style="padding-left:18px;list-style:none">
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#00b4d8;font-weight:700">&#9654;</span> <strong style="color:#e2e8f0">60-80%</strong> of total manufacturing spend</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#00b4d8;font-weight:700">&#9654;</span> High-value, low-transaction-count purchases tied to production</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#00b4d8;font-weight:700">&#9654;</span> Requires <strong style="color:#e2e8f0">BOM integration</strong>, engineering specs, quality inspections</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#00b4d8;font-weight:700">&#9654;</span> <strong style="color:#e2e8f0">Switching costs are very high</strong> &mdash; requalification, testing, production risk</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#00b4d8;font-weight:700">&#9654;</span> Driven by MRP demand signals and JIT delivery schedules</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#00b4d8;font-weight:700">&#9654;</span> Raw materials price volatility (steel, copper, plastics) is a constant concern</li>
+        </ul>
+      </div>
+      <div class="chart-box">
+        <h4>Indirect Spend Characteristics</h4>
+        <ul style="padding-left:18px;list-style:none">
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#10b981;font-weight:700">&#9654;</span> <strong style="color:#e2e8f0">20-40%</strong> of total spend, but <strong style="color:#e2e8f0">80% of transactions</strong></li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#10b981;font-weight:700">&#9654;</span> High-volume, low-value: office supplies, MRO, IT, travel, services</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#10b981;font-weight:700">&#9654;</span> <strong style="color:#e2e8f0">Decentralized</strong> &mdash; HR, IT, marketing, facilities all buy independently</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#10b981;font-weight:700">&#9654;</span> <strong style="color:#e2e8f0">29% is off-contract</strong> (maverick buying)</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#10b981;font-weight:700">&#9654;</span> MRO is critical: unavailable spare parts can halt production lines</li>
+          <li style="margin-bottom:10px;color:#8b95a5;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#10b981;font-weight:700">&#9654;</span> Catalog management and guided buying are key to controlling spend</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h4>Why This Matters for Marketing</h4>
+      <p>
+        When selling to a VP of Direct Procurement at a $2B automotive manufacturer, talk about
+        <strong>BOM accuracy, supplier quality scorecards, and commodity price hedging</strong>.
+        When selling to a CPO managing indirect spend, talk about
+        <strong>maverick spend reduction, guided buying adoption rates, and tail spend visibility</strong>.
+        Same platform &mdash; completely different value propositions.
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- COMPETITOR OVERVIEW -->
+<section id="competitors">
+  <div class="container fade-in">
+    <div class="section-label">Know Your Battlefield</div>
+    <div class="section-title">The Big Three: Jaggaer vs. Ariba vs. Coupa</div>
+    <p class="section-desc">
+      A preview of the competitive landscape. Chapter 7 goes deep &mdash; here's the positioning at a glance.
+    </p>
+
+    <div class="comp-grid">
+      <div class="comp-card highlight">
+        <div class="comp-logo">JAGGAER</div>
+        <div class="comp-type">Best for: Complex Manufacturing &amp; Direct Materials</div>
+        <ul>
+          <li>Strongest direct materials procurement capabilities</li>
+          <li>Deep manufacturing ERP integrations (SAP, Oracle, Infor)</li>
+          <li>Purpose-built for complex supply chains</li>
+          <li>Superior supplier collaboration tools</li>
+          <li>AI-powered contract analytics (GenAI chatbot)</li>
+          <li>Formerly SciQuest; acquired by Vista Equity 2024</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-logo">SAP Ariba</div>
+        <div class="comp-type">Best for: SAP-Centric Enterprises</div>
+        <ul>
+          <li>Largest B2B network (5.5M+ connected companies)</li>
+          <li>Seamless SAP S/4HANA integration</li>
+          <li>Strong indirect procurement and catalog management</li>
+          <li>Weaker on direct materials sourcing depth</li>
+          <li>Complex implementation; long time-to-value</li>
+          <li>Premium pricing tied to SAP ecosystem</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-logo">Coupa</div>
+        <div class="comp-type">Best for: Spend Management &amp; User Experience</div>
+        <ul>
+          <li>Industry-leading user experience and adoption rates</li>
+          <li>Community intelligence benchmarking (AI-driven)</li>
+          <li>Strong BSM (Business Spend Management) vision</li>
+          <li>Best-in-class tail spend and invoice management</li>
+          <li>Weaker on complex direct materials workflows</li>
+          <li>Acquired by Thoma Bravo 2023 ($8B)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="chart-grid" style="margin-top:32px">
+      <div class="chart-box" style="grid-column:1/-1">
+        <h4>Competitive Positioning: Manufacturing Capability Comparison</h4>
+        <canvas id="chart-compete"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- RESOURCES & VIDEOS -->
+<section id="resources">
+  <div class="container fade-in">
+    <div class="section-label">Go Deeper</div>
+    <div class="section-title">Videos &amp; Resources</div>
+    <p class="section-desc">
+      Explore product demos, thought leadership, and analyst resources from Jaggaer and the procurement industry.
+    </p>
+
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="vid-icon">&#9654;&#65039;</div>
+        <h4>Jaggaer One Platform Overview</h4>
+        <p>Official product demo of the unified S2P platform and its key modules.</p>
+        <a href="https://www.jaggaer.com/resources/" target="_blank" rel="noopener">Visit Jaggaer Resources &#8599;</a>
+      </div>
+      <div class="video-card">
+        <div class="vid-icon">&#9654;&#65039;</div>
+        <h4>Jaggaer Direct Procurement</h4>
+        <p>How Jaggaer handles direct materials sourcing, BOM management, and supplier collaboration.</p>
+        <a href="https://www.jaggaer.com/solutions/direct-procurement/" target="_blank" rel="noopener">Explore Direct Procurement &#8599;</a>
+      </div>
+      <div class="video-card">
+        <div class="vid-icon">&#9654;&#65039;</div>
+        <h4>Jaggaer Supplier Management</h4>
+        <p>Supplier lifecycle management, risk assessment, performance scorecards, and onboarding.</p>
+        <a href="https://www.jaggaer.com/solutions/supplier-management/" target="_blank" rel="noopener">Explore Supplier Mgmt &#8599;</a>
+      </div>
+      <div class="video-card">
+        <div class="vid-icon">&#128218;</div>
+        <h4>Gartner S2P Magic Quadrant</h4>
+        <p>Industry analyst view of S2P platform positioning for enterprise procurement leaders.</p>
+        <a href="https://www.gartner.com/reviews/market/source-to-pay-suites" target="_blank" rel="noopener">Read Gartner Reviews &#8599;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CHAPTER 1 QUIZ -->
+<section id="quiz">
+  <div class="container fade-in">
+    <div class="section-label">Test Your Knowledge</div>
+    <div class="section-title">Chapter 1 Quiz</div>
+    <p class="section-desc">
+      10 questions covering everything in this chapter. Score 70% or higher to advance to Chapter 2.
+    </p>
+
+    <div class="quiz-wrapper">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="qz-progress"></div></div>
+      <div class="quiz-card" id="qz-card"></div>
+      <div class="quiz-nav">
+        <button class="quiz-btn" id="qz-next" onclick="qzNext()">Next</button>
+      </div>
+      <div id="qz-results" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    Jaggaer S2P Masterclass &mdash; Internal Training Tool &mdash; Chapter 1 of 9<br>
+    Built for the incoming CMO. Not for external distribution.
+  </div>
+</footer>
+
+<script>
+// ===== WORKFLOW DETAIL DATA =====
+const wfDetails = {
+  spend: {
+    title: 'Spend Analysis',
+    text: 'Aggregate and classify all historical spend data across business units. For a $1B manufacturer, this means analyzing hundreds of millions in purchases across thousands of suppliers. The goal: identify consolidation opportunities, off-contract spending, and category strategies for both direct materials (raw materials, components) and indirect spend (MRO, services, IT).',
+    tags: ['both']
+  },
+  sourcing: {
+    title: 'Strategic Sourcing (RFx)',
+    text: 'Run RFIs, RFPs, and RFQs with detailed engineering specifications. For direct materials, this includes engineering drawings, quality requirements, and capacity assessments. For indirect, leverage e-auctions to drive competitive pricing. Complex manufacturing RFx events can take 3-6 months from need identification to contract execution.',
+    tags: ['both']
+  },
+  supplier: {
+    title: 'Supplier Evaluation & Selection',
+    text: 'Score suppliers on Quality, Cost, Delivery, and Service (QCDS). For direct materials, this includes site audits, quality certifications (ISO, IATF 16949), and sub-tier supplier assessment. 95% of organizations have tier-1 visibility, but only 42% can see tier-2 and beyond — a critical gap for manufacturing.',
+    tags: ['direct']
+  },
+  contract: {
+    title: 'Contract Negotiation & Execution',
+    text: 'Negotiate pricing, payment terms (Net 30/60/90), delivery schedules, quality specs, and penalty clauses. For volatile commodities (steel, copper, plastics), contracts must include price adjustment mechanisms tied to market indices. Organizations lose 9% of annual revenue from poor contract management.',
+    tags: ['both']
+  },
+  onboard: {
+    title: 'Supplier Onboarding',
+    text: 'Register suppliers in procurement systems, set up catalogs, establish EDI/API connections, and verify compliance. This is the #1 reason CPOs switch S2P platforms — 82% experience buyer\'s remorse due to poor supplier onboarding. Effective onboarding can boost production efficiency by 30%.',
+    tags: ['both']
+  },
+  req: {
+    title: 'Requisition & Approval',
+    text: 'For direct materials, MRP automatically generates requisitions based on production schedules and BOMs. For indirect, employees use guided buying through approved catalogs. Best practice: tiered approval thresholds with auto-escalation — a $60 cable shouldn\'t follow the same path as a $60K renewal.',
+    tags: ['both']
+  },
+  po: {
+    title: 'Purchase Orders',
+    text: 'Convert approved requisitions to POs and dispatch electronically. For JIT manufacturing, use blanket POs with scheduled releases against production demand. The average PO processing cost is $429 manually — automation cuts this by 50%+. Order acknowledgment and delivery tracking are critical for production scheduling.',
+    tags: ['both']
+  },
+  receive: {
+    title: 'Goods Receipt & Quality Assurance',
+    text: 'Confirm delivery against PO specifications. For direct materials, this includes incoming quality inspection — sampling, testing, and certification verification per the quality plan. Partial receipts, damaged goods, and rejected materials must be documented. This generates the Goods Receipt Note (GRN) needed for three-way matching.',
+    tags: ['direct']
+  },
+  invoice: {
+    title: 'Three-Way Invoice Matching',
+    text: 'Match supplier invoices against POs and goods receipts for quantity, price, and terms. Manual processing costs $12-30 per invoice; automated processing costs $1-5. Best-in-class: 3.1 days end-to-end vs. 17.4 days for laggards. Three-way matching prevents 2-5% of invoice value in overpayments.',
+    tags: ['both']
+  },
+  payment: {
+    title: 'Payment Processing',
+    text: 'Schedule payments per agreed terms. Early payment discounts (e.g., 2/10 Net 30 = 2% off if paid within 10 days) require fast processing — manual takes 20+ days, making it impossible. Automation reduces this to 3-4 days. On-time payment rates jump from 70% to 95%, reducing vendor disputes by 40-60%.',
+    tags: ['both']
+  },
+  perf: {
+    title: 'Supplier Performance Management',
+    text: 'Regular scorecard reviews on Quality, Cost, Delivery, and Service. Target: 95%+ on-time delivery for critical materials, defect rates under 1%. Quarterly business reviews with strategic suppliers drive continuous improvement. Many teams still rely on spreadsheets — leading to reactive instead of proactive management.',
+    tags: ['direct']
+  },
+  clm: {
+    title: 'Contract Lifecycle Management',
+    text: 'Monitor compliance, track renewals, manage amendments. 88% of organizations cite missed renewal deadlines as a pain point. Without proactive alerts, companies auto-renew unfavorable contracts. Only 39% of procurement teams use AI-powered clause extraction — a growing capability in Jaggaer.',
+    tags: ['both']
+  },
+  analytics: {
+    title: 'Spend Analytics & Optimization',
+    text: 'Ongoing analysis to identify new savings opportunities. World-class procurement influences 93% of total spend vs. 64% average. AI-powered analytics improve spend visibility by 24.4% and overall savings by 8.1%. Benchmark against KPIs and industry standards to drive continuous improvement.',
+    tags: ['both']
+  },
+  risk: {
+    title: 'Risk Monitoring',
+    text: 'Monitor financial health, geopolitical exposure, and sub-tier dependencies. 82% of organizations are affected by tariffs. Supply chain cyber attacks surged 431% between 2021-2023. 45% of enterprises identify supplier-related disruptions as their top risk. Real-time monitoring is essential for manufacturing continuity.',
+    tags: ['both']
+  }
+};
+
+function showWfDetail(el, key) {
+  document.querySelectorAll('.wf-step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const d = wfDetails[key];
+  const box = document.getElementById('wf-detail-box');
+  document.getElementById('wf-detail-title').textContent = d.title;
+  document.getElementById('wf-detail-text').textContent = d.text;
+  const tagsEl = document.getElementById('wf-detail-tags');
+  tagsEl.innerHTML = d.tags.map(t => {
+    if (t === 'direct') return '<span class="tag tag-direct">Direct Materials</span>';
+    if (t === 'indirect') return '<span class="tag tag-indirect">Indirect Spend</span>';
+    return '<span class="tag tag-both">Direct & Indirect</span>';
+  }).join('');
+  box.classList.add('visible');
+}
+
+// ===== PAIN POINTS DATA =====
+const painData = [
+  {
+    title: 'Maverick Spending',
+    items: [
+      '<strong>5-16% of targeted savings</strong> are lost to maverick buying (The Hackett Group)',
+      'Up to <strong>80% of all invoices</strong> come from maverick purchases, even at large organizations with procurement departments',
+      '<strong>29% of indirect spend</strong> is off-contract. Non-mature organizations average 10% maverick spending; world-class achieve 5%',
+      '<strong>74% of organizations</strong> cite unapproved suppliers as their primary concern',
+      'Root causes: confusing P2P workflows, decentralized spending, perception that official channels are "too slow"',
+      '<strong>Jaggaer addresses this</strong> with guided buying, approved catalogs, and configurable approval workflows that make compliant purchasing the easiest path'
+    ],
+    metric: 'Impact: 5-16% of procurement savings evaporate'
+  },
+  {
+    title: 'Supplier Risk & Visibility',
+    items: [
+      '<strong>95% have tier-1 visibility</strong>, but only <strong>42% can see tier-2+</strong> suppliers',
+      '<strong>82% of organizations</strong> are affected by new tariffs, with 20-40% of supply chain activity impacted',
+      'Supply chain <strong>cyber attacks surged 431%</strong> between 2021-2023',
+      '<strong>45% of enterprises</strong> identify supplier-related disruptions as their top risk',
+      'A <strong>single 10-cent component</strong> shortage can halt millions in production revenue',
+      '<strong>Jaggaer addresses this</strong> with multi-tier supply chain mapping, real-time risk alerts, financial health monitoring, and geographic risk assessment'
+    ],
+    metric: 'Only 42% can see beyond tier-1 suppliers'
+  },
+  {
+    title: 'Invoice Processing Chaos',
+    items: [
+      'Manual invoice processing costs <strong>$12-30 per invoice</strong>; automated drops to $1-5',
+      'Manual processing takes <strong>17-21 days end-to-end</strong>, making early payment discounts impossible to capture',
+      'Best-in-class AP processes at <strong>$2.78 per invoice</strong> vs. $12.88 for others',
+      '<strong>3 in 4 companies</strong> experience late B2B payments impacting cash flow',
+      '<strong>79% of companies</strong> were targets of payment fraud in 2024',
+      '<strong>Jaggaer addresses this</strong> with automated three-way matching, AI-powered invoice capture, and dynamic discounting capabilities'
+    ],
+    metric: 'Manual: $12-30/invoice | Automated: $1-5/invoice'
+  },
+  {
+    title: 'Direct Materials Complexity',
+    items: [
+      '<strong>Even a single wrong digit</strong> in a part number causes wrong component orders, production delays, and excess inventory',
+      '<strong>450,000+ electronic components</strong> reached end-of-life in 2023, making BOMs outdated before designs are finished',
+      'Procurement teams need <strong>average supplier lead times in BOMs</strong> to plan material arrivals and optimize safety stock',
+      'Conflicting departmental priorities: <strong>engineering wants optimization, procurement wants cost cuts, production wants streamlined assembly</strong>',
+      'Quality issues from sourcing can <strong>stall production and erode customer trust</strong>',
+      '<strong>Jaggaer addresses this</strong> with deep BOM integration, supplier quality management, and direct materials sourcing designed specifically for manufacturing'
+    ],
+    metric: '60-80% of manufacturing spend is direct materials'
+  },
+  {
+    title: 'Tail Spend Proliferation',
+    items: [
+      'Tail spend represents <strong>~20% of total spend but 80% of transactions</strong>',
+      'MRO procurement is often a <strong>"dumping ground"</strong> for numerous subcategories with daily spot buys',
+      'Improving spend visibility can <strong>reduce indirect costs by up to 43%</strong> (The Hackett Group)',
+      '<strong>55% of organizations</strong> use decentralized procurement for indirect materials, creating fragmented spend',
+      'If spare parts are unavailable when machines fail, the <strong>entire manufacturing process stops</strong>',
+      '<strong>Jaggaer addresses this</strong> with comprehensive catalog management, punch-out to supplier sites, and AI-driven spend classification'
+    ],
+    metric: '20% of spend = 80% of transactions'
+  },
+  {
+    title: 'Contract Value Leakage',
+    items: [
+      'Organizations lose <strong>9% of annual revenue</strong> due to inefficient contract management (World Commerce & Contracting)',
+      '<strong>88% of organizations</strong> cite missed renewal deadlines as a significant pain point',
+      '<strong>62% of professionals</strong> report challenges related to regulatory compliance in contracts',
+      'Only <strong>39% of procurement teams</strong> are implementing AI-powered clause extraction',
+      'Manufacturing contracts include <strong>quality specs, delivery schedules, penalty clauses, and warranty provisions</strong> — all requiring active monitoring',
+      '<strong>Jaggaer addresses this</strong> with CLM including GenAI chatbot for contract Q&A, automated milestone tracking, and proactive renewal alerts'
+    ],
+    metric: '9% of revenue lost to poor contract management'
+  }
+];
+
+function showPain(idx, tabEl) {
+  document.querySelectorAll('.pain-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const d = painData[idx];
+  const el = document.getElementById('pain-content');
+  el.innerHTML = '<h4>' + d.title + '</h4><ul>' +
+    d.items.map(i => '<li>' + i + '</li>').join('') +
+    '</ul><div class="pain-metric">' + d.metric + '</div>';
+}
+showPain(0, document.querySelector('.pain-tab'));
+
+// ===== CHARTS =====
+const chartColors = {
+  blue: '#00b4d8',
+  darkBlue: '#0077b6',
+  green: '#10b981',
+  yellow: '#f59e0b',
+  red: '#ef4444',
+  purple: '#a78bfa',
+  gray: '#4a5568',
+  bg: '#111827'
+};
+
+Chart.defaults.color = '#6b7280';
+Chart.defaults.borderColor = '#1e2d4a';
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+
+// Spend Breakdown Doughnut
+new Chart(document.getElementById('chart-spend'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Direct Materials', 'Indirect / MRO', 'Services', 'Capital'],
+    datasets: [{
+      data: [65, 20, 10, 5],
+      backgroundColor: [chartColors.blue, chartColors.green, chartColors.yellow, chartColors.purple],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10 } }
+    }
+  }
+});
+
+// Manual vs Automated Bar
+new Chart(document.getElementById('chart-manual-vs-auto'), {
+  type: 'bar',
+  data: {
+    labels: ['Cost per Invoice', 'Processing Days', 'Error Rate (%)', 'On-Time Pay (%)'],
+    datasets: [
+      {
+        label: 'Manual',
+        data: [21, 17.4, 2, 70],
+        backgroundColor: chartColors.red + '99',
+        borderRadius: 6
+      },
+      {
+        label: 'Automated',
+        data: [3.5, 3.1, 0.3, 95],
+        backgroundColor: chartColors.green + '99',
+        borderRadius: 6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } },
+    scales: {
+      y: { grid: { color: '#1e2d4a' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Automation Impact Radar
+new Chart(document.getElementById('chart-impact'), {
+  type: 'radar',
+  data: {
+    labels: ['Invoice Speed', 'Spend Visibility', 'Compliance Rate', 'Savings Capture', 'Supplier On-Time', 'Error Reduction'],
+    datasets: [
+      {
+        label: 'Before Automation',
+        data: [30, 40, 55, 45, 70, 35],
+        borderColor: chartColors.red,
+        backgroundColor: chartColors.red + '15',
+        pointBackgroundColor: chartColors.red,
+        borderWidth: 2
+      },
+      {
+        label: 'After Automation',
+        data: [85, 80, 90, 78, 95, 90],
+        borderColor: chartColors.blue,
+        backgroundColor: chartColors.blue + '15',
+        pointBackgroundColor: chartColors.blue,
+        borderWidth: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } },
+    scales: {
+      r: {
+        beginAtZero: true, max: 100,
+        grid: { color: '#1e2d4a' },
+        angleLines: { color: '#1e2d4a' },
+        pointLabels: { font: { size: 11 } },
+        ticks: { display: false }
+      }
+    }
+  }
+});
+
+// Savings Opportunities Horizontal Bar
+new Chart(document.getElementById('chart-savings'), {
+  type: 'bar',
+  data: {
+    labels: ['Spend Visibility Improvement', 'Maverick Spend Reduction', 'Invoice Automation Savings', 'Contract Compliance Gains', 'Early Payment Discounts', 'Supplier Consolidation'],
+    datasets: [{
+      label: 'Potential Savings (%)',
+      data: [43, 16, 80, 10, 2, 12],
+      backgroundColor: [chartColors.blue, chartColors.green, chartColors.yellow, chartColors.purple, chartColors.red, chartColors.darkBlue],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1e2d4a' }, title: { display: true, text: '% Reduction / Improvement', color: '#6b7280' } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// Competitor Radar
+new Chart(document.getElementById('chart-compete'), {
+  type: 'radar',
+  data: {
+    labels: [
+      'Direct Materials',
+      'Indirect Procurement',
+      'Supplier Network Size',
+      'Manufacturing ERP Integration',
+      'User Experience',
+      'AI / Analytics',
+      'Supplier Collaboration',
+      'Implementation Speed'
+    ],
+    datasets: [
+      {
+        label: 'Jaggaer',
+        data: [92, 78, 70, 90, 72, 80, 88, 70],
+        borderColor: chartColors.blue,
+        backgroundColor: chartColors.blue + '15',
+        pointBackgroundColor: chartColors.blue,
+        borderWidth: 2
+      },
+      {
+        label: 'SAP Ariba',
+        data: [65, 85, 95, 80, 62, 75, 72, 55],
+        borderColor: chartColors.yellow,
+        backgroundColor: chartColors.yellow + '15',
+        pointBackgroundColor: chartColors.yellow,
+        borderWidth: 2
+      },
+      {
+        label: 'Coupa',
+        data: [55, 88, 75, 60, 92, 82, 70, 80],
+        borderColor: chartColors.red,
+        backgroundColor: chartColors.red + '15',
+        pointBackgroundColor: chartColors.red,
+        borderWidth: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } },
+    scales: {
+      r: {
+        beginAtZero: true, max: 100,
+        grid: { color: '#1e2d4a' },
+        angleLines: { color: '#1e2d4a' },
+        pointLabels: { font: { size: 11 } },
+        ticks: { display: false }
+      }
+    }
+  }
+});
+
+// ===== QUIZ =====
+const quizData = [
+  {
+    q: 'What percentage of total manufacturing costs typically goes to procurement?',
+    opts: ['20-30%', '40-50%', '60-70%', '80-90%'],
+    ans: 2,
+    explain: 'Procurement represents 60-70% of total manufacturing costs, making it the single largest controllable expense. This is why S2P optimization has such outsized impact on the bottom line.'
+  },
+  {
+    q: 'What does "S2P" stand for?',
+    opts: ['Supplier-to-Purchase', 'Source-to-Pay', 'Spend-to-Procure', 'Supply-to-Payment'],
+    ans: 1,
+    explain: 'Source-to-Pay (S2P) covers the entire lifecycle from finding and qualifying suppliers (source) through making final payment (pay). It encompasses both Source-to-Contract and Procure-to-Pay processes.'
+  },
+  {
+    q: 'What was Jaggaer formerly known as?',
+    opts: ['Aravo', 'SciQuest', 'Determine', 'BravoSolution'],
+    ans: 1,
+    explain: 'Jaggaer was formerly known as SciQuest, headquartered in Durham, North Carolina. The company was acquired by Vista Equity Partners in 2024.'
+  },
+  {
+    q: 'What percentage of CPOs report buyer\'s remorse after choosing their S2P platform?',
+    opts: ['42%', '58%', '72%', '82%'],
+    ans: 3,
+    explain: '82% of CPOs who switched S2P platforms experienced buyer\'s remorse, with inability to effectively onboard suppliers being the most common reason for switching.'
+  },
+  {
+    q: 'In manufacturing, what is the approximate split between direct and indirect spend?',
+    opts: ['50% direct / 50% indirect', '60-80% direct / 20-40% indirect', '40% direct / 60% indirect', '90% direct / 10% indirect'],
+    ans: 1,
+    explain: 'Direct materials represent 60-80% of total manufacturing spend (high-value, production-tied purchases), while indirect spend is 20-40% but accounts for 80% of all transactions.'
+  },
+  {
+    q: 'Which competitor has the largest B2B supplier network?',
+    opts: ['Jaggaer', 'SAP Ariba', 'Coupa', 'Oracle'],
+    ans: 1,
+    explain: 'SAP Ariba has the largest B2B network with 5.5M+ connected companies. This is a key competitive advantage for indirect procurement, though it doesn\'t necessarily translate to direct materials sourcing depth.'
+  },
+  {
+    q: 'What is "three-way matching" in procure-to-pay?',
+    opts: [
+      'Matching 3 supplier bids against each other',
+      'Comparing invoice against PO and goods receipt',
+      'Verifying 3 levels of approval authority',
+      'Cross-referencing 3 different ERP systems'
+    ],
+    ans: 1,
+    explain: 'Three-way matching compares the supplier invoice against the Purchase Order and the Goods Receipt Note to verify quantity, price, and terms match. This prevents overpayments and catches discrepancies — saving 2-5% of invoice value.'
+  },
+  {
+    q: 'How much does manual invoice processing cost per invoice vs. automated?',
+    opts: ['$1-2 manual vs. $0.50 automated', '$5-10 manual vs. $2-3 automated', '$12-30 manual vs. $1-5 automated', '$50-100 manual vs. $20-30 automated'],
+    ans: 2,
+    explain: 'Manual invoice processing costs $12-30 per invoice, while automated processing costs only $1-5. Best-in-class AP departments achieve $2.78 per invoice. This is a 75-90% cost reduction with immediate ROI.'
+  },
+  {
+    q: 'What percentage of organizations have visibility beyond tier-1 suppliers?',
+    opts: ['12%', '42%', '68%', '85%'],
+    ans: 1,
+    explain: '95% of organizations have tier-1 supplier visibility, but only 42% extend visibility to tier-2 or beyond. For manufacturers, this is a critical gap — a missing component anywhere in the supply chain can halt production.'
+  },
+  {
+    q: 'What is Jaggaer\'s primary competitive advantage vs. Ariba and Coupa?',
+    opts: [
+      'Largest supplier network',
+      'Lowest price point',
+      'Best user experience',
+      'Strongest direct materials and manufacturing procurement capabilities'
+    ],
+    ans: 3,
+    explain: 'Jaggaer\'s primary differentiation is its strength in complex manufacturing and direct materials procurement — deep BOM integration, supplier quality management, and manufacturing ERP integrations that Ariba and Coupa cannot match.'
+  }
+];
+
+const letters = ['A','B','C','D'];
+let qzIdx = 0, qzScore = 0, qzAnswered = false, qzUserAnswers = [];
+
+function renderQuiz() {
+  qzAnswered = false;
+  const q = quizData[qzIdx];
+  document.getElementById('qz-progress').style.width = (qzIdx / quizData.length * 100) + '%';
+  const card = document.getElementById('qz-card');
+  card.innerHTML = '<div class="quiz-qnum">Question ' + (qzIdx+1) + ' of ' + quizData.length + '</div>' +
+    '<div class="quiz-qtext">' + q.q + '</div>' +
+    '<div class="quiz-options" id="qz-opts">' +
+    q.opts.map((o,i) =>
+      '<div class="quiz-opt" onclick="qzSelect('+i+')">' +
+      '<span class="quiz-letter">' + letters[i] + '</span><span>' + o + '</span></div>'
+    ).join('') +
+    '</div>' +
+    '<div class="quiz-explanation" id="qz-explain">' + q.explain + '</div>';
+  document.getElementById('qz-next').classList.remove('visible');
+  document.getElementById('qz-results').style.display = 'none';
+}
+
+function qzSelect(idx) {
+  if (qzAnswered) return;
+  qzAnswered = true;
+  const q = quizData[qzIdx];
+  const correct = idx === q.ans;
+  if (correct) qzScore++;
+  qzUserAnswers.push({ selected: idx, correct: q.ans, isCorrect: correct });
+
+  const opts = document.querySelectorAll('#qz-opts .quiz-opt');
+  opts.forEach((o,i) => {
+    if (i === q.ans) o.classList.add('correct');
+    else if (i === idx && !correct) o.classList.add('incorrect');
+    else o.classList.add('dimmed');
+  });
+  document.getElementById('qz-explain').classList.add('visible');
+  const btn = document.getElementById('qz-next');
+  btn.textContent = qzIdx < quizData.length - 1 ? 'Next' : 'See Results';
+  btn.classList.add('visible');
+}
+
+function qzNext() {
+  qzIdx++;
+  if (qzIdx < quizData.length) {
+    renderQuiz();
+  } else {
+    document.getElementById('qz-card').style.display = 'none';
+    document.getElementById('qz-next').classList.remove('visible');
+    document.getElementById('qz-progress').style.width = '100%';
+    showQzResults();
+  }
+}
+
+function showQzResults() {
+  const pct = Math.round(qzScore / quizData.length * 100);
+  let grade, msg;
+  if (pct === 100) { grade = 'perfect'; msg = 'Perfect score! You\'re ready for Chapter 2.'; }
+  else if (pct >= 80) { grade = 'great'; msg = 'Excellent! Strong grasp of S2P fundamentals.'; }
+  else if (pct >= 70) { grade = 'ok'; msg = 'Good enough to proceed! Review the misses below.'; }
+  else { grade = 'low'; msg = 'Review the material above and try again before Chapter 2.'; }
+
+  let review = qzUserAnswers.map((ua, i) => {
+    const q = quizData[i];
+    const tagClass = ua.isCorrect ? 'c' : 'w';
+    const tagText = ua.isCorrect ? 'Correct' : 'Incorrect';
+    const detail = ua.isCorrect
+      ? 'You answered: ' + letters[ua.selected] + ') ' + q.opts[ua.selected]
+      : 'You answered: ' + letters[ua.selected] + ') ' + q.opts[ua.selected] +
+        ' — Correct: ' + letters[ua.correct] + ') ' + q.opts[ua.correct];
+    return '<div class="qr-item"><div class="qr-tag ' + tagClass + '">' + tagText + '</div>' +
+      '<div class="qr-q">' + (i+1) + '. ' + q.q + '</div>' +
+      '<div class="qr-d">' + detail + '</div></div>';
+  }).join('');
+
+  document.getElementById('qz-results').style.display = 'block';
+  document.getElementById('qz-results').innerHTML =
+    '<div class="quiz-results">' +
+    '<div class="qr-circle ' + grade + '">' +
+    '<div class="qr-score">' + qzScore + '/' + quizData.length + '</div>' +
+    '<div class="qr-label">Score</div></div>' +
+    '<h3>' + pct + '%' + (pct >= 70 ? ' — Passed!' : ' — Keep Studying') + '</h3>' +
+    '<p>' + msg + '</p>' +
+    '<div><button class="btn-restart" onclick="qzRestart()">Retake Quiz</button></div>' +
+    '<div class="qr-review">' + review + '</div></div>';
+}
+
+function qzRestart() {
+  qzIdx = 0; qzScore = 0; qzAnswered = false; qzUserAnswers = [];
+  document.getElementById('qz-card').style.display = 'block';
+  document.getElementById('qz-results').style.display = 'none';
+  renderQuiz();
+}
+
+// Initialize quiz
+renderQuiz();
+
+// ===== SCROLL ANIMATIONS =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
