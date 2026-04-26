@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
 import { getGroupColorClass } from '../data/workoutTypes'
 
-function formatDate(dateStr) {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+function sessionVolume(exercises) {
+  return exercises.reduce((sum, e) => {
+    const reps = e.reps || 12
+    return sum + (e.lbs || 0) * (e.sets || 1) * reps
+  }, 0)
 }
 
-function monthLabel(dateStr) {
-  const [y, m] = dateStr.split('-')
-  const d = new Date(Number(y), Number(m) - 1, 1)
-  return d.toLocaleDateString('en-US', { month: 'short' })
+function formatVol(n) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
 }
 
 export default function Dashboard({ workouts, onNavigate }) {
@@ -37,22 +37,12 @@ export default function Dashboard({ workouts, onNavigate }) {
       daysSinceLast = diff
     }
 
-    // Personal records per exercise (max lbs ever)
     const prMap = {}
     workouts.forEach(w => {
       const key = `${w.group}|${w.exercise}`
-      if (!prMap[key] || w.lbs > prMap[key].lbs) {
-        prMap[key] = { ...w }
-      }
+      if (!prMap[key] || w.lbs > prMap[key].lbs) prMap[key] = { ...w }
     })
     const prs = Object.values(prMap).sort((a, b) => b.lbs - a.lbs).slice(0, 8)
-
-    // Monthly workout count
-    const monthlyMap = {}
-    sessionList.forEach(s => {
-      const mo = s.date.slice(0, 7)
-      monthlyMap[mo] = (monthlyMap[mo] || 0) + 1
-    })
 
     return { totalSessions, sessionsThisMonth, daysSinceLast, prs, recentSessions: sessionList.slice(0, 5) }
   }, [workouts])
@@ -73,7 +63,6 @@ export default function Dashboard({ workouts, onNavigate }) {
 
   return (
     <div>
-      {/* Stat cards */}
       <div className="grid-3 section-gap">
         <div className="stat-card">
           <div className="stat-value accent-pull">{totalSessions}</div>
@@ -91,7 +80,6 @@ export default function Dashboard({ workouts, onNavigate }) {
         </div>
       </div>
 
-      {/* Two-column: PRs + Recent Sessions */}
       <div className="grid-2">
         <div className="card">
           <div className="card-title">🏆 Personal Records</div>
@@ -109,10 +97,11 @@ export default function Dashboard({ workouts, onNavigate }) {
         <div className="card">
           <div className="card-title">📅 Recent Sessions</div>
           {recentSessions.map((s, i) => {
-            const [, m, d] = s.date.split('-')
-            const mo = new Date(Number(s.date.split('-')[0]), Number(m) - 1, 1)
+            const [y, m, d] = s.date.split('-')
+            const mo = new Date(Number(y), Number(m) - 1, 1)
               .toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
             const cc = getGroupColorClass(s.group)
+            const vol = sessionVolume(s.exercises)
             return (
               <div className="recent-session" key={i}>
                 <div className="session-date-badge">
@@ -120,12 +109,19 @@ export default function Dashboard({ workouts, onNavigate }) {
                   <div className="session-date-day">{d}</div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div className="session-meta" style={{ marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span className={`badge ${cc}`}>{s.group}</span>
+                    <span style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: cc === 'pull' ? 'var(--blue)' : cc === 'chest' ? 'var(--orange)' : 'var(--green)',
+                    }}>
+                      {formatVol(vol)} lbs total
+                    </span>
                   </div>
                   <div className="session-exercises">
                     {s.exercises.map(e =>
-                      `${e.exercise}${e.lbs ? ` · ${e.lbs} lbs` : ''}`
+                      `${e.exercise}${e.lbs ? ` · ${e.lbs}` : ''}`
                     ).join('  ·  ')}
                   </div>
                 </div>
@@ -140,7 +136,6 @@ export default function Dashboard({ workouts, onNavigate }) {
         </div>
       </div>
 
-      {/* Quick actions */}
       <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
         <button className="btn btn-primary" onClick={() => onNavigate('log')}>+ Log Today's Workout</button>
         <button className="btn btn-ghost" onClick={() => onNavigate('progress')}>📈 View Progress Charts</button>

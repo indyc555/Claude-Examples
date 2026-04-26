@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, Cell,
+  BarChart, Bar,
 } from 'recharts'
-import { getGroupColorClass } from '../data/workoutTypes'
+import { workoutGroups, getGroupColorClass } from '../data/workoutTypes'
 
 const GROUP_COLORS = {
   'Pull / Arms':     '#4fc3f7',
@@ -30,10 +30,7 @@ function monthKey(dateStr) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{
-      background: '#0d0d2b', border: '1px solid #1c1c4a', borderRadius: 8,
-      padding: '10px 14px', fontSize: 13,
-    }}>
+    <div style={{ background: '#0d0d2b', border: '1px solid #1c1c4a', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
       <div style={{ color: '#7986cb', marginBottom: 6 }}>{label}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color, fontWeight: 600 }}>
@@ -47,50 +44,57 @@ const CustomTooltip = ({ active, payload, label }) => {
 const FreqTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{
-      background: '#0d0d2b', border: '1px solid #1c1c4a', borderRadius: 8,
-      padding: '10px 14px', fontSize: 13,
-    }}>
+    <div style={{ background: '#0d0d2b', border: '1px solid #1c1c4a', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
       <div style={{ color: '#7986cb', marginBottom: 4 }}>{label}</div>
       {payload.map((p, i) => (
-        <div key={i} style={{ color: p.fill, fontWeight: 600 }}>
-          {p.name}: {p.value} sessions
-        </div>
+        <div key={i} style={{ color: p.fill, fontWeight: 600 }}>{p.name}: {p.value} sessions</div>
       ))}
     </div>
   )
 }
 
 export default function Progress({ workouts }) {
+  const [activeGroup, setActiveGroup] = useState('all')
+
   const allExercises = useMemo(() => {
     const set = new Set()
     workouts.forEach(w => set.add(`${w.group}||${w.exercise}`))
     return [...set].map(k => {
       const [group, exercise] = k.split('||')
-      return { group, exercise, label: exercise }
+      return { group, exercise }
     }).sort((a, b) => a.exercise.localeCompare(b.exercise))
   }, [workouts])
+
+  const filteredExercises = useMemo(() => {
+    if (activeGroup === 'all') return allExercises
+    return allExercises.filter(e => e.group === activeGroup)
+  }, [allExercises, activeGroup])
 
   const [selectedExercises, setSelectedExercises] = useState(() =>
     allExercises.slice(0, 4).map(e => `${e.group}||${e.exercise}`)
   )
 
+  function selectGroup(groupName) {
+    setActiveGroup(groupName)
+    if (groupName === 'all') return
+    const keys = allExercises
+      .filter(e => e.group === groupName)
+      .map(e => `${e.group}||${e.exercise}`)
+    setSelectedExercises(keys)
+  }
+
   function toggleEx(key) {
     setSelectedExercises(prev =>
-      prev.includes(key)
-        ? prev.filter(k => k !== key)
-        : [...prev, key]
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     )
   }
 
-  // Weight progression data
   const progressData = useMemo(() => {
     const dateSet = new Set()
     workouts.forEach(w => dateSet.add(w.date))
     const dates = [...dateSet].sort()
-
     return dates.map(date => {
-      const point = { date: shortDate(date), fullDate: date }
+      const point = { date: shortDate(date) }
       selectedExercises.forEach(key => {
         const [group, exercise] = key.split('||')
         const hit = workouts.find(w => w.date === date && w.group === group && w.exercise === exercise)
@@ -100,7 +104,6 @@ export default function Progress({ workouts }) {
     })
   }, [workouts, selectedExercises])
 
-  // Monthly frequency
   const freqData = useMemo(() => {
     const map = {}
     const sessionKeys = new Set()
@@ -116,6 +119,11 @@ export default function Progress({ workouts }) {
     return Object.values(map)
   }, [workouts])
 
+  const groupLabels = [
+    { id: 'all', label: 'All Groups' },
+    ...workoutGroups.map(g => ({ id: g.name, label: g.name, cc: g.colorClass })),
+  ]
+
   return (
     <div>
       <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 6, fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2 }}>
@@ -125,19 +133,50 @@ export default function Progress({ workouts }) {
         Track your weight progression and workout frequency over time.
       </p>
 
-      {/* Weight progression chart */}
       <div className="card section-gap">
         <div className="card-title">Weight Progression (lbs)</div>
 
-        {/* Exercise selector */}
-        <div style={{ marginBottom: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-          Select exercises to compare:
+        {/* Group trend buttons */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Trend by group:</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+            {groupLabels.map(g => {
+              const isActive = activeGroup === g.id
+              const color = g.cc === 'pull' ? 'var(--blue)' : g.cc === 'chest' ? 'var(--orange)' : g.cc === 'back' ? 'var(--green)' : 'var(--text-muted)'
+              const glow = g.cc === 'pull' ? 'var(--blue-glow)' : g.cc === 'chest' ? 'var(--orange-glow)' : g.cc === 'back' ? 'var(--green-glow)' : 'rgba(255,255,255,.06)'
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => selectGroup(g.id)}
+                  style={{
+                    padding: '7px 16px',
+                    borderRadius: 20,
+                    border: `1px solid ${isActive ? color : 'var(--border-hi)'}`,
+                    background: isActive ? glow : 'transparent',
+                    color: isActive ? color : 'var(--text-muted)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all .15s',
+                  }}
+                >
+                  {g.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Per-exercise chips */}
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+          Toggle individual exercises:
         </div>
         <div className="exercise-select" style={{ marginBottom: 20 }}>
-          {allExercises.map((ex, i) => {
+          {filteredExercises.map((ex, i) => {
             const key = `${ex.group}||${ex.exercise}`
             const selected = selectedExercises.includes(key)
-            const color = EXERCISE_PALETTE[i % EXERCISE_PALETTE.length]
+            const globalIdx = allExercises.findIndex(e => `${e.group}||${e.exercise}` === key)
+            const color = EXERCISE_PALETTE[globalIdx % EXERCISE_PALETTE.length]
             return (
               <button
                 key={key}
@@ -173,21 +212,22 @@ export default function Progress({ workouts }) {
                   }}
                   wrapperStyle={{ paddingTop: 12 }}
                 />
-                {selectedExercises.map((key, i) => (
-                  <Line
-                    key={key}
-                    type="monotone"
-                    dataKey={key}
-                    name={key}
-                    stroke={EXERCISE_PALETTE[
-                      allExercises.findIndex(e => `${e.group}||${e.exercise}` === key) % EXERCISE_PALETTE.length
-                    ]}
-                    strokeWidth={2.5}
-                    dot={{ r: 4, strokeWidth: 0 }}
-                    activeDot={{ r: 6 }}
-                    connectNulls
-                  />
-                ))}
+                {selectedExercises.map((key) => {
+                  const globalIdx = allExercises.findIndex(e => `${e.group}||${e.exercise}` === key)
+                  return (
+                    <Line
+                      key={key}
+                      type="monotone"
+                      dataKey={key}
+                      name={key}
+                      stroke={EXERCISE_PALETTE[globalIdx % EXERCISE_PALETTE.length]}
+                      strokeWidth={2.5}
+                      dot={{ r: 4, strokeWidth: 0 }}
+                      activeDot={{ r: 6 }}
+                      connectNulls
+                    />
+                  )
+                })}
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -204,18 +244,13 @@ export default function Progress({ workouts }) {
               <XAxis dataKey="month" tick={{ fill: '#7986cb', fontSize: 11 }} />
               <YAxis tick={{ fill: '#7986cb', fontSize: 11 }} allowDecimals={false} />
               <Tooltip content={<FreqTooltip />} />
-              <Legend
-                formatter={v => <span style={{ fontSize: 12 }}>{v}</span>}
-                wrapperStyle={{ paddingTop: 12 }}
-              />
+              <Legend formatter={v => <span style={{ fontSize: 12 }}>{v}</span>} wrapperStyle={{ paddingTop: 12 }} />
               {Object.entries(GROUP_COLORS).map(([group, color]) => (
-                <Bar key={group} dataKey={group} stackId="a" fill={color} name={group} radius={[0, 0, 0, 0]} />
+                <Bar key={group} dataKey={group} stackId="a" fill={color} name={group} />
               ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {/* Legend */}
         <div className="chart-legend" style={{ marginTop: 8 }}>
           {Object.entries(GROUP_COLORS).map(([g, c]) => (
             <div className="legend-item" key={g}>

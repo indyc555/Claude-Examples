@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { workoutGroups, getGroupColorClass } from '../data/workoutTypes'
 
 function today() {
@@ -13,6 +13,18 @@ function lastWeight(workouts, group, exercise) {
   return hits[0]?.lbs ?? null
 }
 
+function Stepper({ value, onChange, min = 0, max = 999, step = 1, dim = false }) {
+  const dec = () => onChange(Math.max(min, parseFloat((value - step).toFixed(1))))
+  const inc = () => onChange(Math.min(max, parseFloat((value + step).toFixed(1))))
+  return (
+    <div className="stepper">
+      <button className="stepper-btn" onClick={dec}>−</button>
+      <span className="stepper-val" style={{ color: dim ? 'var(--text-muted)' : 'var(--text)' }}>{value}</span>
+      <button className="stepper-btn" onClick={inc}>+</button>
+    </div>
+  )
+}
+
 export default function LogWorkout({ workouts, onAdd }) {
   const [selectedGroup, setSelectedGroup] = useState(workoutGroups[0])
   const [date, setDate] = useState(today)
@@ -21,13 +33,17 @@ export default function LogWorkout({ workouts, onAdd }) {
   const [toast, setToast] = useState(false)
 
   function buildRows(group, wk) {
-    return group.exercises.map(ex => ({
-      exercise: ex.name,
-      sets: ex.defaultSets,
-      reps: '',
-      lbs: '',
-      lastLbs: lastWeight(wk, group.name, ex.name),
-    }))
+    return group.exercises.map(ex => {
+      const prev = lastWeight(wk, group.name, ex.name)
+      return {
+        exercise: ex.name,
+        sets: ex.defaultSets,
+        reps: 12,
+        lbs: prev ?? '',
+        lastLbs: prev,
+        lbsTouched: false,
+      }
+    })
   }
 
   function selectGroup(g) {
@@ -36,18 +52,31 @@ export default function LogWorkout({ workouts, onAdd }) {
   }
 
   function updateRow(i, field, value) {
-    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [field]: value } : r))
+    setRows(prev => prev.map((r, idx) => {
+      if (idx !== i) return r
+      const update = { ...r, [field]: value }
+      if (field === 'lbs') update.lbsTouched = true
+      return update
+    }))
+  }
+
+  function setLbs(i, value) {
+    setRows(prev => prev.map((r, idx) =>
+      idx === i ? { ...r, lbs: value, lbsTouched: true } : r
+    ))
   }
 
   function addExercise() {
     const name = newExName.trim().toLowerCase()
     if (!name) return
-    setRows(prev => [...prev, {
+    const prev = lastWeight(workouts, selectedGroup.name, name)
+    setRows(prev2 => [...prev2, {
       exercise: name,
       sets: 4,
-      reps: '',
-      lbs: '',
-      lastLbs: lastWeight(workouts, selectedGroup.name, name),
+      reps: 12,
+      lbs: prev ?? '',
+      lastLbs: prev,
+      lbsTouched: false,
     }])
     setNewExName('')
   }
@@ -65,7 +94,7 @@ export default function LogWorkout({ workouts, onAdd }) {
       group: selectedGroup.name,
       exercise: r.exercise,
       sets: Number(r.sets) || 0,
-      reps: r.reps !== '' ? Number(r.reps) : null,
+      reps: Number(r.reps) || 12,
       lbs: Number(r.lbs),
     }))
     onAdd(entries)
@@ -82,10 +111,9 @@ export default function LogWorkout({ workouts, onAdd }) {
         LOG WORKOUT
       </h2>
       <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 24 }}>
-        Select your workout group, fill in your weights, and save.
+        Select your workout group, adjust weights, and save.
       </p>
 
-      {/* Group selector */}
       <div className="group-selector">
         {workoutGroups.map(g => (
           <button
@@ -98,64 +126,55 @@ export default function LogWorkout({ workouts, onAdd }) {
         ))}
       </div>
 
-      {/* Date */}
       <div className="date-row">
         <span className="date-label">Date</span>
         <input type="date" value={date} onChange={e => setDate(e.target.value)} />
       </div>
 
-      {/* Exercise table */}
       <div className={`card border-${cc} bg-${cc}`} style={{ padding: 0 }}>
         <div className="table-wrap">
           <table className="exercise-table">
             <thead>
               <tr>
                 <th style={{ minWidth: 180 }}>Exercise</th>
-                <th style={{ width: 70 }}>Sets</th>
-                <th style={{ width: 80 }}>Reps</th>
-                <th style={{ width: 100 }}>Lbs</th>
+                <th style={{ width: 110 }}>Sets</th>
+                <th style={{ width: 110 }}>Reps</th>
+                <th style={{ width: 130 }}>Lbs</th>
                 <th style={{ width: 120 }}>Last Weight</th>
                 <th style={{ width: 40 }}></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => {
-                const lbs = Number(row.lbs)
-                const delta = row.lbs !== '' && row.lastLbs != null
-                  ? lbs - row.lastLbs
-                  : null
+                const lbsNum = Number(row.lbs)
+                const delta = row.lbsTouched && row.lbs !== '' && row.lastLbs != null
+                  ? lbsNum - row.lastLbs : null
                 const deltaClass = delta === null ? '' : delta > 0 ? 'up' : delta < 0 ? 'down' : 'same'
+                const lbsDim = !row.lbsTouched && row.lastLbs != null && row.lbs !== ''
+
                 return (
                   <tr key={i}>
                     <td style={{ fontWeight: 600, textTransform: 'capitalize' }}>{row.exercise}</td>
                     <td>
-                      <input
-                        type="number"
-                        min={1}
-                        max={20}
+                      <Stepper
                         value={row.sets}
-                        onChange={e => updateRow(i, 'sets', e.target.value)}
+                        onChange={v => updateRow(i, 'sets', v)}
+                        min={1} max={20} step={1}
                       />
                     </td>
                     <td>
-                      <input
-                        type="number"
-                        min={1}
-                        max={100}
-                        placeholder="—"
+                      <Stepper
                         value={row.reps}
-                        onChange={e => updateRow(i, 'reps', e.target.value)}
+                        onChange={v => updateRow(i, 'reps', v)}
+                        min={1} max={100} step={1}
                       />
                     </td>
                     <td>
-                      <input
-                        type="number"
-                        min={0}
-                        step={0.5}
-                        placeholder="lbs"
-                        className="lbs-input"
-                        value={row.lbs}
-                        onChange={e => updateRow(i, 'lbs', e.target.value)}
+                      <Stepper
+                        value={row.lbs === '' ? 0 : Number(row.lbs)}
+                        onChange={v => setLbs(i, v)}
+                        min={0} max={999} step={2.5}
+                        dim={lbsDim}
                       />
                     </td>
                     <td>
@@ -174,7 +193,6 @@ export default function LogWorkout({ workouts, onAdd }) {
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => removeRow(i)}
-                        title="Remove"
                         style={{ padding: '4px 8px', color: 'var(--red)', borderColor: 'transparent' }}
                       >
                         ✕
@@ -188,7 +206,6 @@ export default function LogWorkout({ workouts, onAdd }) {
         </div>
       </div>
 
-      {/* Add custom exercise */}
       <div className="add-exercise-row">
         <input
           type="text"
@@ -200,18 +217,9 @@ export default function LogWorkout({ workouts, onAdd }) {
         <button className="btn btn-ghost btn-sm" onClick={addExercise}>+ Add</button>
       </div>
 
-      {/* Actions */}
       <div className="form-actions">
-        <button className="btn btn-primary" onClick={handleSubmit}>
-          Save Workout
-        </button>
-        <button
-          className="btn btn-ghost"
-          onClick={() => {
-            setRows(buildRows(selectedGroup, workouts))
-            setDate(today())
-          }}
-        >
+        <button className="btn btn-primary" onClick={handleSubmit}>Save Workout</button>
+        <button className="btn btn-ghost" onClick={() => { setRows(buildRows(selectedGroup, workouts)); setDate(today()) }}>
           Reset
         </button>
       </div>

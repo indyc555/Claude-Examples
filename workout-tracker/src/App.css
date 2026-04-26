@@ -324,6 +324,25 @@ tr:hover td { background: var(--bg-hover); }
 .add-exercise-row { margin-top: 16px; display: flex; gap: 10px; align-items: center; }
 .add-exercise-row input[type=text] { flex: 1; max-width: 240px; }
 
+/* ─── Stepper ────────────────────────────────────── */
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper-btn {
+  width: 28px; height: 28px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-hi);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+.stepper-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-glow); }
+.stepper-val { min-width: 36px; text-align: center; font-weight: 700; font-size: 14px; }
+
 .form-actions {
   display: flex;
   gap: 12px;
