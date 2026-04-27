@@ -173,7 +173,7 @@ export default function LogWorkout({ workouts, onAdd }) {
                       <Stepper
                         value={row.lbs === '' ? 0 : Number(row.lbs)}
                         onChange={v => setLbs(i, v)}
-                        min={0} max={999} step={2.5}
+                        min={0} max={999} step={1}
                         dim={lbsDim}
                       />
                     </td>
