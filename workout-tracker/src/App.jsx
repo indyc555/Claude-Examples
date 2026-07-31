@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Dashboard from './components/Dashboard'
 import LogWorkout from './components/LogWorkout'
 import History from './components/History'
 import Progress from './components/Progress'
 import { historicalData } from './data/historicalData'
+import { loadRemoteWorkouts, saveRemoteWorkouts } from './firebase'
+import Gate, { gatePassed } from './Gate'
+
+function mergeById(local, remote) {
+  const byId = new Map(local.map(w => [w.id, w]))
+  remote.forEach(w => { if (w.id) byId.set(w.id, w) })
+  return Array.from(byId.values())
+}
 
 export default function App() {
+  const [unlocked, setUnlocked] = useState(gatePassed())
   const [activeTab, setActiveTab] = useState('dashboard')
   const [workouts, setWorkouts] = useState(() => {
     try {
@@ -17,10 +26,24 @@ export default function App() {
     } catch (_) {}
     return historicalData
   })
+  const hasMerged = useRef(false)
 
   useEffect(() => {
     localStorage.setItem('ironlog_v1', JSON.stringify(workouts))
+    if (hasMerged.current) saveRemoteWorkouts(workouts)
   }, [workouts])
+
+  useEffect(() => {
+    if (!unlocked) return
+    loadRemoteWorkouts().then(remote => {
+      if (remote) setWorkouts(prev => mergeById(prev, remote))
+      hasMerged.current = true
+    })
+  }, [unlocked])
+
+  if (!unlocked) {
+    return <Gate onUnlock={() => setUnlocked(true)} />
+  }
 
   const addWorkoutEntries = (entries) => {
     setWorkouts(prev => [...prev, ...entries])
