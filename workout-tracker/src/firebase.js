@@ -31,11 +31,13 @@ if (isFirebaseConfigured()) {
   }
 }
 
+// Returns null if the shared doc doesn't exist yet (or on error) — callers
+// must treat that as "unknown", not "empty", so they don't overwrite it.
 export async function loadRemoteWorkouts() {
   if (!db) return null
   try {
     const snap = await getDoc(doc(db, 'ironlog', 'workouts'))
-    return snap.exists() ? snap.data().list || [] : []
+    return snap.exists() ? snap.data().list || [] : null
   } catch (e) {
     console.error('Firestore load failed, falling back to localStorage:', e)
     return null

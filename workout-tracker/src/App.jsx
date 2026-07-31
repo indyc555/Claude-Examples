@@ -26,18 +26,44 @@ export default function App() {
     } catch (_) {}
     return historicalData
   })
-  const hasMerged = useRef(false)
+  // True only while `workouts` is still the untouched placeholder — this
+  // browser has never logged a real session. Never persisted anywhere
+  // (localStorage or Firestore) until it's replaced by real data, so a
+  // fresh/empty browser can't overwrite another device's real history.
+  const isPlaceholder = useRef(workouts === historicalData)
+  // Blocks the persist effect until the one-time Firestore reconciliation
+  // below has run, so we never push local-only data before we've seen
+  // (and merged with) whatever's already shared.
+  const readyToSync = useRef(false)
 
   useEffect(() => {
+    if (isPlaceholder.current || !readyToSync.current) return
     localStorage.setItem('ironlog_v1', JSON.stringify(workouts))
-    if (hasMerged.current) saveRemoteWorkouts(workouts)
+    saveRemoteWorkouts(workouts)
   }, [workouts])
 
   useEffect(() => {
     if (!unlocked) return
     loadRemoteWorkouts().then(remote => {
-      if (remote) setWorkouts(prev => mergeById(prev, remote))
-      hasMerged.current = true
+      if (remote === null) {
+        // No shared data exists yet. If this device has real logged
+        // workouts, it becomes the seed. If it only has the placeholder,
+        // leave Firestore untouched until a device with real data syncs.
+        if (!isPlaceholder.current) {
+          localStorage.setItem('ironlog_v1', JSON.stringify(workouts))
+          saveRemoteWorkouts(workouts)
+        }
+      } else {
+        // Shared data already exists — merge it with any real local data
+        // (never with the untouched placeholder) and push the union back.
+        const base = isPlaceholder.current ? [] : workouts
+        const merged = mergeById(base, remote)
+        isPlaceholder.current = false
+        setWorkouts(merged)
+        localStorage.setItem('ironlog_v1', JSON.stringify(merged))
+        saveRemoteWorkouts(merged)
+      }
+      readyToSync.current = true
     })
   }, [unlocked])
 
@@ -46,10 +72,12 @@ export default function App() {
   }
 
   const addWorkoutEntries = (entries) => {
+    isPlaceholder.current = false
     setWorkouts(prev => [...prev, ...entries])
   }
 
   const deleteSession = (date, group) => {
+    isPlaceholder.current = false
     setWorkouts(prev => prev.filter(w => !(w.date === date && w.group === group)))
   }
 
