@@ -11,12 +11,12 @@ import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore'
 //   }
 // }
 const FIREBASE_CONFIG = {
-  apiKey: 'REPLACE_ME',
-  authDomain: 'REPLACE_ME',
-  projectId: 'REPLACE_ME',
-  storageBucket: 'REPLACE_ME',
-  messagingSenderId: 'REPLACE_ME',
-  appId: 'REPLACE_ME',
+  apiKey: 'AIzaSyD0htBJPB0avTwHRuLt56JX4xbjBmqI37o',
+  authDomain: 'personal-apps-19a32.firebaseapp.com',
+  projectId: 'personal-apps-19a32',
+  storageBucket: 'personal-apps-19a32.firebasestorage.app',
+  messagingSenderId: '187610351019',
+  appId: '1:187610351019:web:1e22ba5f13b50cf324beee',
 }
 
 export const isFirebaseConfigured = () => !FIREBASE_CONFIG.apiKey.includes('REPLACE')
