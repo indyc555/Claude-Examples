@@ -41,7 +41,7 @@ function renderTree() {
     h += `<div class="sup"><button class="sup-h ${st.sup === s.name && !st.worker ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}'})">${ic('sup', 20)}${esc(s.name)}<span class="n">${s.workers.length}</span></button>`;
     s.workers.forEach(w => {
       const open = openWorkers.has(w.name);
-      h += `<button class="wk ${st.worker === w.name && !st.skill ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})"><span class="chev ${open ? 'open' : ''}">▶</span>${ic('wk', 20)}<span>${esc(w.name)}</span></button>`;
+      h += `<button class="wk ${st.worker === w.name && !st.skill ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})"><span class="chev ${open ? 'open' : ''}">▶</span>${ic('wk', 20)}<span class="nm">${esc(w.name)}<small>AI Worker</small></span></button>`;
       if (open) w.skills.forEach((k, i) => h += `<button class="sk ${st.worker === w.name && st.skill === i ? 'on' : ''}" title="${esc(k.name)}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}',skill:${i}})">${ic('skill', 14)}<span>${esc(k.name)}</span></button>`);
     });
     h += `</div>`;
@@ -76,7 +76,7 @@ function diagram(list) {
   const root = list.length > 1 ? `<div class="dg-root"><div class="dg-node dg-rt"><span class="ico i-wk" style="width:26px;height:26px;border-radius:8px"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></span><div><b>JAI</b><small>Guided orchestration</small></div></div><i class="dg-stem0"></i></div>` : '';
   return `<div class="dg-wrap">${root}<div class="dg-cols ${list.length > 1 ? 'multi' : ''}">${list.map(s => `<div class="dg-col">
     <div class="dg-node dg-sup" onclick="go({sup:'${esc(s.name)}'})">${ic('sup', 30)}<div><b>${esc(s.name)}</b><small>Supervisor · ${esc(s.stage)}</small></div></div>
-    <div class="dg-wks">${s.workers.length ? s.workers.map(w => `<div class="dg-node dg-wk" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})">${ic('wk', 26)}<div><b>${esc(w.name)}</b><small>${w.skills.length} skills · ${nAgents(w)} agents</small></div></div>`).join('') : '<div class="tiny" style="padding:8px 0 0 14px">No AI Workers yet</div>'}</div>
+    <div class="dg-wks">${s.workers.length ? s.workers.map(w => `<div class="dg-node dg-wk" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})">${ic('wk', 26)}<div><b>${esc(w.name)}</b><small>AI Worker · ${w.skills.length} skills · ${nAgents(w)} agents</small></div></div>`).join('') : '<div class="tiny" style="padding:8px 0 0 14px">No AI Workers yet</div>'}</div>
   </div>`).join('')}</div></div>
   <p class="tiny" style="margin-top:10px">Click any Supervisor or AI Worker to open it.</p>`;
 }
