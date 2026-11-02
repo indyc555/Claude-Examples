@@ -2,6 +2,19 @@
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const initials = n => n.replace(/^JAI /, '').replace(/\(.*\)/, '').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const ICONS = {
+  sup: '<circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="20" r="2"/><path d="M10 10 6.5 7.5M14 10l3.5-2.5M12 15v3"/>',
+  wk: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  skill: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  agent: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  task: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'
+};
+const ic = (t, sz = 20) => `<span class="ico i-${t}" style="width:${sz}px;height:${sz}px"><svg viewBox="0 0 24 24">${ICONS[t]}</svg></span>`;
+const LEVELS = [['sup', 'Supervisor', 'Orchestrates a group of AI Workers'], ['wk', 'AI Worker', 'A persona that owns a set of Skills'], ['skill', 'Skill', 'A use case, built from Agents'], ['agent', 'Agent', 'Autonomous unit that does a step'], ['task', 'Task', 'Smallest executable action']];
+let legendOpen = true;
+function legend() {
+  return `<div class="legend">${LEVELS.map(([t, n, d], i) => `${i ? '<span class="la">›</span>' : ''}<div class="li">${ic(t, 24)}<div><b>${n}</b><small>${d}</small></div></div>`).join('')}</div>`;
+}
 const allWorkers = () => DATA.flatMap(s => s.workers.map(w => ({ ...w, sup: s })));
 const count = (w, f) => w.skills.reduce((n, s) => n + f(s), 0);
 const nAgents = w => count(w, s => s.agents.length);
@@ -23,22 +36,22 @@ const findWorker = n => allWorkers().find(w => w.name === n);
 function renderTree() {
   const focus = st.sup && !st.worker && !st.skill ? st.sup : (st.worker ? findWorker(st.worker).sup.name : st.sup);
   const filtered = !!(st.sup || st.worker);
-  let h = `<div class="lbl"><span>Supervisors &amp; AI Workers</span>${filtered ? `<button onclick="go({})">Show all</button>` : ''}</div>`;
+  let h = `<div class="lbl"><span>Hierarchy</span><span>${filtered ? `<button onclick="go({})">Show all</button> ` : ''}<button onclick="legendOpen=!legendOpen;renderTree()">${legendOpen ? '▾' : '▸'} legend</button></span></div>` + (legendOpen ? `<div class="legend side-l">${LEVELS.map(([t, n, d]) => `<div class="li" title="${d}">${ic(t, 18)}<div><b>${n}</b><small>${d}</small></div></div>`).join('')}</div>` : '');
   DATA.filter(s => !filtered || s.name === focus).forEach(s => {
-    h += `<div class="sup"><button class="sup-h ${st.sup === s.name && !st.worker ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}'})"><span class="dot"></span>${esc(s.name)}<span class="n">${s.workers.length}</span></button>`;
+    h += `<div class="sup"><button class="sup-h ${st.sup === s.name && !st.worker ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}'})">${ic('sup', 20)}${esc(s.name)}<span class="n">${s.workers.length}</span></button>`;
     s.workers.forEach(w => {
       const open = openWorkers.has(w.name);
-      h += `<button class="wk ${st.worker === w.name && !st.skill ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})"><span class="chev ${open ? 'open' : ''}">▶</span><span class="av">${initials(w.name)}</span><span>${esc(w.name)}</span></button>`;
-      if (open) w.skills.forEach((k, i) => h += `<button class="sk ${st.worker === w.name && st.skill === i ? 'on' : ''}" title="${esc(k.name)}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}',skill:${i}})">${esc(k.name)}</button>`);
+      h += `<button class="wk ${st.worker === w.name && !st.skill ? 'on' : ''}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})"><span class="chev ${open ? 'open' : ''}">▶</span>${ic('wk', 20)}<span>${esc(w.name)}</span></button>`;
+      if (open) w.skills.forEach((k, i) => h += `<button class="sk ${st.worker === w.name && st.skill === i ? 'on' : ''}" title="${esc(k.name)}" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}',skill:${i}})">${ic('skill', 14)}<span>${esc(k.name)}</span></button>`);
     });
     h += `</div>`;
   });
   $('#tree').innerHTML = h;
   $('#navHome').classList.toggle('on', !st.sup && !st.worker && !st.aos);
 
-  const items = [['Supervisor', '◆'], ['Worker', '☻'], ['Skill', '✦'], ['Agent', '⚙'], ['Task', '✓']];
+  const items = [['Supervisor', 'sup'], ['Worker', 'wk'], ['Skill', 'skill'], ['Agent', 'agent'], ['Task', 'task']];
   $('#aos').innerHTML = `<button class="aos-h" onclick="aosOpen=!aosOpen;renderTree()"><span class="chev ${aosOpen ? 'open' : ''}">▶</span>⬡ AgentOS<span class="tag">BUILD</span></button>` +
-    (aosOpen ? `<div class="aos-list">${items.map(([n, i]) => `<button class="aos-i ${st.aos === n ? 'on' : ''}" onclick="go({aos:'${n}'})"><i>${i}</i>Create ${n}</button>`).join('')}</div>` : '');
+    (aosOpen ? `<div class="aos-list">${items.map(([n, i]) => `<button class="aos-i ${st.aos === n ? 'on' : ''}" onclick="go({aos:'${n}'})">${ic(i, 18)}Create ${n}</button>`).join('')}</div>` : '');
 }
 
 /* ------------------------------------------------ main */
@@ -56,9 +69,20 @@ function render() {
   $('#main').innerHTML = h; $('#main').scrollTop = 0;
 }
 
+function htabs() {
+  return `<div class="tabs">${[['overview', 'Overview'], ['diagram', 'Diagram']].map(([k, l]) => `<button class="tab ${(st.htab || 'overview') === k ? 'on' : ''}" onclick="st.htab='${k}';render()">${l}</button>`).join('')}</div>`;
+}
+function diagram(list) {
+  const root = list.length > 1 ? `<div class="dg-root"><div class="dg-node dg-rt"><span class="ico i-wk" style="width:26px;height:26px;border-radius:8px"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></span><div><b>JAI</b><small>Guided orchestration</small></div></div><i class="dg-stem0"></i></div>` : '';
+  return `<div class="dg-wrap">${root}<div class="dg-cols ${list.length > 1 ? 'multi' : ''}">${list.map(s => `<div class="dg-col">
+    <div class="dg-node dg-sup" onclick="go({sup:'${esc(s.name)}'})">${ic('sup', 30)}<div><b>${esc(s.name)}</b><small>Supervisor · ${esc(s.stage)}</small></div></div>
+    <div class="dg-wks">${s.workers.length ? s.workers.map(w => `<div class="dg-node dg-wk" onclick="go({sup:'${esc(s.name)}',worker:'${esc(w.name)}'})">${ic('wk', 26)}<div><b>${esc(w.name)}</b><small>${w.skills.length} skills · ${nAgents(w)} agents</small></div></div>`).join('') : '<div class="tiny" style="padding:8px 0 0 14px">No AI Workers yet</div>'}</div>
+  </div>`).join('')}</div></div>
+  <p class="tiny" style="margin-top:10px">Click any Supervisor or AI Worker to open it.</p>`;
+}
 function workerCard(w) {
   return `<div class="card click" onclick="go({sup:'${esc(w.sup.name)}',worker:'${esc(w.name)}'})">
-    <div class="row between"><span class="av" style="width:34px;height:34px;font-size:13px;border-radius:10px">${initials(w.name)}</span><span class="pill g">● Active</span></div>
+    <div class="row between"><span class="row" style="gap:8px">${ic('wk', 34)}<span class="tiny" style="letter-spacing:.6px">AI WORKER</span></span><span class="pill g">● Active</span></div>
     <h3 style="margin-top:10px">${esc(w.name)}</h3>
     <p class="muted small" style="margin:0 0 10px;min-height:54px">${esc(w.desc)}</p>
     <div class="row wrap small muted"><span><b>${w.skills.length}</b> skills</span>·<span><b>${nAgents(w)}</b> agents</span></div>
@@ -67,20 +91,20 @@ function workerCard(w) {
 function viewHome() {
   const W = allWorkers(), ag = W.reduce((n, w) => n + nAgents(w), 0), sk = W.reduce((n, w) => n + w.skills.length, 0);
   return crumbs([['AI Worker Console']]) + `<div class="page">
-  <h1>Your AI workforce</h1><p class="sub">Every AI Worker, organised under the Supervisor that orchestrates it. Pick a Supervisor to focus, a Worker to see it in action, or a Skill to see the Agents and Tasks it is built from.</p>
+  <h1>Your AI workforce</h1>${legend()}${htabs()}${st.htab === 'diagram' ? diagram(DATA) : `<p class="sub" style="margin-top:14px;${st.htab === 'diagram' ? 'display:none' : ''}">Every AI Worker, organised under the Supervisor that orchestrates it. Pick a Supervisor to focus, a Worker to see it in action, or a Skill to see the Agents and Tasks it is built from.</p>
   <div class="grid g4"><div class="card kpi"><div class="v">${DATA.length}</div><div class="l">Supervisors</div></div><div class="card kpi"><div class="v">${W.length}</div><div class="l">AI Workers</div></div><div class="card kpi"><div class="v">${sk}</div><div class="l">Skills</div></div><div class="card kpi"><div class="v">${ag}</div><div class="l">Agents</div></div></div>
-  ${DATA.map(s => `<div class="sec-title"><h2>${esc(s.name)} <span class="pill p" style="vertical-align:middle">${esc(s.stage)}</span></h2><a class="small" style="color:var(--purple);cursor:pointer" onclick="go({sup:'${esc(s.name)}'})">Open supervisor →</a></div>
-  <div class="grid g3">${s.workers.map(w => workerCard({ ...w, sup: s })).join('')}</div>`).join('')}</div>`;
+  ${DATA.map(s => `<div class="sec-title"><h2 class="row" style="gap:10px">${ic('sup', 30)}<span>${esc(s.name)}</span> <span class="pill p">Supervisor</span><span class="pill">${esc(s.stage)}</span></h2><a class="small" style="color:var(--purple);cursor:pointer" onclick="go({sup:'${esc(s.name)}'})">Open supervisor →</a></div>
+  <div class="grid g3">${s.workers.map(w => workerCard({ ...w, sup: s })).join('')}</div>`).join('')}`}</div>`;
 }
 function viewSup() {
   const s = findSup(st.sup);
   const aw = s.workers.reduce((n, w) => n + nAgents(w), 0);
   return crumbs([['AI Worker Console', 'go({})'], [s.name]]) + `<div class="page">
-  <div class="row"><span class="pill p">Supervisor</span><span class="pill">${esc(s.stage)}</span></div>
-  <h1 style="margin-top:8px">${esc(s.name)}</h1>
+  <div class="row">${ic('sup', 28)}<span class="pill p">Supervisor</span><span class="pill">${esc(s.stage)}</span></div>
+  <h1 style="margin-top:8px">${esc(s.name)}</h1>${legend()}
   <p class="sub">The Supervisor orchestrates ${s.workers.length} AI Worker${s.workers.length > 1 ? 's' : ''}, routes work between them, and escalates exceptions to people.</p>
   <div class="grid g3"><div class="card kpi"><div class="v">${s.workers.length}</div><div class="l">AI Workers</div></div><div class="card kpi"><div class="v">${s.workers.reduce((n, w) => n + w.skills.length, 0)}</div><div class="l">Skills</div></div><div class="card kpi"><div class="v">${aw}</div><div class="l">Agents</div></div></div>
-  <h2>AI Workers</h2><div class="grid g3">${s.workers.map(w => workerCard({ ...w, sup: s })).join('')}</div></div>`;
+  ${htabs()}${st.htab === 'diagram' ? diagram([s]) : `<h2 class="row" style="gap:8px">${ic('wk', 24)}AI Workers</h2><div class="grid g3">${s.workers.map(w => workerCard({ ...w, sup: s })).join('')}</div>`}</div>`;
 }
 
 /* worker screen */
@@ -88,9 +112,9 @@ function viewWorker() {
   const w = findWorker(st.worker);
   const ui = (UIS[w.ui] || UIS.platform)(w);
   return crumbs([['AI Worker Console', 'go({})'], [w.sup.name, `go({sup:'${esc(w.sup.name)}'})`], [w.name]]) + `<div class="page">
-  <div class="hero"><span class="av">${initials(w.name)}</span><div style="flex:1"><div class="row wrap"><h1>${esc(w.name)}</h1><span class="pill g">● Active</span>${licPill(w.lic)}${w.note ? `<span class="pill b">${esc(w.note)}</span>` : ''}</div><p class="sub" style="margin:4px 0 0">${esc(w.desc)}</p></div></div>
+  <div class="hero">${ic('wk', 52)}<div style="flex:1"><div class="row wrap"><span class="pill p">AI Worker</span><h1>${esc(w.name)}</h1><span class="pill g">● Active</span>${licPill(w.lic)}${w.note ? `<span class="pill b">${esc(w.note)}</span>` : ''}</div><p class="sub" style="margin:4px 0 0">${esc(w.desc)}</p></div></div>
   <div class="tabs">${['console:Live console', 'skills:Skills (' + w.skills.length + ')'].map(t => { const [k, l] = t.split(':'); return `<button class="tab ${st.tab === k ? 'on' : ''}" onclick="st.tab='${k}';render()">${l}</button>`; }).join('')}</div>
-  ${st.tab === 'console' ? ui : `<div class="grid g2">${w.skills.map((k, i) => `<div class="card click" onclick="go({sup:'${esc(w.sup.name)}',worker:'${esc(w.name)}',skill:${i}})"><div class="row between"><h3>${esc(k.name)}</h3>${k.lic ? licPill(k.lic, k.release) : ''}</div><div class="small muted">${k.agents.length} agent${k.agents.length === 1 ? '' : 's'} · ${k.agents.reduce((n, a) => n + a.tasks.length, 0)} tasks</div></div>`).join('')}</div>`}
+  ${st.tab === 'console' ? ui : legend() + `<div style="height:14px"></div>` + `<div class="grid g2">${w.skills.map((k, i) => `<div class="card click" onclick="go({sup:'${esc(w.sup.name)}',worker:'${esc(w.name)}',skill:${i}})"><div class="row between"><h3 class="row" style="gap:8px">${ic('skill', 24)}<span>${esc(k.name)}</span></h3>${k.lic ? licPill(k.lic, k.release) : ''}</div><div class="small muted">${k.agents.length} agent${k.agents.length === 1 ? '' : 's'} · ${k.agents.reduce((n, a) => n + a.tasks.length, 0)} tasks</div></div>`).join('')}</div>`}
   </div>`;
 }
 
@@ -99,14 +123,14 @@ function viewSkill() {
   const w = findWorker(st.worker), k = w.skills[st.skill];
   const tasks = k.agents.reduce((n, a) => n + a.tasks.length, 0);
   return crumbs([['AI Worker Console', 'go({})'], [w.sup.name, `go({sup:'${esc(w.sup.name)}'})`], [w.name, `go({sup:'${esc(w.sup.name)}',worker:'${esc(w.name)}'})`], [k.name]]) + `<div class="page">
-  <div class="row wrap"><span class="pill p">Skill</span>${k.lic ? licPill(k.lic, k.release) : licPill(w.lic)}</div>
+  <div class="row wrap">${ic('skill', 28)}<span class="pill p">Skill</span>${k.lic ? licPill(k.lic, k.release) : licPill(w.lic)}</div>
   <h1 style="margin-top:8px">${esc(k.name)}</h1>
   <p class="sub">A Skill of <b>${esc(w.name)}</b>, composed of ${k.agents.length} Agent${k.agents.length === 1 ? '' : 's'} and ${tasks} Task${tasks === 1 ? '' : 's'}.</p>
   <div class="row" style="margin-bottom:6px"><button class="btn p" onclick="toast('Mockup — test run started')">▶ Test run</button><button class="btn" onclick="go({aos:'Agent'})">+ Add agent</button><button class="btn" onclick="go({sup:'${esc(w.sup.name)}',worker:'${esc(w.name)}'})">View worker console</button></div>
-  <h2>Agents &amp; Tasks</h2>
-  ${k.agents.length ? `<div class="flow"><div class="root"><small>Skill</small><b>${esc(k.name)}</b><div class="small" style="margin-top:8px;opacity:.85">${esc(w.name)}</div></div>
-  <div class="agents">${k.agents.map(a => `<div class="agent"><div class="hd"><span class="ic">⚙</span><div style="flex:1"><div class="tiny">AGENT</div><b>${esc(a.name)}</b></div><span class="pill g">● Ready</span></div>
-    <div class="tasks">${a.tasks.length ? a.tasks.map(t => `<span class="task">${esc(t)}</span>`).join('') : `<span class="task tbd">Tasks TBD</span>`}</div></div>`).join('')}</div></div>`
+  <h2>Agents &amp; Tasks</h2>${legend()}<div style="height:14px"></div>
+  ${k.agents.length ? `<div class="flow"><div class="root"><small>${ic('skill', 18)} Skill</small><b>${esc(k.name)}</b><div class="small" style="margin-top:8px;opacity:.85">${esc(w.name)}</div></div>
+  <div class="agents">${k.agents.map(a => `<div class="agent"><div class="hd">${ic('agent', 28)}<div style="flex:1"><div class="tiny">AGENT</div><b>${esc(a.name)}</b></div><span class="pill g">● Ready</span></div>
+    <div class="tasks">${a.tasks.length ? a.tasks.map(t => `<span class="task">${ic('task', 14)}${esc(t)}</span>`).join('') : `<span class="task tbd">${ic('task', 14)}Tasks TBD</span>`}</div></div>`).join('')}</div></div>`
     : `<div class="card" style="text-align:center;padding:36px"><div style="font-size:28px">⚙</div><h3>No Agents defined yet</h3><p class="muted">This Skill is on the roadmap. Create the first Agent in AgentOS.</p><button class="btn p" onclick="go({aos:'Agent'})">Create Agent</button></div>`}
   <h2>Skill in action</h2>${UIS[w.ui] ? UIS[w.ui](w, true) : ''}</div>`;
 }
