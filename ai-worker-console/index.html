@@ -92,6 +92,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .spacer{flex:1}
 .btn{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;font-size:13px}
 .btn:hover{border-color:var(--purple-m)}
+.btn.jai-btn{border-color:var(--purple-m);color:var(--purple-d);background:var(--purple-l);font-weight:600}
 .btn.p{background:var(--purple);border-color:var(--purple);color:#fff}.btn.p:hover{background:var(--purple-d)}
 .page{max-width:1080px;margin:0 auto;padding:26px 28px 60px}
 h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:0 0 4px;letter-spacing:-.2px}
@@ -195,7 +196,7 @@ mark{background:#fbd9d5;padding:0 2px;border-radius:3px}
 .typing{display:flex;gap:4px;padding:6px 2px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--purple-m);animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
 .dock-fab{position:fixed;right:20px;bottom:20px;background:var(--purple);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:600;box-shadow:0 8px 24px rgba(106,47,181,.4);display:none;z-index:20}
-.nodock .dock-fab{display:block}
+.app.nodock ~ .dock-fab{display:block}
 @media (max-width:1100px){
   .app,.app.nodock{grid-template-columns:260px minmax(0,1fr)}
   .dock{position:fixed;right:0;top:0;bottom:0;width:min(400px,100%);z-index:30;box-shadow:-10px 0 40px rgba(0,0,0,.2)}
@@ -236,7 +237,7 @@ mark{background:#fbd9d5;padding:0 2px;border-radius:3px}
 </div>
 <button class="dock-fab" onclick="toggleDock(true)">✦ Ask JAI</button>
 
-<script src="data.js?v=5"></script>
-<script src="ui.js?v=5"></script>
+<script src="data.js?v=6"></script>
+<script src="ui.js?v=6"></script>
 </body>
 </html>

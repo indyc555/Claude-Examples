@@ -56,7 +56,7 @@ function renderTree() {
 
 /* ------------------------------------------------ main */
 function crumbs(parts) {
-  return `<div class="topbar"><div class="crumbs">${parts.map((p, i) => i === parts.length - 1 ? `<b>${esc(p[0])}</b>` : `<a onclick="${p[1]}">${esc(p[0])}</a><span>/</span>`).join('')}</div><span class="spacer"></span><button class="btn" onclick="toast('Mockup — export not wired')">Export</button><button class="btn p" onclick="go({aos:'Worker'})">+ New</button></div>`;
+  return `<div class="topbar"><div class="crumbs">${parts.map((p, i) => i === parts.length - 1 ? `<b>${esc(p[0])}</b>` : `<a onclick="${p[1]}">${esc(p[0])}</a><span>/</span>`).join('')}</div><span class="spacer"></span><button class="btn jai-btn" onclick="toggleDock($('#app').classList.contains('nodock'))">✦ Ask JAI</button><button class="btn" onclick="toast('Mockup — export not wired')">Export</button><button class="btn p" onclick="go({aos:'Worker'})">+ New</button></div>`;
 }
 function render() {
   renderTree();
